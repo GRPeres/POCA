@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScreenSound.Shared.Dados\POCA.Banco.csproj" />
+    <ProjectReference Include="..\POCA.Banco\POCA.Banco.csproj" />
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />

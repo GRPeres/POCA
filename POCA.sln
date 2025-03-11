@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.API", "ScreenSound.API\POCA.API.csproj", "{951D4C17-BCCF-4D18-A2CE-16342EE533F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.API", "POCA.API\POCA.API.csproj", "{951D4C17-BCCF-4D18-A2CE-16342EE533F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.Banco", "ScreenSound.Shared.Dados\POCA.Banco.csproj", "{962CBB4D-1A0A-44B8-85BB-6F814C1F5DAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.Banco", "POCA.Banco\POCA.Banco.csproj", "{962CBB4D-1A0A-44B8-85BB-6F814C1F5DAD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.Web", "ScreenSound.Web\POCA.Web.csproj", "{07AAA37A-CC52-4EC8-BA97-5541C8614173}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "POCA.Web", "POCA.Web\POCA.Web.csproj", "{07AAA37A-CC52-4EC8-BA97-5541C8614173}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
