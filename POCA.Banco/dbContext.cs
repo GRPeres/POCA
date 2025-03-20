@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using MySql.EntityFrameworkCore;
-
 
 namespace POCA.Banco
 {
@@ -17,12 +14,12 @@ namespace POCA.Banco
             if (!optionsBuilder.IsConfigured)
             {
                 var configuration = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .SetBasePath(AppContext.BaseDirectory)
                     .AddJsonFile("appsettings.json")
                     .Build();
 
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
-                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                var connectionString = "Server=localhost;Port=3306;Database=bd_trabalho;User=root;Password=root;" /*configuration.GetConnectionString("DefaultConnection")*/;
+                optionsBuilder.UseMySql(connectionString,ServerVersion.AutoDetect(connectionString));
             }
         }
     }
