@@ -18,8 +18,8 @@ namespace POCA.Banco
                     .AddJsonFile("appsettings.json")
                     .Build();
 
-                var connectionString = "Server=localhost;Port=3306;Database=bd_trabalho;User=root;Password=root;" /*configuration.GetConnectionString("DefaultConnection")*/;
-                optionsBuilder.UseMySql(connectionString,ServerVersion.AutoDetect(connectionString));
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                optionsBuilder.UseMySQL(connectionString);
             }
         }
     }
