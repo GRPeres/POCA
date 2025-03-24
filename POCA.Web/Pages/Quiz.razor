@@ -1,0 +1,82 @@
+﻿@page "/quiz"
+@using QuizApp.Models
+
+<h2>Quiz de Conhecimentos Gerais</h2>
+
+@if (!quizCompleted)
+{
+    <form>
+        @for (int i = 0; i < Questions.Count; i++)
+        {
+            <div class="question">
+                <p>@Questions[i].QuestionText</p>
+                @for (int j = 0; j < Questions[i].Options.Count; j++)
+                {
+                    <label>
+                        <input type="radio" name="answers[@i]" value="@j" @onclick="() => SelectAnswer(i, j)" />
+                        @Questions[i].Options[j]
+                    </label>
+                    <br />
+                }
+            </div>
+        }
+        <button type="button" @onclick="SubmitAnswers">Enviar Respostas</button>
+    </form>
+}
+else
+{
+    <h3>Resultado:</h3>
+    <ul>
+        @for (int i = 0; i < Results.Count; i++)
+        {
+            <li>
+                Pergunta @(i + 1): @(Results[i] ? "✔️ Correta" : "❌ Errada")
+            </li>
+        }
+    </ul>
+}
+
+@code
+{
+    protected List<Question> Questions { get; set; } = new();
+    protected List<int?> SelectedAnswers { get; set; } = new();
+    protected List<bool> Results { get; set; } = new();
+    protected bool quizCompleted = false;
+
+    protected override void OnInitialized()
+    {
+        Questions = new List<Question>
+        {
+            new Question("Qual é a capital da França?", new List<string> { "Madrid", "Paris", "Londres", "Berlim" }, 1),
+            new Question("Quanto é 2 + 2?", new List<string> { "3", "4", "5", "6" }, 1),
+            new Question("Qual o maior planeta do sistema solar?", new List<string> { "Terra", "Marte", "Júpiter", "Saturno" }, 2)
+        };
+
+        SelectedAnswers = new List<int?>(new int?[Questions.Count]);
+    }
+
+    protected void SelectAnswer(int questionIndex, int answerIndex)
+    {
+        SelectedAnswers[questionIndex] = answerIndex;
+    }
+
+    protected void SubmitAnswers()
+    {
+        Results.Clear();
+
+        for (int i = 0; i < Questions.Count; i++)
+        {
+            if (SelectedAnswers[i] != null)
+            {
+                Results.Add(SelectedAnswers[i] == Questions[i].CorrectAnswerIndex);
+            }
+            else
+            {
+                Results.Add(false);
+            }
+        }
+
+        quizCompleted = true;
+        StateHasChanged();
+    }
+}

@@ -17,4 +17,8 @@
     <Folder Include="Componentes\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\POCA.Banco\POCA.Banco.csproj" />
+  </ItemGroup>
+
 </Project>
