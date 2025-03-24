@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
-using ScreenSound.Web;
-using ScreenSound.Web.Services;
+using POCA.Web;
+using POCA.Web.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -10,8 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMudServices();
 
-builder.Services.AddTransient<ArtistasAPI>();
-builder.Services.AddTransient<MusicasAPI>();
+builder.Services.AddTransient<QuestoesAPI>();
 //builder.Services.AddScoped<ArtistaAPI>();
 
 builder.Services.AddHttpClient("API", client => {
