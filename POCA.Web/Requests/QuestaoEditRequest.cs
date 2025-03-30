@@ -1,7 +1,15 @@
-﻿// POCA.Web.Requests.QuestionEditRequest
+﻿// POCA.Web.Requests.QuestaoEditRequest
 public record QuestaoEditRequest(
-    int Id,
-    string Enunciado,
-    int AtividadeId,
-    ICollection<AlternativaRequest>? OpcoesResposta = null
-) : QuestaoRequest(Enunciado, AtividadeId, OpcoesResposta);
+    int IdQuestao,  // Changed from 'Id' to match your DB model
+    string EnunciadoQuestao,
+    string RespostaCertaQuestao,
+    string RespostaErrada1Questao,
+    string RespostaErrada2Questao,
+    string RespostaErrada3Questao
+) : QuestaoRequest(
+    EnunciadoQuestao,
+    RespostaCertaQuestao,
+    RespostaErrada1Questao,
+    RespostaErrada2Questao,
+    RespostaErrada3Questao
+);

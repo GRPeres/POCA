@@ -1,40 +1,36 @@
-﻿// ScreenSound.Web.Services.PerguntasAPI
-using POCA.Web.Response;
+﻿// POCA.Web.Services.QuestoesAPI
 using System.Net.Http.Json;
 
-namespace POCA.Web.Services{
+namespace POCA.Web.Services
+{
     public class QuestoesAPI
     {
         private readonly HttpClient _httpClient;
 
         public QuestoesAPI(IHttpClientFactory factory)
         {
-            _httpClient = factory.CreateClient("API");
+            _httpClient = factory.CreateClient("API"); // Use your named client
         }
 
-        // Get all questions
-        public async Task<ICollection<QuestaoResponse>?> GetPerguntasAsync()
+        // All methods remain the same as before
+        public async Task<ICollection<QuestaoResponse>?> GetQuestoesAsync()
         {
-            return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>("perguntas");
+            return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>("questoes");
         }
 
-        // Get questions by activity
-        public async Task<ICollection<QuestaoResponse>?> GetPerguntasPorAtividadeAsync(int atividadeId)
+        public async Task AddQuestaoAsync(QuestaoRequest questao)
         {
-            return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>(
-                $"atividades/{atividadeId}/perguntas");
+            await _httpClient.PostAsJsonAsync("questoes", questao);
         }
 
-        // Create a new question
-        public async Task AddPerguntaAsync(QuestaoRequest pergunta)
+        public async Task UpdateQuestaoAsync(QuestaoEditRequest questao)
         {
-            await _httpClient.PostAsJsonAsync("perguntas", pergunta);
+            await _httpClient.PutAsJsonAsync($"questoes/{questao.IdQuestao}", questao);
         }
 
-        // Update a question
-        public async Task UpdatePerguntaAsync(QuestaoEditRequest pergunta)
+        public async Task DeleteQuestaoAsync(int idQuestao)
         {
-            await _httpClient.PutAsJsonAsync($"perguntas/{pergunta.Id}", pergunta);
+            await _httpClient.DeleteAsync($"questoes/{idQuestao}");
         }
     }
 }
