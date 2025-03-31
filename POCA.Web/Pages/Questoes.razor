@@ -1,0 +1,46 @@
+@page "/questoes"
+
+@using MudBlazor
+
+<MudLayout>
+    <MudAppBar Elevation="4">
+        <MudText Typo="Typo.h5">Lista de Questões</MudText>
+    </MudAppBar>
+
+    <MudDrawer Open="true" Class="mud-theme-primary">
+        <MudNavMenu>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">Início</MudNavLink>
+            <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer>
+            <MudTable Items="@questoes" Dense="true" Hover="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>Assunto</MudTh>
+                    <MudTh>Nível de Dificuldade</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="questao">
+                    <MudTd>@questao.Assunto</MudTd>
+                    <MudTd>@questao.Dificuldade</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private List<Questao> questoes = new()
+    {
+        new Questao { Assunto = "Matemática", Dificuldade = "Fácil" },
+        new Questao { Assunto = "Física", Dificuldade = "Médio" },
+        new Questao { Assunto = "Química", Dificuldade = "Difícil" },
+    };
+
+    private class Questao
+    {
+        public string Assunto { get; set; }
+        public string Dificuldade { get; set; }
+    }
+}

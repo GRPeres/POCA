@@ -1,6 +1,8 @@
-﻿// POCA.Web.Requests.QuestaoEditRequest
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace POCA.API.Requests;
 public record QuestaoEditRequest(
-    int IdQuestao,  // Changed from 'Id' to match your DB model
+    [Required] int IdQuestao,
     string EnunciadoQuestao,
     string RespostaCertaQuestao,
     string RespostaErrada1Questao,

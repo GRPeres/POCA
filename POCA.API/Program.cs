@@ -1,38 +1,33 @@
 using Microsoft.EntityFrameworkCore;
-using ScreenSound.API.EndPoints;
-using ScreenSound.Banco;
-using ScreenSound.Shared.Modelos;
-
+using POCA.API.Endpoints;
+using POCA.Banco;
+using POCA.Banco.Model;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<ScreenSoundContext>((options) =>
-{
-    options.UseSqlServer(builder.Configuration["ConnectionStrings:ScreenSoundDB"]).UseLazyLoadingProxies();
-});
 
-builder.Services.AddTransient<DAL<Artista>>();
-builder.Services.AddTransient<DAL<Musica>>();
-builder.Services.AddTransient<DAL<Genero>>();
+// MySQL configuration - ensure connection string is in appsettings
+builder.Services.AddDbContext<DbPocaContext>(options =>
+    options.UseMySQL(builder.Configuration["ConnectionStrings:POCADB"]));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+// Prevents circular reference issues in JSON responses
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+// Open CORS policy - tighten for production
 builder.Services.AddCors();
+
 var app = builder.Build();
 
-app.UseCors(options =>
-{
-    options.AllowAnyOrigin()
+app.UseCors(options => options
+    .AllowAnyOrigin()
     .AllowAnyMethod()
-    .AllowAnyHeader();
+    .AllowAnyHeader());
 
-});
-
-app.AddEndPointsArtistas();
-app.AddEndPointsMusicas();
-app.AddEndPointsGeneros();
+app.AddEndpointsQuestoes();
 app.UseSwagger();
 app.UseSwaggerUI();
 

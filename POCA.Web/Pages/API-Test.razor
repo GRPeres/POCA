@@ -1,0 +1,74 @@
+﻿@page "/test-api"
+@inject QuestoesAPI ApiService
+
+<h3>API Test Console</h3>
+
+<div class="mb-3">
+    <button @onclick="TestGetAll" class="btn btn-primary me-2">Test GET All</button>
+    <button @onclick="TestCreate" class="btn btn-success me-2">Test POST</button>
+    <button @onclick="TestDelete" class="btn btn-danger">Test DELETE</button>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        API Response
+    </div>
+    <div class="card-body">
+        <pre>@apiResponse</pre>
+    </div>
+</div>
+
+@code {
+    private string apiResponse = "Click buttons to test API endpoints";
+    private int testId = 1; // ID to use for delete test
+
+    private async Task TestGetAll()
+    {
+        try
+        {
+            var questions = await ApiService.GetQuestoesAsync();
+            apiResponse = JsonSerializer.Serialize(questions, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"GET Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestCreate()
+    {
+        try
+        {
+            var newQuestion = new QuestaoRequest(
+                "Sample question?",
+                "Correct answer",
+                "Wrong 1",
+                "Wrong 2",
+                "Wrong 3"
+            );
+
+            await ApiService.AddQuestaoAsync(newQuestion);
+            apiResponse = "POST successful! Use GET to verify.";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"POST Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestDelete()
+    {
+        try
+        {
+            await ApiService.DeleteQuestaoAsync(testId);
+            apiResponse = $"DELETE successful for ID {testId}. Use GET to verify.";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"DELETE Error: {ex.Message}";
+        }
+    }
+}

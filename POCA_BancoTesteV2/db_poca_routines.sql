@@ -12,7 +12,7 @@ DROP SCHEMA IF EXISTS `db_poca` ;
 -- -----------------------------------------------------
 -- Schema db_poca
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `db_poca` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA IF NOT EXISTS `db_poca` DEFAULT CHARACTER SET utf8mb3 ;
 USE `db_poca` ;
 
 -- -----------------------------------------------------
@@ -27,8 +27,12 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_questoes` (
   `respostaerrada1_questao` VARCHAR(100) NOT NULL,
   `respostaerrada2_questao` VARCHAR(100) NOT NULL,
   `respostaerrada3_questao` VARCHAR(100) NOT NULL,
+  `dificuldade_questao` ENUM('Fácil', 'Médio', 'Difícil') NOT NULL,
+  `tema_questao` ENUM('Teoria', 'Programação') NOT NULL,
   PRIMARY KEY (`id_questao`))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+AUTO_INCREMENT = 2
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

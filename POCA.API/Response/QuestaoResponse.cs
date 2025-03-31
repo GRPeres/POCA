@@ -1,4 +1,5 @@
-﻿// POCA.Web.Responses.QuestaoResponse
+﻿namespace POCA.API.Response;
+
 public record QuestaoResponse(
     int IdQuestao,
     string EnunciadoQuestao,

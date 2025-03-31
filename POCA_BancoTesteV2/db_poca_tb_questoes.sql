@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `db_poca` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `db_poca`;
 -- MySQL dump 10.13  Distrib 8.0.32, for Win64 (x86_64)
 --
 -- Host: localhost    Database: db_poca
@@ -29,8 +31,10 @@ CREATE TABLE `tb_questoes` (
   `respostaerrada1_questao` varchar(100) NOT NULL,
   `respostaerrada2_questao` varchar(100) NOT NULL,
   `respostaerrada3_questao` varchar(100) NOT NULL,
+  `dificuldade_questao` enum('Fácil','Médio','Difícil') NOT NULL,
+  `tema_questao` enum('Teoria','Programação') NOT NULL,
   PRIMARY KEY (`id_questao`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +43,7 @@ CREATE TABLE `tb_questoes` (
 
 LOCK TABLES `tb_questoes` WRITE;
 /*!40000 ALTER TABLE `tb_questoes` DISABLE KEYS */;
-INSERT INTO `tb_questoes` VALUES (1,'Este é um teste?','Sim.','Não!','Chute errado.','Também não!');
+INSERT INTO `tb_questoes` VALUES (1,'Este é um teste?','Sim.','Não!','Chute errado.','Também não!','Fácil','Teoria'),(2,'Este é um teste?','Sim.','Não!','Chute errado.','Também não!','Médio','Programação');
 /*!40000 ALTER TABLE `tb_questoes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-24  9:32:41
+-- Dump completed on 2025-03-30 14:51:50

@@ -1,4 +1,4 @@
-﻿namespace QuizApp.Models
+﻿namespace POCA.Web
 {
     public class Question
     {

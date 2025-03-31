@@ -1,5 +1,6 @@
-﻿// POCA.Web.Requests.QuestaoRequest
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace POCA.API.Requests;
 
 public record QuestaoRequest(
     [Required] string EnunciadoQuestao,
