@@ -16,4 +16,8 @@ public partial class TbQuestoes
     public string Respostaerrada2Questao { get; set; } = null!;
 
     public string Respostaerrada3Questao { get; set; } = null!;
+
+    public string DificuldadeQuestao { get; set; } = null!;
+
+    public string TemaQuestao { get; set; } = null!;
 }

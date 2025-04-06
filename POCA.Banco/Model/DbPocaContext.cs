@@ -15,6 +15,8 @@ public partial class DbPocaContext : DbContext
     {
     }
 
+    public virtual DbSet<Efmigrationshistory> Efmigrationshistories { get; set; }
+
     public virtual DbSet<TbQuestoes> TbQuestoes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -23,6 +25,16 @@ public partial class DbPocaContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Efmigrationshistory>(entity =>
+        {
+            entity.HasKey(e => e.MigrationId).HasName("PRIMARY");
+
+            entity.ToTable("__efmigrationshistory");
+
+            entity.Property(e => e.MigrationId).HasMaxLength(150);
+            entity.Property(e => e.ProductVersion).HasMaxLength(32);
+        });
+
         modelBuilder.Entity<TbQuestoes>(entity =>
         {
             entity.HasKey(e => e.IdQuestao).HasName("PRIMARY");
@@ -30,6 +42,9 @@ public partial class DbPocaContext : DbContext
             entity.ToTable("tb_questoes");
 
             entity.Property(e => e.IdQuestao).HasColumnName("id_questao");
+            entity.Property(e => e.DificuldadeQuestao)
+                .HasColumnType("enum('Fácil','Médio','Difícil')")
+                .HasColumnName("dificuldade_questao");
             entity.Property(e => e.EnunciadoQuestao)
                 .HasMaxLength(200)
                 .HasColumnName("enunciado_questao");
@@ -45,6 +60,9 @@ public partial class DbPocaContext : DbContext
             entity.Property(e => e.Respostaerrada3Questao)
                 .HasMaxLength(100)
                 .HasColumnName("respostaerrada3_questao");
+            entity.Property(e => e.TemaQuestao)
+                .HasColumnType("enum('Teoria','Programação')")
+                .HasColumnName("tema_questao");
         });
 
         OnModelCreatingPartial(modelBuilder);
