@@ -1,0 +1,36 @@
+﻿@page "/teste"
+@using MudBlazor
+@using POCA.Web
+
+<h3>Teste</h3>
+
+<MudRadioGroup T="int" Label="Selecione uma opção" @bind-Value="opcaoSelecionadaindex">
+    <MudRadio Value="1">@pergunta.Options[0]</MudRadio>
+    <MudRadio Value="2">@pergunta.Options[1]</MudRadio>
+    <MudRadio Value="3">@pergunta.Options[2]</MudRadio>
+    <MudRadio Value="4">@pergunta.Options[3]</MudRadio>
+</MudRadioGroup>
+
+<p>Opção selecionada: @opcaoSelecionadaindex</p>
+
+@code {
+    private List<string> opcoes;
+    private Question pergunta;
+    private int opcaoSelecionadaindex;
+    private int teste;
+
+    private void InicializarObjetos()
+    {
+        List<string> opcoes = new List<string> { "opcao 1", "opcao 2", "opcao 3", "opcao 4" };
+        pergunta = new Question(
+            "opcao correta e a 1",
+            opcoes,
+            1
+        );
+    }
+
+    protected override void OnInitialized()
+    {
+        InicializarObjetos();
+    }
+}
