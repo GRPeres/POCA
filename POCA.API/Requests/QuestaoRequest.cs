@@ -8,6 +8,6 @@ public record QuestaoRequest(
     [Required] string RespostaErrada1Questao,
     [Required] string RespostaErrada2Questao,
     [Required] string RespostaErrada3Questao,
-    [Required] string Dificuldade,
-    [Required] string Tema
+    [Required] string DificuldadeQuestao,
+    [Required] string TemaQuestao
 );
