@@ -37,7 +37,9 @@ namespace POCA.API.Endpoints
                     RespostacertaQuestao = request.RespostaCertaQuestao,
                     Respostaerrada1Questao = request.RespostaErrada1Questao,
                     Respostaerrada2Questao = request.RespostaErrada2Questao,
-                    Respostaerrada3Questao = request.RespostaErrada3Questao
+                    Respostaerrada3Questao = request.RespostaErrada3Questao,
+                    DificuldadeQuestao = request.Dificuldade,
+                    TemaQuestao = request.Tema
                 };
 
                 context.TbQuestoes.Add(questao);
@@ -47,8 +49,8 @@ namespace POCA.API.Endpoints
 
             // PUT update question
             group.MapPut("/{id}", async ([FromServices] DbPocaContext context,
-                                       int id,
-                                       [FromBody] QuestaoRequest request) =>
+                           int id,
+                           [FromBody] QuestaoRequest request) =>
             {
                 var questao = await context.TbQuestoes.FindAsync(id);
                 if (questao is null) return Results.NotFound();
@@ -58,6 +60,8 @@ namespace POCA.API.Endpoints
                 questao.Respostaerrada1Questao = request.RespostaErrada1Questao;
                 questao.Respostaerrada2Questao = request.RespostaErrada2Questao;
                 questao.Respostaerrada3Questao = request.RespostaErrada3Questao;
+                questao.DificuldadeQuestao = request.Dificuldade;
+                questao.TemaQuestao = request.Tema;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();

@@ -1,0 +1,57 @@
+@page "/adicionar-questao"
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
+<MudPaper Class="pa-4 mx-auto mt-6" Style="max-width:600px;">
+    <MudText Typo="Typo.h5">Adicionar Nova Questão</MudText>
+    <EditForm Model="@questao" OnValidSubmit="Enviar">
+        <MudTextField @bind-Value="questao.EnunciadoQuestao" Label="Enunciado" Required="true" />
+        <MudTextField @bind-Value="questao.RespostaCertaQuestao" Label="Resposta Certa" Required="true" />
+        <MudTextField @bind-Value="questao.RespostaErrada1Questao" Label="Resposta Errada 1" Required="true" />
+        <MudTextField @bind-Value="questao.RespostaErrada2Questao" Label="Resposta Errada 2" Required="true" />
+        <MudTextField @bind-Value="questao.RespostaErrada3Questao" Label="Resposta Errada 3" Required="true" />
+
+        <MudSelect @bind-Value="questao.Dificuldade" Label="Dificuldade" Required="true">
+            <MudSelectItem Value="Fácil">Fácil</MudSelectItem>
+            <MudSelectItem Value="Médio">Médio</MudSelectItem>
+            <MudSelectItem Value="Difícil">Difícil</MudSelectItem>
+        </MudSelect>
+
+        <MudSelect @bind-Value="questao.Tema" Label="Tema" Required="true">
+            <MudSelectItem Value="Teoria">Teoria</MudSelectItem>
+            <MudSelectItem Value="Programação">Programação</MudSelectItem>
+        </MudSelect>
+
+        <MudButton Type="Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-3">
+            Salvar
+        </MudButton>
+    </EditForm>
+</MudPaper>
+
+@code {
+    private QuestaoRequest questao = new();
+
+    private async Task Enviar()
+    {
+        var response = await Http.PostAsJsonAsync("https://localhost:xxxx/questoes", questao);
+        if (response.IsSuccessStatusCode)
+        {
+            NavManager.NavigateTo("/questoes");
+        }
+        else
+        {
+            // lidar com erro
+        }
+    }
+
+    public class QuestaoRequest
+    {
+        public string EnunciadoQuestao { get; set; }
+        public string RespostaCertaQuestao { get; set; }
+        public string RespostaErrada1Questao { get; set; }
+        public string RespostaErrada2Questao { get; set; }
+        public string RespostaErrada3Questao { get; set; }
+        public string Dificuldade { get; set; }
+        public string Tema { get; set; }
+    }
+}
