@@ -2,35 +2,66 @@
 @using MudBlazor
 @using POCA.Web
 
-<h3>Teste</h3>
 
-<MudRadioGroup T="int" Label="Selecione uma opção" @bind-Value="opcaoSelecionadaindex">
-    <MudRadio Value="1">@pergunta.Options[0]</MudRadio>
-    <MudRadio Value="2">@pergunta.Options[1]</MudRadio>
-    <MudRadio Value="3">@pergunta.Options[2]</MudRadio>
-    <MudRadio Value="4">@pergunta.Options[3]</MudRadio>
-</MudRadioGroup>
+@if (emAndamento)
+{
+    <div>@Questoes[posicao].QuestionText</div>
+    <MudRadioGroup T="int" Label="@Questoes[posicao].QuestionText" @bind-Value="SelectedAnswers[posicao]">
+        @foreach (var (opcao, index) in Questoes[posicao].Options.Select((o, i) => (o, i)))
+        {
+            <MudRadio Value="@index">@opcao</MudRadio>
+        }
+    </MudRadioGroup>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextQuestion">
+        @(posicao == Questoes.Count - 1 ? "Ver Resultados" : "Próxima Questão")
+    </MudButton>
+}
 
-<p>Opção selecionada: @opcaoSelecionadaindex</p>
+@if (!emAndamento)
+{
+    <h3>Resultados:</h3>
+    @for (int i = 0; i < Questoes.Count; i++)
+    {
+        <p>
+            <strong>Pergunta @(i + 1):</strong> @Questoes[i].QuestionText<br />
+            Opção selecionada: @Questoes[i].Options[SelectedAnswers[i]] (@(SelectedAnswers[i] == Questoes[i].CorrectAnswerIndex ? "Correta" : "Incorreta"))<br />
+            Resposta correta: @Questoes[i].Options[Questoes[i].CorrectAnswerIndex]
+        </p>
+    }
+}
+
 
 @code {
-    private List<string> opcoes;
-    private Question pergunta;
-    private int opcaoSelecionadaindex;
-    private int teste;
-
-    private void InicializarObjetos()
-    {
-        List<string> opcoes = new List<string> { "opcao 1", "opcao 2", "opcao 3", "opcao 4" };
-        pergunta = new Question(
-            "opcao correta e a 1",
-            opcoes,
-            1
-        );
-    }
+    protected List<Question> Questoes { get; set; } = new();
+    protected List<int> SelectedAnswers { get; set; } = new();
+    protected List<Boolean> CorrectList { get; set; } = new();
+    private Boolean emAndamento;
+    private int posicao;
 
     protected override void OnInitialized()
     {
-        InicializarObjetos();
+        Questoes = new List<Question>
+        {
+            new Question("Qual é a capital da França?", new List<string> { "Madrid", "Paris", "Londres", "Berlim" }, 1),
+            new Question("Quanto é 2 + 2?", new List<string> { "3", "6", "5", "4" }, 3),
+            new Question("Qual o maior planeta do sistema solar?", new List<string> { "Júpiter", "Terra", "Marte", "Saturno" }, 0)
+        };
+
+        CorrectList = new List<Boolean>(new Boolean[Questoes.Count]);
+        SelectedAnswers = new List<int>(new int[Questoes.Count]);
+        posicao = 0;
+        emAndamento = true;
+    }
+
+    private void NextQuestion()
+    {
+        if (posicao <= Questoes.Count) 
+        {
+            posicao++;
+        }
+        else
+        {
+            emAndamento = false;
+        }
     }
 }

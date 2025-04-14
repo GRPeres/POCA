@@ -1,125 +1,64 @@
 ﻿@page "/quiz"
 @using POCA.Web
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background - color: #f4f4f4;
-    text - align: center;
-    margin: 20px;
-}
-
-h2 {
-    color: #333;
-}
-
-form {
-    background: #fff;
-    padding: 20px;
-    border - radius: 8px;
-    box - shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    display: inline - block;
-    text - align: left;
-    max - width: 500px;
-    width: 100 %;
-}
-
-.question {
-    margin-bottom: 15px;
-}
-
-button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border - radius: 5px;
-    cursor: pointer;
-    font - size: 16px;
-}
-
-button: hover {
-    background - color: #218838;
-}
-
-</style>
-
-<h2>Quiz de Conhecimentos Gerais</h2>
-
-@if (!quizCompleted)
+@if (emAndamento)
 {
-    <form>
-        @for (int i = 0; i < Questions.Count; i++)
+    <div>@Questoes[posicao].QuestionText</div>
+    <MudRadioGroup T="int" Label="@Questoes[posicao].QuestionText" @bind-Value="SelectedAnswers[posicao]">
+        @foreach (var (opcao, index) in Questoes[posicao].Options.Select((o, i) => (o, i)))
         {
-            <div class="question">
-                <p>@Questions[i].QuestionText</p>
-                @for (int j = 0; j < Questions[i].Options.Count; j++)
-                {
-                    <label>
-                        <input type="radio" name="answers[@i]" value="@j" @onclick="() => SelectAnswer(i, j)" />
-                        @Questions[i].Options[j]
-                    </label>
-                    <br />
-                }
-            </div>
+            <MudRadio Value="@index">@opcao</MudRadio>
         }
-        <button type="button" @onclick="SubmitAnswers">Enviar Respostas</button>
-    </form>
-}
-else
-{
-    <h3>Resultado:</h3>
-    <ul>
-        @for (int i = 0; i < Results.Count; i++)
-        {
-            <li>
-                Pergunta @(i + 1): @(Results[i] ? "✔️ Correta" : "❌ Errada")
-            </li>
-        }
-    </ul>
+    </MudRadioGroup>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextQuestion">
+        @(posicao == Questoes.Count - 1 ? "Ver Resultados" : "Próxima Questão")
+    </MudButton>
 }
 
-@code
+@if (!emAndamento)
 {
-    protected List<Question> Questions { get; set; } = new();
-    protected List<int?> SelectedAnswers { get; set; } = new();
-    protected List<bool> Results { get; set; } = new();
-    protected bool quizCompleted = false;
+    <h3>Resultados:</h3>
+    @for (int i = 0; i < Questoes.Count; i++)
+    {
+        <p>
+            <strong>Pergunta @(i + 1):</strong> @Questoes[i].QuestionText<br />
+            Opção selecionada: @Questoes[i].Options[SelectedAnswers[i]] (@(SelectedAnswers[i] == Questoes[i].CorrectAnswerIndex ? "Correta" : "Incorreta"))<br />
+            Resposta correta: @Questoes[i].Options[Questoes[i].CorrectAnswerIndex]
+        </p>
+    }
+}
+
+@code {
+    protected List<Question> Questoes { get; set; } = new();
+    protected List<int> SelectedAnswers { get; set; } = new();
+    protected List<Boolean> CorrectList { get; set; } = new();
+    private Boolean emAndamento;
+    private int posicao;
 
     protected override void OnInitialized()
     {
-        Questions = new List<Question>
+        Questoes = new List<Question>
         {
             new Question("Qual é a capital da França?", new List<string> { "Madrid", "Paris", "Londres", "Berlim" }, 1),
-            new Question("Quanto é 2 + 2?", new List<string> { "3", "4", "5", "6" }, 1),
-            new Question("Qual o maior planeta do sistema solar?", new List<string> { "Terra", "Marte", "Júpiter", "Saturno" }, 2)
+            new Question("Quanto é 2 + 2?", new List<string> { "3", "6", "5", "4" }, 3),
+            new Question("Qual o maior planeta do sistema solar?", new List<string> { "Júpiter", "Terra", "Marte", "Saturno" }, 0)
         };
 
-        SelectedAnswers = new List<int?>(new int?[Questions.Count]);
+        CorrectList = new List<Boolean>(new Boolean[Questoes.Count]);
+        SelectedAnswers = new List<int>(new int[Questoes.Count]);
+        posicao = 0;
+        emAndamento = true;
     }
 
-    protected void SelectAnswer(int questionIndex, int answerIndex)
+    private void NextQuestion()
     {
-        SelectedAnswers[questionIndex] = answerIndex;
-    }
-
-    protected void SubmitAnswers()
-    {
-        Results.Clear();
-
-        for (int i = 0; i < Questions.Count; i++)
+        if (posicao <= Questoes.Count)
         {
-            if (SelectedAnswers[i] != null)
-            {
-                Results.Add(SelectedAnswers[i] == Questions[i].CorrectAnswerIndex);
-            }
-            else
-            {
-                Results.Add(false);
-            }
+            posicao++;
         }
-
-        quizCompleted = true;
-        StateHasChanged();
+        else
+        {
+            emAndamento = false;
+        }
     }
 }
