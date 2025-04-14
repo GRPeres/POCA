@@ -46,7 +46,7 @@
     {
         try
         {
-            questoes = await Http.GetFromJsonAsync<List<QuestaoResponse>>("https://localhost:xxxx/questoes");
+            questoes = await Http.GetFromJsonAsync<List<QuestaoResponse>>("http://localhost:5000/questoes");
         }
         catch (Exception ex)
         {

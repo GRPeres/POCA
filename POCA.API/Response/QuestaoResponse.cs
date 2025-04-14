@@ -7,6 +7,6 @@ public record QuestaoResponse(
     string RespostaErrada1Questao,
     string RespostaErrada2Questao,
     string RespostaErrada3Questao,
-    string Dificuldade,
-    string Tema
+    string DificuldadeQuestao,
+    string TemaQuestao
 );

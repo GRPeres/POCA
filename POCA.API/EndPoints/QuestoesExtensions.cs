@@ -38,8 +38,8 @@ namespace POCA.API.Endpoints
                     Respostaerrada1Questao = request.RespostaErrada1Questao,
                     Respostaerrada2Questao = request.RespostaErrada2Questao,
                     Respostaerrada3Questao = request.RespostaErrada3Questao,
-                    DificuldadeQuestao = request.Dificuldade,
-                    TemaQuestao = request.Tema
+                    DificuldadeQuestao = request.DificuldadeQuestao,
+                    TemaQuestao = request.TemaQuestao
                 };
 
                 context.TbQuestoes.Add(questao);
@@ -60,8 +60,8 @@ namespace POCA.API.Endpoints
                 questao.Respostaerrada1Questao = request.RespostaErrada1Questao;
                 questao.Respostaerrada2Questao = request.RespostaErrada2Questao;
                 questao.Respostaerrada3Questao = request.RespostaErrada3Questao;
-                questao.DificuldadeQuestao = request.Dificuldade;
-                questao.TemaQuestao = request.Tema;
+                questao.DificuldadeQuestao = request.DificuldadeQuestao;
+                questao.TemaQuestao = request.TemaQuestao;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();
