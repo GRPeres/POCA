@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Endpoints;
+using POCA.API.EndPoints;
 using POCA.Banco;
 using POCA.Banco.Model;
 using System.Text.Json.Serialization;
@@ -28,6 +29,7 @@ app.UseCors(options => options
     .AllowAnyHeader());
 
 app.AddEndpointsQuestoes();
+app.AddEndpointsAlunos();
 app.UseSwagger();
 app.UseSwaggerUI();
 

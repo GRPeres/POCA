@@ -8,7 +8,7 @@ namespace POCA.API.EndPoints
 {
     public static class AlunoExtension
     {
-     public static void AddEndpointsQuestoes(this WebApplication app)
+     public static void AddEndpointsAlunos(this WebApplication app)
         {
             var group = app.MapGroup("/alunos")
                            .WithTags("Alunos");
