@@ -17,6 +17,8 @@ public partial class DbPocaContext : DbContext
 
     public virtual DbSet<Efmigrationshistory> Efmigrationshistories { get; set; }
 
+    public virtual DbSet<TbAluno> TbAlunos { get; set; }
+
     public virtual DbSet<TbQuestoes> TbQuestoes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -33,6 +35,31 @@ public partial class DbPocaContext : DbContext
 
             entity.Property(e => e.MigrationId).HasMaxLength(150);
             entity.Property(e => e.ProductVersion).HasMaxLength(32);
+        });
+
+        modelBuilder.Entity<TbAluno>(entity =>
+        {
+            entity.HasKey(e => e.IdAluno).HasName("PRIMARY");
+
+            entity.ToTable("tb_alunos");
+
+            entity.HasIndex(e => e.NomeAluno, "nome_aluno_UNIQUE").IsUnique();
+
+            entity.Property(e => e.IdAluno).HasColumnName("id_aluno");
+            entity.Property(e => e.ContatoAluno)
+                .HasMaxLength(45)
+                .HasColumnName("contato_aluno");
+            entity.Property(e => e.IdadeAluno).HasColumnName("idade_aluno");
+            entity.Property(e => e.LoginAluno)
+                .HasMaxLength(45)
+                .HasColumnName("login_aluno");
+            entity.Property(e => e.NomeAluno)
+                .HasMaxLength(45)
+                .HasColumnName("nome_aluno");
+            entity.Property(e => e.ProgressoAluno).HasColumnName("progresso_aluno");
+            entity.Property(e => e.SenhaAluno)
+                .HasMaxLength(45)
+                .HasColumnName("senha_aluno");
         });
 
         modelBuilder.Entity<TbQuestoes>(entity =>
