@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Requests;
 using POCA.API.Response;
+using POCA.API.Services;
 using POCA.Banco;
 using POCA.Banco.Model;
 
@@ -76,6 +77,23 @@ namespace POCA.API.Endpoints
                 context.TbQuestoes.Remove(questao);
                 await context.SaveChangesAsync();
                 return Results.NoContent();
+            });
+
+            //Cria Atividade de forma automatica
+            group.MapGet("/random", async (
+                [FromServices] AtividadeService service,
+                [FromQuery] string? tema,
+                [FromQuery] int? facilCount,
+                [FromQuery] int? medioCount,
+                [FromQuery] int? dificilCount) =>
+            {
+                var questions = await service.GetRandomQuestionsAsync(
+                    tema,
+                    facilCount,
+                    medioCount,
+                    dificilCount);
+
+                return Results.Ok(questions);
             });
         }
     }

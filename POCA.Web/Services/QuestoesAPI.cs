@@ -12,7 +12,31 @@ namespace POCA.Web.Services
             _httpClient = factory.CreateClient("API"); // Use your named client
         }
 
-        // All methods remain the same as before
+        public async Task<ICollection<QuestaoResponse>?> GetRandomQuestionsAsync(
+            string? tema = null,
+            int? facilCount = null,
+            int? medioCount = null,
+            int? dificilCount = null)
+        {
+            var queryParams = new List<string>();
+
+            if (!string.IsNullOrEmpty(tema))
+                queryParams.Add($"tema={Uri.EscapeDataString(tema)}");
+
+            if (facilCount.HasValue)
+                queryParams.Add($"facilCount={facilCount.Value}");
+
+            if (medioCount.HasValue)
+                queryParams.Add($"medioCount={medioCount.Value}");
+
+            if (dificilCount.HasValue)
+                queryParams.Add($"dificilCount={dificilCount.Value}");
+
+            var queryString = queryParams.Any() ? $"?{string.Join("&", queryParams)}" : "";
+
+            return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>($"questoes/random{queryString}");
+        }
+
         public async Task<ICollection<QuestaoResponse>?> GetQuestoesAsync()
         {
             return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>("questoes");
