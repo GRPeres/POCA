@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Endpoints;
 using POCA.API.EndPoints;
+using POCA.API.Services;
 using POCA.Banco;
 using POCA.Banco.Model;
 using System.Text.Json.Serialization;
@@ -13,6 +14,8 @@ builder.Services.AddDbContext<DbPocaContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<AtividadeService>();
 
 // Prevents circular reference issues in JSON responses
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
