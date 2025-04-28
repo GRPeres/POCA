@@ -1,7 +1,6 @@
-﻿@page "/teste"
+﻿@page "/teste/{idQuestion:int}"
 @using MudBlazor
 @using POCA.Web
-
 
 @if (emAndamento)
 {
@@ -30,8 +29,10 @@
     }
 }
 
-
 @code {
+    [Parameter]
+    public int idQuestion { get; set; }
+
     protected List<Question> Questoes { get; set; } = new();
     protected List<int> SelectedAnswers { get; set; } = new();
     protected List<Boolean> CorrectList { get; set; } = new();
@@ -52,6 +53,8 @@
         posicao = 0;
         emAndamento = true;
     }
+
+
 
     private void NextQuestion()
     {
