@@ -33,7 +33,14 @@
                     <MudTd>@questao.EnunciadoQuestao</MudTd>
                     <MudTd>@questao.TemaQuestao</MudTd>
                     <MudTd>@questao.DificuldadeQuestao</MudTd>
-                    <mudTd><MudNavLink Href="@($"/teste/{@questao.IdQuestao}")" Match="NavLinkMatch.Prefix">quiz</MudNavLink></mudTd>
+                    <mudTd><MudButton 
+                            Variant="Variant.Outlined" 
+                            Color="Color.Primary" 
+                            Size="Size.Small"
+                            StartIcon="@Icons.Material.Filled.Visibility"
+                            Href="@($"/questao/{questao.IdQuestao}")">
+                            Ver
+                        </MudButton></mudTd>
                 </RowTemplate>
             </MudTable>
         </MudContainer>
