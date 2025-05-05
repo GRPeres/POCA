@@ -18,33 +18,31 @@ USE `db_poca`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `tb_professores`
+-- Table structure for table `tb_materias`
 --
 
-DROP TABLE IF EXISTS `tb_professores`;
+DROP TABLE IF EXISTS `tb_materias`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tb_professores` (
-  `id_professor` int NOT NULL AUTO_INCREMENT,
-  `nome_professor` varchar(45) NOT NULL,
-  `materia_professor` varchar(45) NOT NULL,
-  `contato_professor` varchar(45) NOT NULL,
-  `login_professor` varchar(45) NOT NULL,
-  `senha_professor` varchar(45) NOT NULL,
-  PRIMARY KEY (`id_professor`),
-  UNIQUE KEY `nome_professor_UNIQUE` (`nome_professor`),
-  UNIQUE KEY `contato_professor_UNIQUE` (`contato_professor`),
-  UNIQUE KEY `login_professor_UNIQUE` (`login_professor`)
+CREATE TABLE `tb_materias` (
+  `id_materia` int NOT NULL AUTO_INCREMENT,
+  `id_professor_materia` int DEFAULT NULL,
+  `id_aluno_materia` int DEFAULT NULL,
+  PRIMARY KEY (`id_materia`),
+  KEY `id_professor_materia_idx` (`id_professor_materia`),
+  KEY `id_aluno_materia_idx` (`id_aluno_materia`),
+  CONSTRAINT `id_aluno_materia` FOREIGN KEY (`id_aluno_materia`) REFERENCES `tb_alunos` (`id_aluno`),
+  CONSTRAINT `id_professor_materia` FOREIGN KEY (`id_professor_materia`) REFERENCES `tb_professores` (`id_professor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `tb_professores`
+-- Dumping data for table `tb_materias`
 --
 
-LOCK TABLES `tb_professores` WRITE;
-/*!40000 ALTER TABLE `tb_professores` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tb_professores` ENABLE KEYS */;
+LOCK TABLES `tb_materias` WRITE;
+/*!40000 ALTER TABLE `tb_materias` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tb_materias` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

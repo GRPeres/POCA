@@ -72,6 +72,31 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_professores` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `db_poca`.`tb_materias`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_materias` ;
+
+CREATE TABLE IF NOT EXISTS `db_poca`.`tb_materias` (
+  `id_materia` INT NOT NULL AUTO_INCREMENT,
+  `id_professor_materia` INT NULL,
+  `id_aluno_materia` INT NULL,
+  PRIMARY KEY (`id_materia`),
+  INDEX `id_professor_materia_idx` (`id_professor_materia` ASC) VISIBLE,
+  INDEX `id_aluno_materia_idx` (`id_aluno_materia` ASC) VISIBLE,
+  CONSTRAINT `id_professor_materia`
+    FOREIGN KEY (`id_professor_materia`)
+    REFERENCES `db_poca`.`tb_professores` (`id_professor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `id_aluno_materia`
+    FOREIGN KEY (`id_aluno_materia`)
+    REFERENCES `db_poca`.`tb_alunos` (`id_aluno`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
