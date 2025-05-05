@@ -1,0 +1,66 @@
+@page "/gerar-atividade"
+@inject HttpClient Http
+@using System.Net.Http.Json
+@using MudBlazor
+
+<PageTitle>Gerar Atividade</PageTitle>
+
+<MudPaper Class="pa-4" Elevation="4">
+    <MudText Typo="Typo.h5">Gerar Atividade Aleatória</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="Quantidade Fácil" @bind-Value="_facil" Min="0" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="Quantidade Médio" @bind-Value="_medio" Min="0" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="Quantidade Difícil" @bind-Value="_dificil" Min="0" />
+        </MudItem>
+    </MudGrid>
+
+    <MudButton Color="Color.Primary" OnClick="GerarAtividade" Class="mt-4">Gerar</MudButton>
+
+    <MudDivider Class="my-4" />
+
+    <MudText Typo="Typo.h6">Questões Geradas:</MudText>
+
+    @if (_questoes is null)
+    {
+        <MudText>Nenhuma atividade gerada ainda.</MudText>
+    }
+    else if (!_questoes.Any())
+    {
+        <MudText>Não foram encontradas questões com os critérios informados.</MudText>
+    }
+    else
+    {
+        <MudTable Items="_questoes">
+            <HeaderContent>
+                <MudTh>Enunciado</MudTh>
+                <MudTh>Dificuldade</MudTh>
+                <MudTh>Tema</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.EnunciadoQuestao</MudTd>
+                <MudTd>@context.DificuldadeQuestao</MudTd>
+                <MudTd>@context.TemaQuestao</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudPaper>
+
+@code {
+    private int _facil = 0;
+    private int _medio = 0;
+    private int _dificil = 0;
+
+    private List<QuestaoResponse>? _questoes;
+
+    private async Task GerarAtividade()
+    {
+        var query = $"questoes/random?facilCount={_facil}&medioCount={_medio}&dificilCount={_dificil}";
+        _questoes = await Http.GetFromJsonAsync<List<QuestaoResponse>>(query);
+    }
+}
