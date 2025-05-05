@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace POCA.Banco.Model;
 
-public partial class TbQuestoes
+public partial class TbQuesto
 {
     public int IdQuestao { get; set; }
 

@@ -32,7 +32,7 @@ namespace POCA.API.Endpoints
             group.MapPost("/", async ([FromServices] DbPocaContext context,
                                     [FromBody] QuestaoRequest request) =>
             {
-                var questao = new TbQuestoes
+                var questao = new TbQuesto
                 {
                     EnunciadoQuestao = request.EnunciadoQuestao,
                     RespostacertaQuestao = request.RespostaCertaQuestao,

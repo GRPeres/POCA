@@ -19,7 +19,9 @@ public partial class DbPocaContext : DbContext
 
     public virtual DbSet<TbAluno> TbAlunos { get; set; }
 
-    public virtual DbSet<TbQuestoes> TbQuestoes { get; set; }
+    public virtual DbSet<TbProfessore> TbProfessores { get; set; }
+
+    public virtual DbSet<TbQuesto> TbQuestoes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -62,7 +64,37 @@ public partial class DbPocaContext : DbContext
                 .HasColumnName("senha_aluno");
         });
 
-        modelBuilder.Entity<TbQuestoes>(entity =>
+        modelBuilder.Entity<TbProfessore>(entity =>
+        {
+            entity.HasKey(e => e.IdProfessor).HasName("PRIMARY");
+
+            entity.ToTable("tb_professores");
+
+            entity.HasIndex(e => e.ContatoProfessor, "contato_professor_UNIQUE").IsUnique();
+
+            entity.HasIndex(e => e.LoginProfessor, "login_professor_UNIQUE").IsUnique();
+
+            entity.HasIndex(e => e.NomeProfessor, "nome_professor_UNIQUE").IsUnique();
+
+            entity.Property(e => e.IdProfessor).HasColumnName("id_professor");
+            entity.Property(e => e.ContatoProfessor)
+                .HasMaxLength(45)
+                .HasColumnName("contato_professor");
+            entity.Property(e => e.LoginProfessor)
+                .HasMaxLength(45)
+                .HasColumnName("login_professor");
+            entity.Property(e => e.MateriaProfessor)
+                .HasMaxLength(45)
+                .HasColumnName("materia_professor");
+            entity.Property(e => e.NomeProfessor)
+                .HasMaxLength(45)
+                .HasColumnName("nome_professor");
+            entity.Property(e => e.SenhaProfessor)
+                .HasMaxLength(45)
+                .HasColumnName("senha_professor");
+        });
+
+        modelBuilder.Entity<TbQuesto>(entity =>
         {
             entity.HasKey(e => e.IdQuestao).HasName("PRIMARY");
 
