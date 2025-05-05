@@ -1,0 +1,64 @@
+﻿@page "/login"
+@using MudBlazor
+@using POCA.Web
+
+<h1>Página de Login</h1>
+
+<MudTextField @bind-Value="usuario.User" Label="Usuário" Variant="Variant.Filled" />
+<MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
+
+@code {
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
+
+    private Usuario usuario = new Usuario();
+    private LoginService login;
+    private bool LoginSucesso { get; set; }
+
+    protected override void OnInitialized()
+    {
+        LoginSucesso = false;
+        login = new("2222", "tuser", "teste@teste.com", "teste");
+    }
+
+    private class Usuario
+    {
+        public string User { get; set; }
+        public string Senha { get; set; }
+    }
+
+    private void EfetuarLogin()
+    {
+        if (login.AutenticarUsuario(usuario.User, usuario.Senha))
+        {
+            LoginSucesso = true;
+            Mostramensagem("Login bem-sucedido!");
+        }
+        else
+        {
+            LoginSucesso = false;
+            Mostramensagem("Credenciais inválidas.");
+        }
+    }
+    private void Mostramensagem(string mensagem)
+    {
+        if (LoginSucesso)
+        {
+            Snackbar.Add(mensagem, Severity.Success);
+            RedirecionarParaOutraPagina();
+        }
+        else if (!LoginSucesso)
+        {
+            Snackbar.Add(mensagem, Severity.Warning);
+        }
+        else
+        {
+            Snackbar.Add("Erro ao mostrar mensagem", Severity.Error);
+        }
+    }
+    private void RedirecionarParaOutraPagina()
+    {
+        NavigationManager.NavigateTo("/questoes");
+    }
+}
