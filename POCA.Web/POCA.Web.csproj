@@ -21,4 +21,8 @@
     <ProjectReference Include="..\POCA.Banco\POCA.Banco.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Pages\Login.razor" />
+  </ItemGroup>
+
 </Project>

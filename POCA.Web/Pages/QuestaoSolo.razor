@@ -1,0 +1,70 @@
+﻿@page "/questao/{id:int}"
+@inject HttpClient Http
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    @if (questao == null)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else
+    {
+        <MudPaper Elevation="4" Class="p-6">
+            <MudText Typo="Typo.h5" GutterBottom="true">@questao.EnunciadoQuestao</MudText>
+            <MudDivider Class="mb-4" />
+
+            <MudText><strong>Assunto:</strong> @questao.TemaQuestao</MudText>
+            <MudText><strong>Dificuldade:</strong> @questao.DificuldadeQuestao</MudText>
+
+            <MudDivider Class="my-4" />
+            <MudText Typo="Typo.h6" Class="mb-2">Resposta Certa:</MudText>
+            <MudText Class="mb-4">@questao.RespostacertaQuestao</MudText>
+
+            <MudText Typo="Typo.h6" Class="mb-2">Respostas Erradas:</MudText>
+            <MudList T="string">
+                <MudListItem>@questao.Respostaerrada1Questao</MudListItem>
+                <MudListItem>@questao.Respostaerrada2Questao</MudListItem>
+                <MudListItem>@questao.Respostaerrada3Questao</MudListItem>
+            </MudList>
+
+            <MudButton 
+                Variant="Variant.Outlined" 
+                Color="Color.Primary" 
+                Class="mt-4"
+                Href="/questoes">
+                Voltar
+            </MudButton>
+        </MudPaper>
+    }
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private QuestaoResponse? questao;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            questao = await Http.GetFromJsonAsync<QuestaoResponse>($"http://localhost:5000/questoes/{id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar questão: {ex.Message}");
+        }
+    }
+
+    public class QuestaoResponse
+    {
+        public int IdQuestao { get; set; }
+        public string EnunciadoQuestao { get; set; }
+        public string RespostacertaQuestao { get; set; }
+        public string Respostaerrada1Questao { get; set; }
+        public string Respostaerrada2Questao { get; set; }
+        public string Respostaerrada3Questao { get; set; }
+        public string DificuldadeQuestao { get; set; }
+        public string TemaQuestao { get; set; }
+    }
+}

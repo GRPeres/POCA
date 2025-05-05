@@ -2,18 +2,14 @@
 @inject HttpClient Http
 
 <MudLayout>
-    <MudAppBar Elevation="4">
-        <MudText Typo="Typo.h5">Lista de Questões</MudText>
-        <MudSpacer />
-        <MudButton 
-            Color="Color.Primary" 
-            Variant="Variant.Filled" 
-            StartIcon="@Icons.Material.Filled.Add" 
-            Href="/adicionar-questao">
+    <MudChatHeader Class="d-flex justify-end">
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/adicionar-questao">
             Nova Questão
         </MudButton>
-    </MudAppBar>
-
+    </MudChatHeader>
     <MudDrawer Open="true" Class="mud-theme-primary">
         <MudNavMenu>
             <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">Início</MudNavLink>
@@ -22,6 +18,9 @@
     </MudDrawer>
 
     <MudMainContent>
+        <MudChatHeader>
+            <MudText Typo="Typo.h5">Lista de Questões</MudText>
+        </MudChatHeader>
         <MudContainer>
             <MudTable Items="@questoes" Dense="true" Hover="true" Striped="true">
                 <HeaderContent>
@@ -33,6 +32,14 @@
                     <MudTd>@questao.EnunciadoQuestao</MudTd>
                     <MudTd>@questao.TemaQuestao</MudTd>
                     <MudTd>@questao.DificuldadeQuestao</MudTd>
+                    <mudTd><MudButton 
+                            Variant="Variant.Outlined" 
+                            Color="Color.Primary" 
+                            Size="Size.Small"
+                            StartIcon="@Icons.Material.Filled.Visibility"
+                            Href="@($"/questao/{questao.IdQuestao}")">
+                            Ver
+                        </MudButton></mudTd>
                 </RowTemplate>
             </MudTable>
         </MudContainer>

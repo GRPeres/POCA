@@ -6,10 +6,16 @@
 
 <MudLayout>
     <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
-        <MudImage Src="images/POCA_logo.png"></MudImage>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/">
+            <MudImage Src="images/POCA_logo.png"></MudImage>
+        </MudButton>
+        <MudSpacer />
+        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/login">
+            <MudImage Src="images/conta.png"></MudImage>
+        </MudButton>
     </MudAppBar>
     <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
-            <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
+        <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
     </MudDrawer>
     <MudMainContent class="main-content pa-10">
         @Body

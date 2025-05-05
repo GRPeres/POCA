@@ -2,66 +2,29 @@
 @using MudBlazor
 @using POCA.Web
 
+<h1>teste</h1>
 
-@if (emAndamento)
+<MudTextField @bind-Value="teste" Label="Pesquisar" Variant="Variant.Outlined" Class="mb-2" />
+<MudButton OnClick="OnSearchClicked" Variant="Variant.Filled" Color="Color.Primary">
+    Pesquisar
+</MudButton>
+
+@code
 {
-    <div>@Questoes[posicao].QuestionText</div>
-    <MudRadioGroup T="int" Label="@Questoes[posicao].QuestionText" @bind-Value="SelectedAnswers[posicao]">
-        @foreach (var (opcao, index) in Questoes[posicao].Options.Select((o, i) => (o, i)))
-        {
-            <MudRadio Value="@index">@opcao</MudRadio>
-        }
-    </MudRadioGroup>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="NextQuestion">
-        @(posicao == Questoes.Count - 1 ? "Ver Resultados" : "Próxima Questão")
-    </MudButton>
-}
+    [Inject] ISnackbar Snackbar { get; set; }
+    
+    public string teste;
 
-@if (!emAndamento)
-{
-    <h3>Resultados:</h3>
-    @for (int i = 0; i < Questoes.Count; i++)
+    private void OnSearchClicked()
     {
-        <p>
-            <strong>Pergunta @(i + 1):</strong> @Questoes[i].QuestionText<br />
-            Opção selecionada: @Questoes[i].Options[SelectedAnswers[i]] (@(SelectedAnswers[i] == Questoes[i].CorrectAnswerIndex ? "Correta" : "Incorreta"))<br />
-            Resposta correta: @Questoes[i].Options[Questoes[i].CorrectAnswerIndex]
-        </p>
-    }
-}
-
-
-@code {
-    protected List<Question> Questoes { get; set; } = new();
-    protected List<int> SelectedAnswers { get; set; } = new();
-    protected List<Boolean> CorrectList { get; set; } = new();
-    private Boolean emAndamento;
-    private int posicao;
-
-    protected override void OnInitialized()
-    {
-        Questoes = new List<Question>
+        // Simula lógica de pesquisa
+        if (string.IsNullOrWhiteSpace(teste))
         {
-            new Question("Qual é a capital da França?", new List<string> { "Madrid", "Paris", "Londres", "Berlim" }, 1),
-            new Question("Quanto é 2 + 2?", new List<string> { "3", "6", "5", "4" }, 3),
-            new Question("Qual o maior planeta do sistema solar?", new List<string> { "Júpiter", "Terra", "Marte", "Saturno" }, 0)
-        };
-
-        CorrectList = new List<Boolean>(new Boolean[Questoes.Count]);
-        SelectedAnswers = new List<int>(new int[Questoes.Count]);
-        posicao = 0;
-        emAndamento = true;
-    }
-
-    private void NextQuestion()
-    {
-        if (posicao <= Questoes.Count) 
-        {
-            posicao++;
+            Snackbar.Add("Por favor, digite algo para pesquisar.", Severity.Warning);
         }
         else
         {
-            emAndamento = false;
+            Snackbar.Add($"Pesquisa por '{teste}' realizada com sucesso!", Severity.Success);
         }
     }
 }
