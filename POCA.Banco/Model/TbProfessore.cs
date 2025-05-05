@@ -16,4 +16,6 @@ public partial class TbProfessore
     public string LoginProfessor { get; set; } = null!;
 
     public string SenhaProfessor { get; set; } = null!;
+
+    public virtual ICollection<TbMateria> TbMateria { get; set; } = new List<TbMateria>();
 }

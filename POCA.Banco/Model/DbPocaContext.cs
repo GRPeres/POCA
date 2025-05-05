@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace POCA.Banco.Model;
 
@@ -16,39 +15,20 @@ public partial class DbPocaContext : DbContext
     {
     }
 
-    public virtual DbSet<Efmigrationshistory> Efmigrationshistories { get; set; }
-
     public virtual DbSet<TbAluno> TbAlunos { get; set; }
+
+    public virtual DbSet<TbMateria> TbMaterias { get; set; }
 
     public virtual DbSet<TbProfessore> TbProfessores { get; set; }
 
     public virtual DbSet<TbQuesto> TbQuestoes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySQL("server=localhost;port=3306;user=root;password=root;database=db_poca");
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseMySQL(connectionString);
-        }
-    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Efmigrationshistory>(entity =>
-        {
-            entity.HasKey(e => e.MigrationId).HasName("PRIMARY");
-
-            entity.ToTable("__efmigrationshistory");
-
-            entity.Property(e => e.MigrationId).HasMaxLength(150);
-            entity.Property(e => e.ProductVersion).HasMaxLength(32);
-        });
-
         modelBuilder.Entity<TbAluno>(entity =>
         {
             entity.HasKey(e => e.IdAluno).HasName("PRIMARY");
@@ -72,6 +52,29 @@ public partial class DbPocaContext : DbContext
             entity.Property(e => e.SenhaAluno)
                 .HasMaxLength(45)
                 .HasColumnName("senha_aluno");
+        });
+
+        modelBuilder.Entity<TbMateria>(entity =>
+        {
+            entity.HasKey(e => e.IdMateria).HasName("PRIMARY");
+
+            entity.ToTable("tb_materias");
+
+            entity.HasIndex(e => e.IdAlunoMateria, "id_aluno_materia_idx");
+
+            entity.HasIndex(e => e.IdProfessorMateria, "id_professor_materia_idx");
+
+            entity.Property(e => e.IdMateria).HasColumnName("id_materia");
+            entity.Property(e => e.IdAlunoMateria).HasColumnName("id_aluno_materia");
+            entity.Property(e => e.IdProfessorMateria).HasColumnName("id_professor_materia");
+
+            entity.HasOne(d => d.IdAlunoMateriaNavigation).WithMany(p => p.TbMateria)
+                .HasForeignKey(d => d.IdAlunoMateria)
+                .HasConstraintName("id_aluno_materia");
+
+            entity.HasOne(d => d.IdProfessorMateriaNavigation).WithMany(p => p.TbMateria)
+                .HasForeignKey(d => d.IdProfessorMateria)
+                .HasConstraintName("id_professor_materia");
         });
 
         modelBuilder.Entity<TbProfessore>(entity =>

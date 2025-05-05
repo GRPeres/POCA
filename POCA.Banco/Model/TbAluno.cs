@@ -18,4 +18,6 @@ public partial class TbAluno
     public string LoginAluno { get; set; } = null!;
 
     public string SenhaAluno { get; set; } = null!;
+
+    public virtual ICollection<TbMateria> TbMateria { get; set; } = new List<TbMateria>();
 }

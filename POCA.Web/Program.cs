@@ -12,6 +12,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMudServices();
 
 builder.Services.AddTransient<AlunoAPI>();
+builder.Services.AddTransient<MateriaAPI>();
 builder.Services.AddTransient<ProfessorAPI>();
 builder.Services.AddTransient<QuestoesAPI>();
 
