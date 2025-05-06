@@ -1,23 +1,44 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider Theme="@CustomTheme.MyTheme" IsDarkMode="false" />
+<MudThemeProvider Theme="@CustomTheme.MyTheme" IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
         <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/">
-            <MudImage Src="images/POCA_logo.png"></MudImage>
+            <MudImage Src="images/POCA_logo.png" Height="40" />
         </MudButton>
+
         <MudSpacer />
-        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/login">
-            <MudImage Src="images/conta.png"></MudImage>
+
+        <!-- Dark Mode Toggle -->
+        <MudTooltip Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" Placement="Placement.Bottom">
+            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                           Color="Color.Primary"
+                           OnClick="@ToggleTheme"
+                           Class="ml-2" />
+        </MudTooltip>
+
+        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/login" Class="ml-2">
+            <MudImage Src="images/conta.png" Height="30" />
         </MudButton>
     </MudAppBar>
+
     <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
     </MudDrawer>
-    <MudMainContent class="main-content pa-10">
+
+    <MudMainContent Class="main-content pa-10">
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    private bool _isDarkMode = false;
+
+    private void ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+}
