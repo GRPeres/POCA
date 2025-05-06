@@ -9,8 +9,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddMudServices();
-
 builder.Services.AddTransient<AlunoAPI>();
 builder.Services.AddTransient<MateriaAPI>();
 builder.Services.AddTransient<ProfessorAPI>();
@@ -20,9 +18,6 @@ builder.Services.AddHttpClient("API", client => {
 	client.BaseAddress = new Uri(builder.Configuration["APIServer:Url"]!);
 	client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
-//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
-await builder.Build().RunAsync();
 
 builder.Services.AddMudServices(config =>
 {
@@ -32,3 +27,5 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.VisibleStateDuration = 3000;
     config.SnackbarConfiguration.MaxDisplayedSnackbars = 3;
 });
+
+await builder.Build().RunAsync();

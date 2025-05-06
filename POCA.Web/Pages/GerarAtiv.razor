@@ -1,5 +1,5 @@
 @page "/gerar-atividade"
-@inject HttpClient Http
+@inject QuestoesAPI APIquestoes
 @using System.Net.Http.Json
 @using MudBlazor
 
@@ -60,7 +60,7 @@
 
     private async Task GerarAtividade()
     {
-        var query = $"questoes/random?facilCount={_facil}&medioCount={_medio}&dificilCount={_dificil}";
-        _questoes = await Http.GetFromJsonAsync<List<QuestaoResponse>>(query);
+        var questoes = await APIquestoes.GetRandomQuestionsAsync(null, _facil, _medio, _dificil);
+        _questoes = questoes.ToList();
     }
 }
