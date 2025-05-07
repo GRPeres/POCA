@@ -42,6 +42,11 @@ namespace POCA.Web.Services
             return await _httpClient.GetFromJsonAsync<ICollection<QuestaoResponse>>("questoes");
         }
 
+        public async Task<QuestaoResponse?> GetQuestaoByIdAsync(int id)
+        {
+            return await _httpClient.GetFromJsonAsync<QuestaoResponse>($"questoes/{id}");
+        }
+
         public async Task AddQuestaoAsync(QuestaoRequest questao)
         {
             await _httpClient.PostAsJsonAsync("questoes", questao);
