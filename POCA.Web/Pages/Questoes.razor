@@ -47,7 +47,15 @@
                     <MudSelectItem Value="@topic">@topic</MudSelectItem>
                 }
             </MudSelect>
+
+            <MudTooltip Text="Limpar todos filtros">
+                <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                               Color="Color.Primary"
+                               OnClick="ClearFilters"
+                               Class="ml-1" />
+            </MudTooltip>
         </div>
+
     </MudPaper>
 
     <!-- Questions Table -->
@@ -90,18 +98,21 @@
                             Size="Size.Small" />
                 </MudTd>
                 <MudTd>
-                    <MudButton Variant="Variant.Text" 
-                              Color="Color.Primary" 
-                              Size="Size.Small"
-                              StartIcon="@Icons.Material.Filled.Visibility"
-                              Href="@($"/questao/{questao.IdQuestao}")"/>
-                    <MudButton Variant="Variant.Text" 
-                              Color="Color.Secondary" 
-                              Size="Size.Small"
-                              StartIcon="@Icons.Material.Filled.Edit"
-                              Href="@($"/editar-questao/{questao.IdQuestao}")"
-                              Class="ml-1" />
+                    <div class="d-flex flex-column align-items-start">
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Visibility"
+                                   Href="@($"/questao/{questao.IdQuestao}")" />
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Secondary"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   Href="@($"/editar-questao/{questao.IdQuestao}")"
+                                   class="mt-1" />
+                    </div>
                 </MudTd>
+
             </RowTemplate>
             
             <PagerContent>
@@ -166,5 +177,12 @@
             "Difícil" => Color.Error,
             _ => Color.Default
         };
+    }
+
+    private void ClearFilters()
+    {
+        _searchString = "";
+        _selectedDifficulty = "";
+        _selectedTopic = "";
     }
 }
