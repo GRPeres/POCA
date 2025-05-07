@@ -1,4 +1,4 @@
-﻿namespace POCA.Web
+﻿namespace POCA.Web.Utils
 {
     public class LoginService
     {

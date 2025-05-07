@@ -1,5 +1,5 @@
 @page "/gerar-atividade"
-@inject QuestoesAPI APIquestoes
+@inject POCA.Web.Services.QuestoesAPI QuestoesAPI
 @using System.Net.Http.Json
 @using MudBlazor
 
@@ -60,7 +60,7 @@
 
     private async Task GerarAtividade()
     {
-        var questoes = await APIquestoes.GetRandomQuestionsAsync(null, _facil, _medio, _dificil);
+        var questoes = await QuestoesAPI.GetRandomQuestionsAsync(null, _facil, _medio, _dificil);
         _questoes = questoes.ToList();
     }
 }

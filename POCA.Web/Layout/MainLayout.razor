@@ -5,40 +5,84 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="2">
-        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/">
-            <MudImage Src="images/POCA_logo.png" Height="40" />
-        </MudButton>
+    <!-- App Bar (Top Bar) -->
+    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                      Color="Color.Primary" 
+                      OnClick="@ToggleDrawer" 
+                      Edge="Edge.Start" />
+        
+        <MudTooltip Text="Home" Placement="Placement.Bottom">
+            <MudIconButton Icon="@Icons.Material.Filled.Spa" 
+                          Color="Color.Primary" 
+                          Href="/" 
+                          Class="ml-2" />
+        </MudTooltip>
 
         <MudSpacer />
 
         <!-- Dark Mode Toggle -->
         <MudTooltip Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" Placement="Placement.Bottom">
             <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                           Color="Color.Primary"
-                           OnClick="@ToggleTheme"
-                           Class="ml-2" />
+                          Color="Color.Primary"
+                          OnClick="@ToggleTheme"
+                          Class="ml-2" />
         </MudTooltip>
 
-        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/login" Class="ml-2">
-            <MudImage Src="images/conta.png" Height="30" />
-        </MudButton>
+        <!-- User Account Button (Login/Profile) -->
+        <MudTooltip Text="Account" Placement="Placement.Bottom">
+            <MudIconButton Icon="@Icons.Material.Filled.Person"
+                           Color="Color.Primary"
+                           Href="/login"
+                           Class="ml-2" />
+        </MudTooltip>
     </MudAppBar>
 
-    <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
+    <!-- Sidebar Navigation -->
+    <MudDrawer @bind-Open="_drawerOpen" 
+               ClipMode="DrawerClipMode.Always" 
+               Elevation="2"
+               Variant="DrawerVariant.Responsive"
+               Color="Color.Surface">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6" Color="Color.Primary">Navigation</MudText>
+        </MudDrawerHeader>
+        
+        <MudDrawerContainer>
+            <MudNavMenu>
+                <MudNavLink Href="/questoes" 
+                           Icon="@Icons.Material.Filled.List" 
+                           IconColor="Color.Primary">Questões</MudNavLink>
+                <!-- Add more navigation links as needed -->
+                <MudNavLink Href="/categorias" 
+                           Icon="@Icons.Material.Filled.Category" 
+                           IconColor="Color.Primary">Categorias</MudNavLink>
+                <MudNavLink Href="/configuracoes" 
+                           Icon="@Icons.Material.Filled.Settings" 
+                           IconColor="Color.Primary">Configurações</MudNavLink>
+            </MudNavMenu>
+        </MudDrawerContainer>
     </MudDrawer>
 
-    <MudMainContent Class="main-content pa-10">
-        @Body
+    <!-- Main Content -->
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
 @code {
     private bool _isDarkMode = false;
+    private bool _drawerOpen = true;
 
     private void ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
     }
 }

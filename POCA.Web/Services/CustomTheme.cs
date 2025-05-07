@@ -7,72 +7,73 @@ public static class CustomTheme
         PaletteLight = new PaletteLight()
         {
             // ===== CORE COLORS =====
-            Primary = "#3a7d44",         // Fern Green - main accent
-            Secondary = "#011638",       // Oxford Blue - secondary accent
-            Tertiary = "#04f06a",        // Spring Green - rare highlights
+            Primary = "#2E7D32",         // Material Green 800 (stronger contrast)
+            Secondary = "#1B5E20",       // Material Green 900 (darker accent)
+            Tertiary = "#4CAF50",        // Material Green 500 (highlight)
 
             // ===== BACKGROUNDS =====
-            Background = "#fffcf7",      // Baby Powder - main background
-            AppbarBackground = "#fffcf7",// Light appbar (was blue)
-            DrawerBackground = "#f7f7f7",// Seasalt - subtle contrast
-            Surface = "#fffcf7",         // Cards/paper same as background
-            OverlayDark = "rgba(33,33,33,0.15)", // Subtle overlay
+            Background = "#FFFFFF",      // Pure white (Material standard)
+            AppbarBackground = "#FFFFFF",// White appbar
+            DrawerBackground = "#F5F5F5",// Material Grey 100
+            Surface = "#FFFFFF",         // White surface for cards
+            OverlayDark = "rgba(0,0,0,0.12)", // Material standard overlay
 
             // ===== TEXT =====
-            TextPrimary = "#333333",     // Dark gray (better readability)
-            TextSecondary = "#3a7d44",  // Fern Green
-            TextDisabled = "#aaaaaa",
+            TextPrimary = "rgba(0, 0, 0, 0.87)", // Material high-emphasis text
+            TextSecondary = "rgba(0, 0, 0, 0.6)", // Medium emphasis
+            TextDisabled = "rgba(0, 0, 0, 0.38)", // Disabled text
 
             // ===== STATES =====
-            Success = "#3a7d44",        // Fern Green
-            Info = "#011638",            // Oxford Blue
-            Warning = "#ff9800",
-            Error = "#f44336",
+            Success = "#2E7D32",         // Material Green 800
+            Info = "#2196F3",            // Material Blue 500
+            Warning = "#FF9800",         // Material Orange 500
+            Error = "#F44336",          // Material Red 500
 
             // ===== COMPONENTS =====
-            Divider = "#e0e0e0",         // Very light gray
-            DividerLight = "#f5f5f5",    // Nearly white
-            LinesDefault = "#e0e0e0",    // Borders
-            LinesInputs = "#bdbdbd",     // Input borders
-            TableLines = "#e0e0e0",
-            TableStriped = "rgba(0,0,0,0.02)",
-            TableHover = "rgba(0,0,0,0.04)"
+            Divider = "rgba(0, 0, 0, 0.12)", // Material divider
+            DividerLight = "rgba(0, 0, 0, 0.08)",
+            LinesDefault = "rgba(0, 0, 0, 0.12)",
+            LinesInputs = "rgba(0, 0, 0, 0.24)",
+            TableLines = "rgba(0, 0, 0, 0.12)",
+            TableStriped = "rgba(0, 0, 0, 0.02)",
+            TableHover = "rgba(0, 0, 0, 0.04)"
         },
 
         PaletteDark = new PaletteDark()
         {
             // ===== CORE COLORS =====
-            Primary = "#3a7d44",         // Fern Green stays primary
-            Secondary = "#04f06a",       // Spring Green as secondary
-            Tertiary = "#011638",        // Oxford Blue as tertiary
+            Primary = "#81C784",         // Material Green 300 (lighter for dark mode)
+            Secondary = "#66BB6A",       // Material Green 400
+            Tertiary = "#4CAF50",        // Material Green 500
 
             // ===== BACKGROUNDS =====
-            Background = "#121212",      // True dark mode
-            AppbarBackground = "#1e1e1e",
-            DrawerBackground = "#1a1a1a",
-            Surface = "#1e1e1e",
+            Background = "#121212",      // Material Dark background
+            AppbarBackground = "#1E1E1E",// Darker surface
+            DrawerBackground = "#1E1E1E",
+            Surface = "#1E1E1E",         // Dark surface for cards
             OverlayDark = "rgba(0,0,0,0.5)",
 
             // ===== TEXT =====
-            TextPrimary = "#ffffff",     // White
-            TextSecondary = "#04f06a",   // Spring Green
-            TextDisabled = "#666666",
+            TextPrimary = "rgba(255, 255, 255, 0.87)", // High emphasis
+            TextSecondary = "rgba(255, 255, 255, 0.6)", // Medium
+            TextDisabled = "rgba(255, 255, 255, 0.38)", // Disabled
 
             // ===== STATES =====
-            Success = "#3a7d44",
-            Info = "#04f06a",
-            Warning = "#ff9800",
-            Error = "#f44336",
+            Success = "#81C784",         // Material Green 300
+            Info = "#64B5F6",            // Material Blue 300
+            Warning = "#FFB74D",         // Material Orange 300
+            Error = "#E57373",           // Material Red 300
 
             // ===== COMPONENTS =====
-            Divider = "#333333",
-            DividerLight = "#252525",
-            LinesDefault = "#333333",
-            LinesInputs = "#555555",
-            TableLines = "#333333",
-            TableStriped = "rgba(255,255,255,0.02)",
-            TableHover = "rgba(255,255,255,0.04)"
+            Divider = "rgba(255, 255, 255, 0.12)",
+            DividerLight = "rgba(255, 255, 255, 0.08)",
+            LinesDefault = "rgba(255, 255, 255, 0.12)",
+            LinesInputs = "rgba(255, 255, 255, 0.3)",
+            TableLines = "rgba(255, 255, 255, 0.12)",
+            TableStriped = "rgba(255, 255, 255, 0.02)",
+            TableHover = "rgba(255, 255, 255, 0.04)"
         },
+
 
         // ===== TYPOGRAPHY =====
         Typography = new Typography()

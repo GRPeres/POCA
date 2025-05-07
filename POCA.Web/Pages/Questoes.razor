@@ -1,76 +1,170 @@
 @page "/questoes"
-@inject HttpClient Http
+@inject POCA.Web.Services.QuestoesAPI QuestoesAPI
 
-<MudLayout>
-    <MudChatHeader Class="d-flex justify-end">
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
+    <!-- Page Header with Action Button -->
+    <div class="d-flex align-center justify-space-between mb-6">
+        <MudText Typo="Typo.h4" Class="mb-0">Lista de Questões</MudText>
         <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   Href="/adicionar-questao">
+                  Variant="Variant.Filled"
+                  StartIcon="@Icons.Material.Filled.Add"
+                  Href="/adicionar-questao"
+                  Size="Size.Small">
             Nova Questão
         </MudButton>
-    </MudChatHeader>
-    <MudDrawer Open="true" Class="mud-theme-primary">
-        <MudNavMenu>
-            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All">Início</MudNavLink>
-            <MudNavLink Href="/questoes" Icon="@Icons.Material.Filled.List">Questões</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
+    </div>
 
-    <MudMainContent>
-        <MudChatHeader>
-            <MudText Typo="Typo.h5">Lista de Questões</MudText>
-        </MudChatHeader>
-        <MudContainer>
-            <MudTable Items="@questoes" Dense="true" Hover="true" Striped="true">
-                <HeaderContent>
-                    <MudTh>Enunciado</MudTh>
-                    <MudTh>Assunto</MudTh>
-                    <MudTh>Dificuldade</MudTh>
-                </HeaderContent>
-                <RowTemplate Context="questao">
-                    <MudTd>@questao.EnunciadoQuestao</MudTd>
-                    <MudTd>@questao.TemaQuestao</MudTd>
-                    <MudTd>@questao.DificuldadeQuestao</MudTd>
-                    <mudTd><MudButton 
-                            Variant="Variant.Outlined" 
-                            Color="Color.Primary" 
-                            Size="Size.Small"
-                            StartIcon="@Icons.Material.Filled.Visibility"
-                            Href="@($"/questao/{questao.IdQuestao}")">
-                            Ver
-                        </MudButton></mudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+    <!-- Search and Filter Bar -->
+    <MudPaper Class="pa-4 mb-4" Elevation="1">
+        <div class="d-flex align-center">
+            <MudTextField @bind-Value="_searchString" 
+                          Placeholder="Pesquisar questões..."
+                          Variant="Variant.Outlined"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Adornment="Adornment.Start"
+                          Immediate="true"
+                          Class="mr-4"
+                          Style="flex-grow: 1;" />
+
+            <MudSelect @bind-Value="_selectedDifficulty" 
+                      Label="Dificuldade"
+                      Variant="Variant.Outlined"
+                      AnchorOrigin="Origin.BottomRight"
+                      Class="mr-4"
+                      Style="min-width: 150px;">
+                <MudSelectItem Value="@( "Fácil" )">Fácil</MudSelectItem>
+                <MudSelectItem Value="@( "Média" )">Média</MudSelectItem>
+                <MudSelectItem Value="@( "Difícil" )">Difícil</MudSelectItem>
+            </MudSelect>
+
+            <MudSelect @bind-Value="_selectedTopic"
+                      Label="Assunto"
+                      Variant="Variant.Outlined"
+                      AnchorOrigin="Origin.BottomRight"
+                      Style="min-width: 150px;">
+                @foreach (var topic in _uniqueTopics)
+                {
+                    <MudSelectItem Value="@topic">@topic</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+    </MudPaper>
+
+    <!-- Questions Table -->
+    <MudPaper Elevation="2" Class="overflow-hidden">
+        <MudTable Items="@FilteredQuestions" 
+                 Dense="true" 
+                 Hover="true" 
+                 Striped="false"
+                 Bordered="true"
+                 Loading="@_isLoading">
+            <ToolBarContent>
+                <MudText Typo="Typo.body2" Class="ml-2">
+                    Total: @FilteredQuestions.Count() questões
+                </MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Text" 
+                          Color="Color.Primary" 
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.Refresh"
+                          OnClick="RefreshData">
+                    Atualizar
+                </MudButton>
+            </ToolBarContent>
+            
+            <HeaderContent>
+                <MudTh>Enunciado</MudTh>
+                <MudTh>Assunto</MudTh>
+                <MudTh>Dificuldade</MudTh>
+                <MudTh Style="width: 120px;">Ações</MudTh>
+            </HeaderContent>
+            
+            <RowTemplate Context="questao">
+                <MudTd Style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    @questao.EnunciadoQuestao
+                </MudTd>
+                <MudTd>@questao.TemaQuestao</MudTd>
+                <MudTd>
+                    <MudChip T="string" Text="@questao.DificuldadeQuestao" 
+                            Color="@GetDifficultyColor(questao.DificuldadeQuestao)" 
+                            Size="Size.Small" />
+                </MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Text" 
+                              Color="Color.Primary" 
+                              Size="Size.Small"
+                              StartIcon="@Icons.Material.Filled.Visibility"
+                              Href="@($"/questao/{questao.IdQuestao}")"/>
+                    <MudButton Variant="Variant.Text" 
+                              Color="Color.Secondary" 
+                              Size="Size.Small"
+                              StartIcon="@Icons.Material.Filled.Edit"
+                              Href="@($"/editar-questao/{questao.IdQuestao}")"
+                              Class="ml-1" />
+                </MudTd>
+            </RowTemplate>
+            
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
 
 @code {
-    private List<QuestaoResponse> questoes = new();
+    private List<QuestaoResponse> _questoes = new();
+    private bool _isLoading = true;
+    private string _searchString = "";
+    private string _selectedDifficulty = "";
+    private string _selectedTopic = "";
+    private List<string> _uniqueTopics = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadQuestions();
+    }
+
+    private async Task LoadQuestions()
+    {
+        _isLoading = true;
         try
         {
-            questoes = await Http.GetFromJsonAsync<List<QuestaoResponse>>("http://localhost:5000/questoes");
+            _questoes = (await QuestoesAPI.GetQuestoesAsync())?.ToList() ?? new();
+            _uniqueTopics = _questoes.Select(q => q.TemaQuestao).Distinct().ToList();
         }
         catch (Exception ex)
         {
-            // Lida com erro
             Console.WriteLine($"Erro ao carregar questões: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
         }
     }
 
-    public class QuestaoResponse
+    private async Task RefreshData()
     {
-        public int IdQuestao { get; set; }
-        public string EnunciadoQuestao { get; set; }
-        public string RespostacertaQuestao { get; set; }
-        public string Respostaerrada1Questao { get; set; }
-        public string Respostaerrada2Questao { get; set; }
-        public string Respostaerrada3Questao { get; set; }
-        public string DificuldadeQuestao { get; set; }
-        public string TemaQuestao { get; set; }
+        await LoadQuestions();
+    }
+
+    private IEnumerable<QuestaoResponse> FilteredQuestions => _questoes
+        .Where(q => string.IsNullOrWhiteSpace(_searchString) || 
+                    q.EnunciadoQuestao.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                    q.TemaQuestao.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        .Where(q => string.IsNullOrEmpty(_selectedDifficulty) || 
+                    q.DificuldadeQuestao == _selectedDifficulty)
+        .Where(q => string.IsNullOrEmpty(_selectedTopic) || 
+                    q.TemaQuestao == _selectedTopic)
+        .ToList();
+
+    private Color GetDifficultyColor(string difficulty)
+    {
+        return difficulty switch
+        {
+            "Fácil" => Color.Success,
+            "Média" => Color.Warning,
+            "Difícil" => Color.Error,
+            _ => Color.Default
+        };
     }
 }
