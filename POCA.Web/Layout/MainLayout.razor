@@ -6,64 +6,136 @@
 <MudPopoverProvider />
 
 <MudLayout>
-    <!-- App Bar (Top Bar) -->
-    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
-                      Color="Color.Primary" 
-                      OnClick="@ToggleDrawer" 
-                      Edge="Edge.Start" />
-        
-        <MudTooltip Text="Home" Placement="Placement.Bottom">
-            <MudIconButton Icon="@Icons.Material.Filled.Spa" 
-                          Color="Color.Primary" 
-                          Href="/" 
-                          Class="ml-2" />
-        </MudTooltip>
+    <!-- App Bar with Dropdown Navigation -->
+    <MudAppBar Color="Color.Surface" Fixed="true" Elevation="0" Class="px-4">
+        <!-- Left side - Logo -->
+        <MudLink Href="/" Underline="Underline.None" Class="d-flex align-center">
+            <MudImage Src="/images/IconGreenNoBG.png"
+                      Height="40"
+                      Width="40"
+                      Class="mr-2 logo-image" />
+            <MudText Typo="Typo.h6"
+                     Class="ml-1 font-weight-bold"
+                     Style="font-family: 'Helvetica', sans-serif;"
+                     Color="@(_isDarkMode ? Color.Default : Color.Dark)">
+                POCA
+            </MudText>
+        </MudLink>
 
-        <MudSpacer />
+        <!-- Center - Main Navigation Dropdowns -->
+        <div class="d-flex align-center mx-auto">
+            <!-- Questions Dropdown -->
+            <MudMenu>
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                               Class="px-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Quiz" Class="mr-2" />
+                        Questões
+                    </MudButton>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/questoes" Icon="@Icons.Material.Filled.List">Gerenciar Questões</MudMenuItem>
+                    <MudMenuItem Href="/adicionar-questao" Icon="@Icons.Material.Filled.Add">Nova Questão</MudMenuItem>
+                    <MudMenuItem Href="/importar-questoes" Icon="@Icons.Material.Filled.Upload">Importar Questões</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
 
-        <!-- Dark Mode Toggle -->
-        <MudTooltip Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" Placement="Placement.Bottom">
-            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                          Color="Color.Primary"
-                          OnClick="@ToggleTheme"
-                          Class="ml-2" />
-        </MudTooltip>
+            <!-- Activities Dropdown -->
+            <MudMenu>
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                               Class="px-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
+                        Atividades
+                    </MudButton>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/atividades" Icon="@Icons.Material.Filled.List">Todas Atividades</MudMenuItem>
+                    <MudMenuItem Href="/nova-atividade" Icon="@Icons.Material.Filled.Add">Criar Atividade</MudMenuItem>
+                    <MudMenuItem Href="/atribuir-atividade" Icon="@Icons.Material.Filled.Send">Atribuir Atividade</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
 
-        <!-- User Account Button (Login/Profile) -->
-        <MudTooltip Text="Account" Placement="Placement.Bottom">
-            <MudIconButton Icon="@Icons.Material.Filled.Person"
-                           Color="Color.Primary"
-                           Href="/login"
-                           Class="ml-2" />
-        </MudTooltip>
+            <!-- Subjects Dropdown -->
+            <MudMenu>
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                               Class="px-3">
+                        <MudIcon Icon="@Icons.Material.Filled.School" Class="mr-2" />
+                        Disciplinas
+                    </MudButton>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/disciplinas" Icon="@Icons.Material.Filled.List">Todas Disciplinas</MudMenuItem>
+                    <MudMenuItem Href="/nova-disciplina" Icon="@Icons.Material.Filled.Add">Nova Disciplina</MudMenuItem>
+                    <MudMenuItem Href="/matriculas" Icon="@Icons.Material.Filled.GroupAdd">Gerenciar Matrículas</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+
+            <!-- Reports Dropdown -->
+            <MudMenu>
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Secondary"
+                               EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                               Class="px-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Analytics" Class="mr-2" />
+                        Relatórios
+                    </MudButton>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/relatorios/desempenho" Icon="@Icons.Material.Filled.Assessment">Desempenho</MudMenuItem>
+                    <MudMenuItem Href="/relatorios/participacao" Icon="@Icons.Material.Filled.People">Participação</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </div>
+
+        <!-- Right side - User Actions -->
+        <div class="d-flex align-center">
+            <!-- Quick Create Dropdown -->
+            <MudMenu Direction="Direction.Left">
+                <ActivatorContent>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   Color="Color.Primary"
+                                   Class="mr-2" />
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/adicionar-questao" Icon="@Icons.Material.Filled.Quiz">Nova Questão</MudMenuItem>
+                    <MudMenuItem Href="/nova-atividade" Icon="@Icons.Material.Filled.Assignment">Nova Atividade</MudMenuItem>
+                    <MudMenuItem Href="/nova-disciplina" Icon="@Icons.Material.Filled.School">Nova Disciplina</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+
+            <!-- Dark Mode Toggle -->
+            <MudTooltip Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" Placement="Placement.Bottom">
+                <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                               Color="Color.Primary"
+                               OnClick="@ToggleTheme"
+                               Class="ml-2" />
+            </MudTooltip>
+
+            <!-- User Profile Dropdown -->
+            <MudMenu Direction="Direction.Left">
+                <ActivatorContent>
+                    <MudAvatar Color="Color.Primary" Class="ml-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" />
+                    </MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="/perfil" Icon="@Icons.Material.Filled.AccountCircle">Meu Perfil</MudMenuItem>
+                    <MudMenuItem Href="/configuracoes" Icon="@Icons.Material.Filled.Settings">Configurações</MudMenuItem>
+                    <MudDivider />
+                    <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="@Logout">Sair</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </div>
     </MudAppBar>
-
-    <!-- Sidebar Navigation -->
-    <MudDrawer @bind-Open="_drawerOpen" 
-               ClipMode="DrawerClipMode.Always" 
-               Elevation="2"
-               Variant="DrawerVariant.Responsive"
-               Color="Color.Surface">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6" Color="Color.Primary">Navigation</MudText>
-        </MudDrawerHeader>
-        
-        <MudDrawerContainer>
-            <MudNavMenu>
-                <MudNavLink Href="/questoes" 
-                           Icon="@Icons.Material.Filled.List" 
-                           IconColor="Color.Primary">Questões</MudNavLink>
-                <!-- Add more navigation links as needed -->
-                <MudNavLink Href="/categorias" 
-                           Icon="@Icons.Material.Filled.Category" 
-                           IconColor="Color.Primary">Categorias</MudNavLink>
-                <MudNavLink Href="/configuracoes" 
-                           Icon="@Icons.Material.Filled.Settings" 
-                           IconColor="Color.Primary">Configurações</MudNavLink>
-            </MudNavMenu>
-        </MudDrawerContainer>
-    </MudDrawer>
 
     <!-- Main Content -->
     <MudMainContent>
@@ -75,15 +147,16 @@
 
 @code {
     private bool _isDarkMode = false;
-    private bool _drawerOpen = true;
 
     private void ToggleTheme()
     {
         _isDarkMode = !_isDarkMode;
     }
 
-    private void ToggleDrawer()
+    private async Task Logout()
     {
-        _drawerOpen = !_drawerOpen;
+        // Implement logout logic
+        // await AuthService.Logout();
+        // NavManager.NavigateTo("/login");
     }
 }

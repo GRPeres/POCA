@@ -1,0 +1,212 @@
+﻿@page "/editar-questao/{IdQuestao}"
+@inject POCA.Web.Services.QuestoesAPI QuestoesService
+@inject NavigationManager NavManager
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+        <!-- Header with back button -->
+        <div class="d-flex align-center mb-4">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Color="Color.Primary"
+                           Variant="Variant.Text"
+                           Href="/questoes"
+                           Class="mr-2" />
+            <MudText Typo="Typo.h4">Editar Questão</MudText>
+        </div>
+
+        @if (questaoModelo == null)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudForm @ref="_form" @bind-IsValid="_isValid" @bind-Errors="_errors">
+                <!-- Question Text -->
+                <MudTextField @bind-Value="questaoModelo.EnunciadoQuestao"
+                              Label="Enunciado da Questão *"
+                              Variant="Variant.Outlined"
+                              Required="true"
+                              RequiredError="O enunciado é obrigatório"
+                              Lines="3"
+                              Class="mb-4" />
+
+                <!-- Correct Answer -->
+                <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-success);">
+                    <MudText Typo="Typo.subtitle1" Color="Color.Success" Class="mb-2">
+                        Resposta Correta *
+                    </MudText>
+                    <MudTextField @bind-Value="questaoModelo.RespostaCertaQuestao"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="A resposta correta é obrigatória"
+                                  FullWidth="true" />
+                </MudPaper>
+
+                <!-- Incorrect Answers -->
+                <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-error);">
+                    <MudText Typo="Typo.subtitle1" Color="Color.Error" Class="mb-2">
+                        Respostas Incorretas *
+                    </MudText>
+
+                    <MudStack Spacing="2">
+                        <MudTextField @bind-Value="questaoModelo.RespostaErrada1Questao"
+                                      Label="Opção 1"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Campo obrigatório"
+                                      FullWidth="true" />
+                        <MudTextField @bind-Value="questaoModelo.RespostaErrada2Questao"
+                                      Label="Opção 2"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Campo obrigatório"
+                                      FullWidth="true" />
+                        <MudTextField @bind-Value="questaoModelo.RespostaErrada3Questao"
+                                      Label="Opção 3"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      RequiredError="Campo obrigatório"
+                                      FullWidth="true" />
+                    </MudStack>
+                </MudPaper>
+
+                <!-- Difficulty and Topic -->
+                <MudGrid Spacing="2" Class="mb-4">
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="questaoModelo.DificuldadeQuestao"
+                                   Label="Dificuldade *"
+                                   Variant="Variant.Outlined"
+                                   Required="true"
+                                   RequiredError="Selecione a dificuldade"
+                                   AnchorOrigin="Origin.BottomRight"
+                                   FullWidth="true">
+                            <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
+                            <MudSelectItem Value="@("Média")">Média</MudSelectItem>
+                            <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="questaoModelo.TemaQuestao"
+                                   Label="Tema *"
+                                   Variant="Variant.Outlined"
+                                   Required="true"
+                                   RequiredError="Selecione o tema"
+                                   AnchorOrigin="Origin.BottomRight"
+                                   FullWidth="true">
+                            <MudSelectItem Value="@("Teoria")">Teoria</MudSelectItem>
+                            <MudSelectItem Value="@("Programação")">Programação</MudSelectItem>
+                            <MudSelectItem Value="@("Matemática")">Matemática</MudSelectItem>
+                            <MudSelectItem Value="@("Lógica")">Lógica</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Action Buttons -->
+                <MudDivider Class="my-4" />
+                <div class="d-flex justify-space-between">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               Href="/questoes"
+                               StartIcon="@Icons.Material.Filled.Cancel">
+                        Cancelar
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.Save"
+                               OnClick="HandleSubmit"
+                               Disabled="@(!_isValid || _isSubmitting)"
+                               Class="ml-auto">
+                        @(_isSubmitting ? "Salvando..." : "Salvar Alterações")
+                    </MudButton>
+                </div>
+            </MudForm>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string IdQuestao { get; set; }
+
+    private MudForm _form;
+    private bool _isValid = false;
+    private bool _isSubmitting = false;
+    private string[] _errors = Array.Empty<string>();
+
+    private QuestaoModelo questaoModelo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadQuestion();
+    }
+
+    private async Task LoadQuestion()
+    {
+        try
+        {
+            var questao = await QuestoesService.GetQuestaoByIdAsync(int.Parse(IdQuestao));
+            if (questao != null)
+            {
+                questaoModelo = new QuestaoModelo
+                    {
+                        EnunciadoQuestao = questao.EnunciadoQuestao,
+                        RespostaCertaQuestao = questao.RespostaCertaQuestao,
+                        RespostaErrada1Questao = questao.RespostaErrada1Questao,
+                        RespostaErrada2Questao = questao.RespostaErrada2Questao,
+                        RespostaErrada3Questao = questao.RespostaErrada3Questao,
+                        DificuldadeQuestao = questao.DificuldadeQuestao,
+                        TemaQuestao = questao.TemaQuestao
+                    };
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao carregar questão: {ex.Message}", Severity.Error);
+            NavManager.NavigateTo("/questoes");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        await _form.Validate();
+
+        if (!_isValid) return;
+
+        _isSubmitting = true;
+
+        try
+        {
+            var request = new QuestaoEditRequest(
+                IdQuestao: int.Parse(IdQuestao),
+                EnunciadoQuestao: questaoModelo.EnunciadoQuestao,
+                RespostaCertaQuestao: questaoModelo.RespostaCertaQuestao,
+                RespostaErrada1Questao: questaoModelo.RespostaErrada1Questao,
+                RespostaErrada2Questao: questaoModelo.RespostaErrada2Questao,
+                RespostaErrada3Questao: questaoModelo.RespostaErrada3Questao,
+                DificuldadeQuestao: questaoModelo.DificuldadeQuestao,
+                TemaQuestao: questaoModelo.TemaQuestao
+            );
+
+            await QuestoesService.UpdateQuestaoAsync(request);
+            Snackbar.Add("Questão atualizada com sucesso!", Severity.Success);
+            NavManager.NavigateTo("/questoes");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao atualizar questão: {ex.Message}", Severity.Error);
+            _isSubmitting = false;
+        }
+    }
+
+    public class QuestaoModelo
+    {
+        public string EnunciadoQuestao { get; set; }
+        public string RespostaCertaQuestao { get; set; }
+        public string RespostaErrada1Questao { get; set; }
+        public string RespostaErrada2Questao { get; set; }
+        public string RespostaErrada3Questao { get; set; }
+        public string DificuldadeQuestao { get; set; }
+        public string TemaQuestao { get; set; }
+    }
+}
