@@ -1,0 +1,92 @@
+﻿@page "/test-login-api"
+@inject AlunosAPI ApiService
+
+<h3>API_Login_Test</h3>
+
+<div class="mb-3">
+    <button @onclick="TestGetAll" class="btn btn-primary me-2">Test GET All</button>
+    <button @onclick="TestCreate" class="btn btn-success me-2">Test POST</button>
+    <button @onclick="TestDelete" class="btn btn-danger">Test DELETE</button>
+    <button @onclick="TestGETONE" class="btn btn-danger">Test GET One</button>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        API Response
+    </div>
+    <div class="card-body">
+        <pre>@apiResponse</pre>
+    </div>
+</div>
+
+@code {
+    private string apiResponse = "Click buttons to test API endpoints";
+    private int testId = 2; // ID to use for delete test
+
+    private async Task TestGetAll()
+    {
+        try
+        {
+            var alunos = await ApiService.GetAlunosAsync();
+            apiResponse = JsonSerializer.Serialize(alunos, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"GET Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestCreate()
+    {
+        try
+        {
+            var newAluno = new AlunoRequest(
+                "Gabriel Ribeirao Pereira",
+                23,
+                7,
+                "GabrielRP@yahoo.com",
+                "GabrielRiPe",
+                "brinks"
+            );
+
+            await ApiService.AddAlunosAsync(newAluno);
+            apiResponse = "POST successful! Use GET to verify.";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"POST Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestDelete()
+    {
+        try
+        {
+            await ApiService.DeleteAlunosAsync(testId);
+            apiResponse = $"DELETE successful for ID {testId}. Use GET to verify.";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"DELETE Error: {ex.Message}";
+        }
+    }
+    
+    private async Task TestGETONE()
+    {
+        try
+        {
+            var alunos = await ApiService.CheckAlunosAsync("JoaoPera", "oila");
+            apiResponse = JsonSerializer.Serialize(alunos, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"GET ONE Error: {ex.Message}";
+        }
+    }
+}

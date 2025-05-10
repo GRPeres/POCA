@@ -95,6 +95,88 @@ namespace POCA.API.Endpoints
 
                 return Results.Ok(questions);
             });
+
+            // Add this method to your QuestoesExtensions class
+            group.MapPost("/import", async (
+                [FromServices] DbPocaContext context,
+                [FromBody] QuestaoBatchImportRequest batchRequest) =>
+            {
+                // Validate the request
+                if (batchRequest?.Questoes == null || !batchRequest.Questoes.Any())
+                {
+                    return Results.BadRequest("Nenhuma questão fornecida para importação.");
+                }
+
+                var importedQuestions = new List<TbQuesto>();
+                var errors = new List<string>();
+                var rowNumber = 1;
+
+                foreach (var questao in batchRequest.Questoes)
+                {
+                    rowNumber++;
+
+                    // Basic validation
+                    if (string.IsNullOrWhiteSpace(questao.EnunciadoQuestao))
+                    {
+                        errors.Add($"Linha {rowNumber}: Enunciado não pode ser vazio");
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(questao.RespostaCertaQuestao))
+                    {
+                        errors.Add($"Linha {rowNumber}: Resposta correta não pode ser vazia");
+                        continue;
+                    }
+
+                    // Create the entity
+                    var newQuestao = new TbQuesto
+                    {
+                        EnunciadoQuestao = questao.EnunciadoQuestao,
+                        RespostacertaQuestao = questao.RespostaCertaQuestao,
+                        Respostaerrada1Questao = questao.RespostaErrada1Questao,
+                        Respostaerrada2Questao = questao.RespostaErrada2Questao,
+                        Respostaerrada3Questao = questao.RespostaErrada3Questao,
+                        DificuldadeQuestao = questao.DificuldadeQuestao,
+                        TemaQuestao = questao.TemaQuestao
+                    };
+
+                    context.TbQuestoes.Add(newQuestao);
+                    importedQuestions.Add(newQuestao);
+                }
+
+                try
+                {
+                    await context.SaveChangesAsync();
+
+                    var result = new
+                    {
+                        Success = true,
+                        ImportedCount = importedQuestions.Count,
+                        ErrorCount = errors.Count,
+                        Errors = errors
+                    };
+
+                    if (errors.Any())
+                    {
+                        return Results.Ok(result); // Partial success
+                    }
+
+                    return Results.Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    // Rollback any changes if there was an error
+                    foreach (var question in importedQuestions)
+                    {
+                        context.Entry(question).State = EntityState.Detached;
+                    }
+
+                    return Results.Problem($"Erro ao importar questões: {ex.Message}");
+                }
+            }).WithName("ImportQuestoesBatch")
+              .Produces(StatusCodes.Status200OK)
+              .Produces(StatusCodes.Status400BadRequest)
+              .Produces(StatusCodes.Status500InternalServerError);
         }
     }
 }

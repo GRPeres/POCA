@@ -9,7 +9,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddTransient<AlunoAPI>();
+builder.Services.AddTransient<AlunosAPI>();
 builder.Services.AddTransient<MateriaAPI>();
 builder.Services.AddTransient<ProfessorAPI>();
 builder.Services.AddTransient<QuestoesAPI>();

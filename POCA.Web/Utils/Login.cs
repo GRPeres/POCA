@@ -1,27 +1,24 @@
-﻿namespace POCA.Web.Utils
+﻿using MudBlazor;
+
+namespace POCA.Web.Utils
 {
     public class LoginService
     {
-        private string ID;
-        private string Usuario;
+        private string UserName;
+        private int Age;
+        private int Progress;
         private string Email;
-        private string Senha;
+        private string UserLogin;
+        private string Password;
 
-        public LoginService(string id, string usuario, string email, string senha)
+        public LoginService(string usuario, int idade, int progresso, string email, string login, string senha)
         {
-            ID = id;
-            Usuario = usuario;
+            UserName = usuario;
+            Age = idade;
+            Progress = progresso;
             Email = email;
-            Senha = senha;
-        }
-
-        public bool AutenticarUsuario(string username, string password)
-        {
-            if ((username == Usuario || username == Email) && password == Senha)
-            {
-                return true;
-            }
-            return false;
+            UserLogin = login;
+            Password = senha;
         }
     }
 }

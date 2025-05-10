@@ -2,12 +2,29 @@
 @using MudBlazor
 @using POCA.Web
 @using POCA.Web.Utils
+@inject POCA.Web.Services.AlunosAPI AlunosAPI
 
 <h1>Página de Login</h1>
+
+@if(LoginFalha)
+{
+    <MudAlert>@mensagemfalha</MudAlert>
+}
 
 <MudTextField @bind-Value="usuario.User" Label="Usuário" Variant="Variant.Filled" />
 <MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
+
+<!--
+    "idAluno": 6,
+    "nomeAluno": "Gabriel Ribeirao Pereira",
+    "idadeAluno": 23,
+    "progressoAluno": 7,
+    "contatoAluno": "GabrielRP@yahoo.com",
+    "loginAluno": "GabrielRiPe",
+    "senhaAluno": "brinks",
+    "tbMateria": []
+</!-->
 
 @code {
     [Inject] private NavigationManager NavigationManager { get; set; }
@@ -15,13 +32,10 @@
 
     private Usuario usuario = new Usuario();
     private LoginService login;
-    private bool LoginSucesso { get; set; }
-
-    protected override void OnInitialized()
-    {
-        LoginSucesso = false;
-        login = new("2222", "tuser", "teste@teste.com", "teste");
-    }
+    private AlunoResponse temporario;
+    private bool LoginSucesso = false;
+    private bool LoginFalha = false;
+    private string mensagemfalha;
 
     private class Usuario
     {
@@ -29,37 +43,40 @@
         public string Senha { get; set; }
     }
 
-    private void EfetuarLogin()
+    private async Task EfetuarLogin()
     {
-        if (login.AutenticarUsuario(usuario.User, usuario.Senha))
+        var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
+
+        if (login != null)
         {
             LoginSucesso = true;
-            Mostramensagem("Login bem-sucedido!");
+            MostrarMensagem("Login bem-sucedido!", 2);
+            RedirecionarParaOutraPagina("/");
         }
         else
         {
-            LoginSucesso = false;
-            Mostramensagem("Credenciais inválidas.");
+            LoginFalha = true;
+            mensagemfalha = "Erro ao fazer login. O login ou senha errado";
         }
     }
-    private void Mostramensagem(string mensagem)
+
+    private void MostrarMensagem(string mensagem, int codigoSeveridade)
     {
-        if (LoginSucesso)
+        var severidade = codigoSeveridade switch
         {
-            Snackbar.Add(mensagem, Severity.Success);
-            RedirecionarParaOutraPagina();
-        }
-        else if (!LoginSucesso)
-        {
-            Snackbar.Add(mensagem, Severity.Warning);
-        }
-        else
-        {
-            Snackbar.Add("Erro ao mostrar mensagem", Severity.Error);
-        }
+            0 => Severity.Normal,
+            1 => Severity.Info,
+            2 => Severity.Success,
+            3 => Severity.Warning,
+            4 => Severity.Error,
+            _ => Severity.Normal
+        };
+
+        Snackbar.Add(mensagem, severidade);
     }
-    private void RedirecionarParaOutraPagina()
+
+    private void RedirecionarParaOutraPagina(string pagina)
     {
-        NavigationManager.NavigateTo("/questoes");
+        NavigationManager.NavigateTo(pagina);
     }
 }

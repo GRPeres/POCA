@@ -12,11 +12,11 @@ public static class CustomTheme
             Tertiary = "#4CAF50",        // Material Green 500 (highlight)
 
             // ===== BACKGROUNDS =====
-            Background = "#FFFFFF",      // Pure white (Material standard)
-            AppbarBackground = "#FFFFFF",// White appbar
-            DrawerBackground = "#F5F5F5",// Material Grey 100
+            Background = "#FAFAFA",      // Slightly off-white (Material Grey 50)
+            AppbarBackground = "#FFFFFF", // Pure white for contrast
+            DrawerBackground = "#EEEEEE", // Material Grey 200 (more visible difference)
             Surface = "#FFFFFF",         // White surface for cards
-            OverlayDark = "rgba(0,0,0,0.12)", // Material standard overlay
+            OverlayDark = "rgba(0,0,0,0.16)", // Slightly darker overlay
 
             // ===== TEXT =====
             TextPrimary = "rgba(0, 0, 0, 0.87)", // Material high-emphasis text

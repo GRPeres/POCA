@@ -13,20 +13,20 @@ namespace POCA.API.EndPoints
             var group = app.MapGroup("/alunos")
                            .WithTags("Alunos");
 
-            // GET aluno
+            // GET alunos
             group.MapGet("/", async ([FromServices] DbPocaContext context) =>
             {
                 return Results.Ok(await context.TbAlunos.ToListAsync());
             });
 
-            // GET aluno by ID
+            // GET alunos by ID
             group.MapGet("/{id}", async ([FromServices] DbPocaContext context, int id) =>
             {
                 var aluno = await context.TbAlunos.FindAsync(id);
                 return aluno is null ? Results.NotFound() : Results.Ok(aluno);
             });
 
-            // POST new question
+            // POST new alunos
             group.MapPost("/", async ([FromServices] DbPocaContext context,
                                     [FromBody] AlunoRequest request) =>
             {
@@ -45,7 +45,7 @@ namespace POCA.API.EndPoints
                 return Results.Created($"/alunos/{aluno.IdAluno}", aluno);
             });
 
-            // PUT update question
+            // PUT update alunos
             group.MapPut("/{id}", async ([FromServices] DbPocaContext context,
                            int id,
                            [FromBody] AlunoRequest request) =>
@@ -64,7 +64,7 @@ namespace POCA.API.EndPoints
                 return Results.NoContent();
             });
 
-            // DELETE question
+            // DELETE alunos
             group.MapDelete("/{id}", async ([FromServices] DbPocaContext context, int id) =>
             {
                 var aluno = await context.TbAlunos.FindAsync(id);
@@ -75,5 +75,5 @@ namespace POCA.API.EndPoints
                 return Results.NoContent();
             });
         }
-}
+    }
 }

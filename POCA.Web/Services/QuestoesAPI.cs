@@ -1,5 +1,6 @@
 ﻿// POCA.Web.Services.QuestoesAPI
 using System.Net.Http.Json;
+using static POCA.Web.Pages.ImportarQuestoes;
 
 namespace POCA.Web.Services
 {
@@ -50,6 +51,11 @@ namespace POCA.Web.Services
         public async Task AddQuestaoAsync(QuestaoRequest questao)
         {
             await _httpClient.PostAsJsonAsync("questoes", questao);
+        }
+
+        public async Task<HttpResponseMessage> ImportQuestoesBatchAsync(QuestaoBatchImportRequest batchRequest)
+        {
+            return await _httpClient.PostAsJsonAsync("questoes/import", batchRequest);
         }
 
         public async Task UpdateQuestaoAsync(QuestaoEditRequest questao)
