@@ -12,9 +12,25 @@
                            Variant="Variant.Text"
                            Href="/questoes"
                            Class="mr-2" />
+            <MudText Typo="Typo.h4">Importar Questões</MudText>
         </div>
 
+        <!-- File Upload Zone -->
+        <MudPaper Elevation="2"
+                  Class="pa-6 mb-4 rounded-lg border-dashed border-2"
+                  Style="cursor: pointer;">
+            <div class="d-flex flex-column align-center text-center">
+                <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Class="mb-2" />
+                <MudText Typo="Typo.h6" Class="mb-2">Selecione seu arquivo CSV</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                    O arquivo deve conter as colunas: Enunciado, Resposta Correta, Resposta Errada 1,
+                    Resposta Errada 2, Resposta Errada 3, Dificuldade, Tema
+                </MudText>
+                <MudButton Variant="Variant.Outlined"
                            Color="Color.Primary"
+                           OnClick="OpenFileDialog"
+                           StartIcon="@Icons.Material.Filled.Upload">
+                    Selecionar Arquivo
                 </MudButton>
                 <InputFile @ref="_fileInput"
                            style="display: none;"
@@ -30,6 +46,8 @@
 
         @if (_responseMessage != null)
         {
+            <MudAlert Severity="@(_responseMessage.IsSuccessStatusCode ? Severity.Success : Severity.Error)"
+                      Class="mb-4">
                 @_responseMessage.ReasonPhrase
             </MudAlert>
         }
@@ -41,7 +59,15 @@
     private HttpResponseMessage? _responseMessage;
     private bool _isProcessing = false;
 
+    private async Task OpenFileDialog()
+    {
+        if (_fileInput != null)
+        {
+            await JS.InvokeVoidAsync("triggerFileInputClick", _fileInput.Element);
+        }
+    }
 
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         _isProcessing = true;
         _responseMessage = null;
@@ -61,25 +87,60 @@
         }
     }
 
+    private async Task ProcessFile(IBrowserFile file)
     {
+        if (file.ContentType != "text/csv" && !file.Name.EndsWith(".csv"))
         {
-        {
+            Snackbar.Add("Por favor, envie um arquivo CSV válido.", Severity.Warning);
+            return;
         }
-            });
 
+        using var stream = file.OpenReadStream(5 * 1024 * 1024); // Max 5MB
+        using var reader = new StreamReader(stream);
+        var csvContent = await reader.ReadToEndAsync();
+
+        var questions = ParseCsvToQuestions(csvContent);
+
+        if (questions.Count == 0)
+        {
+            Snackbar.Add("O CSV não contém questões válidas ou está formatado incorretamente.", Severity.Error);
+            return;
+        }
+
+        _responseMessage = await QuestoesService.ImportQuestoesBatchAsync(new QuestaoBatchImportRequest(questions));
 
         if (_responseMessage.IsSuccessStatusCode)
         {
+            Snackbar.Add($"{questions.Count} questões importadas com sucesso!", Severity.Success);
+            await Task.Delay(1000); // Give user time to see the success message
             NavManager.NavigateTo("/questoes");
         }
-            else
-            {
-                Snackbar.Add($"Erro: {_responseMessage.ReasonPhrase}", Severity.Error);
-            }
     }
+
+    private List<QuestaoImportModel> ParseCsvToQuestions(string csvContent)
+    {
+        var questions = new List<QuestaoImportModel>();
+        var lines = csvContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines.Skip(1)) // Skip header
+        {
+            var columns = line.Split(',');
+
+            if (columns.Length >= 7)
+            {
+                questions.Add(new QuestaoImportModel
                     {
+                        EnunciadoQuestao = columns[0].Trim(),
+                        RespostaCertaQuestao = columns[1].Trim(),
+                        RespostaErrada1Questao = columns[2].Trim(),
+                        RespostaErrada2Questao = columns[3].Trim(),
+                        RespostaErrada3Questao = columns[4].Trim(),
+                        DificuldadeQuestao = columns[5].Trim(),
+                        TemaQuestao = columns[6].Trim()
+                    });
             }
         }
 
+        return questions;
     }
 }
