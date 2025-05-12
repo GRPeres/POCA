@@ -10,7 +10,7 @@
     <MudAppBar Color="Color.Surface" Fixed="true" Elevation="0" Class="px-4">
         <!-- Left side - Logo -->
         <MudLink Href="/" Underline="Underline.None" Class="d-flex align-center">
-            <MudImage Src="/images/IconGreenNoBG.png"
+            <MudImage Src="@(_isDarkMode ? "/images/IconLightGreenNoBG.png" : "/images/IconGreenNoBG.png" )"
                       Height="40"
                       Width="40"
                       Class="mr-2 logo-image" />

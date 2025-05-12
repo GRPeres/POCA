@@ -1,29 +1,35 @@
 ﻿@page "/importar-questoes"
 @inject QuestoesAPI QuestoesService
-@inject ISnackbar Snackbar
 @inject NavigationManager NavManager
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
     <MudPaper Elevation="4" Class="pa-6 rounded-lg">
         <div class="d-flex align-center mb-4">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
-            Color="Color.Primary"
-            Variant="Variant.Text"
-            Href="/questoes"
-            Class="mr-2" />
-            <MudText Typo="Typo.h4">Testar Importação</MudText>
+                           Color="Color.Primary"
+                           Variant="Variant.Text"
+                           Href="/questoes"
+                           Class="mr-2" />
         </div>
 
-        <MudButton Variant="Variant.Filled"
-        Color="Color.Primary"
-        OnClick="TestImport"
-        Class="mb-4">
-            Testar API de Importação
-        </MudButton>
+                           Color="Color.Primary"
+                </MudButton>
+                <InputFile @ref="_fileInput"
+                           style="display: none;"
+                           accept=".csv"
+                           OnChange="OnFileSelected" />
+            </div>
+        </MudPaper>
+
+        @if (_isProcessing)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+        }
 
         @if (_responseMessage != null)
         {
-            <MudAlert Severity="@(_responseMessage.IsSuccessStatusCode ? Severity.Success : Severity.Error)">
                 @_responseMessage.ReasonPhrase
             </MudAlert>
         }
@@ -31,64 +37,49 @@
 </MudContainer>
 
 @code {
+    private InputFile? _fileInput;
+    private HttpResponseMessage? _responseMessage;
+    private bool _isProcessing = false;
 
-    private HttpResponseMessage _responseMessage;
 
-    private async Task TestImport()
     {
+        _isProcessing = true;
+        _responseMessage = null;
+
         try
         {
+            var file = e.File;
+            await ProcessFile(file);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao processar arquivo: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
 
-            var testQuestions = new QuestaoBatchImportRequest(new List<global::QuestaoImportModel>
-            {
-                new()
-                {
-                    EnunciadoQuestao = "Qual é a capital do Brasil?",
-                    RespostaCertaQuestao = "Brasília",
-                    RespostaErrada1Questao = "Rio de Janeiro",
-                    RespostaErrada2Questao = "São Paulo",
-                    RespostaErrada3Questao = "Salvador",
-                    DificuldadeQuestao = "Fácil",
-                    TemaQuestao = "Teoria"
-                },
-                new()
-                {
-                    EnunciadoQuestao = "Quanto é 2 + 2?",
-                    RespostaCertaQuestao = "4",
-                    RespostaErrada1Questao = "5",
-                    RespostaErrada2Questao = "3",
-                    RespostaErrada3Questao = "22",
-                    DificuldadeQuestao = "Fácil",
-                    TemaQuestao = "Teoria"
-                }
+    {
+        {
+        {
+        }
             });
 
-            _responseMessage = await QuestoesService.ImportQuestoesBatchAsync(testQuestions);
 
-            if (_responseMessage.IsSuccessStatusCode)
-            {
-                Snackbar.Add("Importação testada com sucesso!", Severity.Success);
-                NavManager.NavigateTo("/questoes");
-            }
+        if (_responseMessage.IsSuccessStatusCode)
+        {
+            NavManager.NavigateTo("/questoes");
+        }
             else
             {
                 Snackbar.Add($"Erro: {_responseMessage.ReasonPhrase}", Severity.Error);
             }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Falha: {ex.Message}", Severity.Error);
-        }
     }
+                    {
+            }
+        }
 
-    public class QuestaoImportModel
-    {
-        public string Enunciado { get; set; }
-        public string RespostaCorreta { get; set; }
-        public string RespostaErrada1 { get; set; }
-        public string RespostaErrada2 { get; set; }
-        public string RespostaErrada3 { get; set; }
-        public string Dificuldade { get; set; }
-        public string Tema { get; set; }
     }
 }

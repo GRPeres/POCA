@@ -1,6 +1,7 @@
 ﻿@page "/questao/{id:int}"
 @inject POCA.Web.Services.QuestoesAPI QuestoesAPI
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
     @if (questao == null)
@@ -20,12 +21,12 @@
 
             <!-- Metadata chips - now in a compact row -->
             <div class="d-flex flex-wrap gap-2 mb-4">
-                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" 
-                        StartIcon="@Icons.Material.Filled.Category" Class="px-3">
+                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined"
+                         StartIcon="@Icons.Material.Filled.Category" Class="px-3">
                     <MudText Typo="Typo.caption">@questao.TemaQuestao</MudText>
                 </MudChip>
-                <MudChip T="string" Color="@GetDifficultyColor(questao.DificuldadeQuestao)" 
-                        Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.StarHalf" Class="px-3">
+                <MudChip T="string" Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
+                         Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.StarHalf" Class="px-3">
                     <MudText Typo="Typo.caption">@questao.DificuldadeQuestao</MudText>
                 </MudChip>
             </div>
@@ -49,7 +50,7 @@
                     <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Color="Color.Error" Class="mr-2" />
                     <MudText Typo="Typo.subtitle1" Color="Color.Error">Respostas Incorretas</MudText>
                 </div>
-                
+
                 <MudList T="string" Dense="true" Class="py-0">
                     <MudListItem Class="px-0">
                         <MudPaper Elevation="0" Class="pa-3 mb-2 rounded" Style="background-color: rgba(var(--mud-palette-error-rgb), 0.1); width: 100%;">
@@ -81,25 +82,26 @@
             <!-- Action Buttons -->
             <MudDivider Class="my-6" />
             <div class="d-flex justify-space-between">
-                <MudButton Variant="Variant.Text" 
-                          Color="Color.Primary" 
-                          Href="/questoes" 
-                          StartIcon="@Icons.Material.Filled.ArrowBack">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Href="/questoes"
+                           StartIcon="@Icons.Material.Filled.ArrowBack">
                     Voltar
                 </MudButton>
                 <div>
-                    <MudButton Variant="Variant.Outlined" 
-                              Color="Color.Secondary" 
-                              Href="@($"/editar-questao/{questao.IdQuestao}")"
-                              StartIcon="@Icons.Material.Filled.Edit"
-                              Class="mr-2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               Href="@($"/editar-questao/{questao.IdQuestao}")"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               Class="mr-2">
                         Editar
                     </MudButton>
-                    <MudButton Variant="Variant.Filled" 
-                              Color="Color.Primary" 
-                              Href="/adicionar-questao"
-                              StartIcon="@Icons.Material.Filled.Add">
-                        Nova Questão
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="() => deleteDialog.ShowAsync()"
+                               Class="mr-2">
+                        Excluir
                     </MudButton>
                 </div>
             </div>
@@ -107,11 +109,26 @@
     }
 </MudContainer>
 
+<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Confirmar Exclusão</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Deseja realmente excluir esta questão?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteQuestaoAsync">Excluir</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     [Parameter]
     public int id { get; set; }
 
     private QuestaoResponse? questao;
+    private MudDialog deleteDialog = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -133,4 +150,20 @@
             "Difícil" => Color.Error,
             _ => Color.Default
         };
+
+    private async Task DeleteQuestaoAsync()
+    {
+        try
+        {
+            await QuestoesAPI.DeleteQuestaoAsync(id);
+            deleteDialog.ShowAsync();
+            Snackbar.Add("Questão excluída com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/questoes");
+        }
+        catch (Exception ex)
+        {
+            deleteDialog.CloseAsync();
+            Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
+        }
+    }
 }

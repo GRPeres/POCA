@@ -21,7 +21,7 @@ namespace POCA.API.Services
              int? medioCount = null,
              int? dificilCount = null)
         {
-            IQueryable<TbQuesto> query = _context.TbQuestoes;
+            IQueryable<TbQuestoes> query = _context.TbQuestoes;
 
             if (!string.IsNullOrEmpty(tema))
             {
@@ -42,7 +42,7 @@ namespace POCA.API.Services
                 dificilCount ?? 0);
         }
 
-        private async Task<List<QuestaoResponse>> GetFullyRandomQuestions(IQueryable<TbQuesto> query, int total)
+        private async Task<List<QuestaoResponse>> GetFullyRandomQuestions(IQueryable<TbQuestoes> query, int total)
         {
             var allQuestions = await query.ToListAsync();
             return allQuestions
@@ -53,7 +53,7 @@ namespace POCA.API.Services
         }
 
         private async Task<List<QuestaoResponse>> GetDifficultyBalancedQuestions(
-    IQueryable<TbQuesto> query,
+    IQueryable<TbQuestoes> query,
     int facilCount,
     int medioCount,
     int dificilCount)
@@ -101,7 +101,7 @@ namespace POCA.API.Services
             return result.OrderBy(q => random.Next()).ToList();
         }
 
-        private QuestaoResponse ToQuestaoResponse(TbQuesto q) => new(
+        private QuestaoResponse ToQuestaoResponse(TbQuestoes q) => new(
             q.IdQuestao,
             q.EnunciadoQuestao,
             q.RespostacertaQuestao,

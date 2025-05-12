@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Requests;
-using POCA.API.Response;
-using POCA.Banco;
+
 using POCA.Banco.Model;
 namespace POCA.API.EndPoints
 {

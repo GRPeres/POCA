@@ -19,9 +19,9 @@ public partial class DbPocaContext : DbContext
 
     public virtual DbSet<TbMateria> TbMaterias { get; set; }
 
-    public virtual DbSet<TbProfessore> TbProfessores { get; set; }
+    public virtual DbSet<TbProfessores> TbProfessores { get; set; }
 
-    public virtual DbSet<TbQuesto> TbQuestoes { get; set; }
+    public virtual DbSet<TbQuestoes> TbQuestoes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -77,7 +77,7 @@ public partial class DbPocaContext : DbContext
                 .HasConstraintName("id_professor_materia");
         });
 
-        modelBuilder.Entity<TbProfessore>(entity =>
+        modelBuilder.Entity<TbProfessores>(entity =>
         {
             entity.HasKey(e => e.IdProfessor).HasName("PRIMARY");
 
@@ -107,7 +107,7 @@ public partial class DbPocaContext : DbContext
                 .HasColumnName("senha_professor");
         });
 
-        modelBuilder.Entity<TbQuesto>(entity =>
+        modelBuilder.Entity<TbQuestoes>(entity =>
         {
             entity.HasKey(e => e.IdQuestao).HasName("PRIMARY");
 
