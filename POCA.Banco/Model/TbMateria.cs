@@ -13,5 +13,5 @@ public partial class TbMateria
 
     public virtual TbAluno? IdAlunoMateriaNavigation { get; set; }
 
-    public virtual TbProfessore? IdProfessorMateriaNavigation { get; set; }
+    public virtual TbProfessores? IdProfessorMateriaNavigation { get; set; }
 }

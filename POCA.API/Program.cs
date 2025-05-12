@@ -33,6 +33,8 @@ app.UseCors(options => options
 
 app.AddEndpointsQuestoes();
 app.AddEndpointsAlunos();
+app.AddEndpointsProfessores();
+app.AddEndpointsMaterias(); 
 app.UseSwagger();
 app.UseSwaggerUI();
 
