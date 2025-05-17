@@ -14,6 +14,8 @@ builder.Services.AddTransient<MateriaAPI>();
 builder.Services.AddTransient<ProfessorAPI>();
 builder.Services.AddTransient<QuestoesAPI>();
 
+builder.Services.AddScoped<UserSessionService>();
+
 builder.Services.AddHttpClient("API", client => {
 	client.BaseAddress = new Uri(builder.Configuration["APIServer:Url"]!);
 	client.DefaultRequestHeaders.Add("Accept", "application/json");

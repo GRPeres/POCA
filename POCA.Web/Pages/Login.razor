@@ -3,10 +3,13 @@
 @using POCA.Web
 @using POCA.Web.Utils
 @inject POCA.Web.Services.AlunosAPI AlunosAPI
+@inject UserSessionService UserSessionInstance
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 <h1>Página de Login</h1>
 
-@if(LoginFalha)
+@if (LoginFalha)
 {
     <MudAlert>@mensagemfalha</MudAlert>
 }
@@ -15,25 +18,8 @@
 <MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
 <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
 
-<!--
-    "idAluno": 6,
-    "nomeAluno": "Gabriel Ribeirao Pereira",
-    "idadeAluno": 23,
-    "progressoAluno": 7,
-    "contatoAluno": "GabrielRP@yahoo.com",
-    "loginAluno": "GabrielRiPe",
-    "senhaAluno": "brinks",
-    "tbMateria": []
-</!-->
-
 @code {
-    [Inject] private NavigationManager NavigationManager { get; set; }
-    [Inject] ISnackbar Snackbar { get; set; }
-
     private Usuario usuario = new Usuario();
-    private LoginService login;
-    private AlunoResponse temporario;
-    private bool LoginSucesso = false;
     private bool LoginFalha = false;
     private string mensagemfalha;
 
@@ -49,15 +35,27 @@
 
         if (login != null)
         {
-            LoginSucesso = true;
+            await UserSessionInstance.Login(login);
             MostrarMensagem("Login bem-sucedido!", 2);
-            RedirecionarParaOutraPagina("/");
+            NavigationManager.NavigateTo("/");
         }
         else
         {
             LoginFalha = true;
             mensagemfalha = "Erro ao fazer login. O login ou senha errado";
         }
+
+        //como usar dps 
+        //      @inject UserSessionService UserSession
+
+        //     @if (UserSession.IsLoggedIn)
+        //     {
+        //         <p>Welcome, @UserSession.CurrentUser.nomeAluno!</p>
+        //     }
+        //     else
+        //     {
+        //         <p>Please log in.</p>
+        //     }
     }
 
     private void MostrarMensagem(string mensagem, int codigoSeveridade)
@@ -73,10 +71,5 @@
         };
 
         Snackbar.Add(mensagem, severidade);
-    }
-
-    private void RedirecionarParaOutraPagina(string pagina)
-    {
-        NavigationManager.NavigateTo(pagina);
     }
 }
