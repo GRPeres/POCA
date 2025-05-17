@@ -6,7 +6,7 @@
 
 <h1>Página de Login</h1>
 
-@if(LoginFalha)
+@if (LoginFalha)
 {
     <MudAlert>@mensagemfalha</MudAlert>
 }
@@ -32,7 +32,6 @@
 
     private Usuario usuario = new Usuario();
     private LoginService login;
-    private AlunoResponse temporario;
     private bool LoginSucesso = false;
     private bool LoginFalha = false;
     private string mensagemfalha;
@@ -45,18 +44,25 @@
 
     private async Task EfetuarLogin()
     {
-        var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
-
-        if (login != null)
+        if (usuario.User != "" && usuario.Senha != "")
         {
-            LoginSucesso = true;
-            MostrarMensagem("Login bem-sucedido!", 2);
-            RedirecionarParaOutraPagina("/");
+            var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
+
+            if (login != null)
+            {
+                LoginSucesso = true;
+                MostrarMensagem("Login bem-sucedido!", 2);
+                RedirecionarParaOutraPagina("/");
+            }
+            else
+            {
+                LoginFalha = true;
+                mensagemfalha = "Erro ao fazer login. O login ou senha errado";
+            }
         }
         else
         {
-            LoginFalha = true;
-            mensagemfalha = "Erro ao fazer login. O login ou senha errado";
+            MostrarMensagem("Coloque a senha", 1);
         }
     }
 
