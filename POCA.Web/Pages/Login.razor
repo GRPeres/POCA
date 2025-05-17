@@ -37,19 +37,24 @@
         {
             var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
 
-        if (login != null)
-        {
-            await UserSessionInstance.Login(login);
-            MostrarMensagem("Login bem-sucedido!", 2);
-            NavigationManager.NavigateTo("/");
+            if (login != null)
+            {
+                await UserSessionInstance.Login(login);
+                MostrarMensagem("Login bem-sucedido!", 2);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                LoginFalha = true;
+                mensagemfalha = "Erro ao fazer login. O login ou senha errado";
+            }
         }
         else
         {
-            LoginFalha = true;
-            mensagemfalha = "Erro ao fazer login. O login ou senha errado";
+            MostrarMensagem("Coloque a senha", 1);
         }
 
-        //como usar dps 
+    //como usar dps 
         //      @inject UserSessionService UserSession
 
         //     @if (UserSession.IsLoggedIn)
