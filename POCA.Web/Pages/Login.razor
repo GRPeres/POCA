@@ -20,6 +20,8 @@
 
 @code {
     private Usuario usuario = new Usuario();
+    private LoginService login;
+    private bool LoginSucesso = false;
     private bool LoginFalha = false;
     private string mensagemfalha;
 
@@ -31,7 +33,9 @@
 
     private async Task EfetuarLogin()
     {
-        var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
+        if (usuario.User != "" && usuario.Senha != "")
+        {
+            var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
 
         if (login != null)
         {
