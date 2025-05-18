@@ -1,13 +1,17 @@
 ﻿@page "/test-login-api"
 @inject AlunosAPI ApiService
+@inject UserSessionService UserSession
 
 <h3>API_Login_Test</h3>
 
 <div class="mb-3">
-    <button @onclick="TestGetAll" class="btn btn-primary me-2">Test GET All</button>
+    <button @onclick="TestGetAll" class="btn btn-success me-2">Test GET All</button>
     <button @onclick="TestCreate" class="btn btn-success me-2">Test POST</button>
-    <button @onclick="TestDelete" class="btn btn-danger">Test DELETE</button>
-    <button @onclick="TestGETONE" class="btn btn-danger">Test GET One</button>
+    <button @onclick="TestDelete" class="btn btn-success me-2">Test DELETE</button>
+    <button @onclick="TestGETONE" class="btn btn-success me-2">Test GET One</button>
+    <button @onclick="TestLOGIN" class="btn btn-success">Test Login</button>
+    <button @onclick="TestGetUser" class="btn btn-success me-2">Test User Enter</button>
+    <button @onclick="TestLOGOUT" class="btn btn-success">Test Logout</button>
 </div>
 
 <div class="card">
@@ -44,6 +48,24 @@
         try
         {
             var newAluno = new AlunoRequest(
+                "Joao Alves Pera",
+                12,
+                1,
+                "temdemais@yahoo.com",
+                "JoaoPera",
+                "oila"
+            );
+
+            var newAluno2 = new AlunoRequest(
+                "string",
+                0,
+                0,
+                "string",
+                "string",
+                "string"
+            );
+
+            var newAluno3 = new AlunoRequest(
                 "Gabriel Ribeirao Pereira",
                 23,
                 7,
@@ -52,7 +74,10 @@
                 "brinks"
             );
 
+
             await ApiService.AddAlunosAsync(newAluno);
+            await ApiService.AddAlunosAsync(newAluno2);
+            await ApiService.AddAlunosAsync(newAluno3);
             apiResponse = "POST successful! Use GET to verify.";
         }
         catch (Exception ex)
@@ -73,13 +98,13 @@
             apiResponse = $"DELETE Error: {ex.Message}";
         }
     }
-    
+
     private async Task TestGETONE()
     {
         try
         {
-            var alunos = await ApiService.CheckAlunosAsync("JoaoPera", "oila");
-            apiResponse = JsonSerializer.Serialize(alunos, new JsonSerializerOptions
+            var aluno = await ApiService.CheckAlunosAsync("JoaoPera", "oila");
+            apiResponse = JsonSerializer.Serialize(aluno, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
@@ -89,4 +114,69 @@
             apiResponse = $"GET ONE Error: {ex.Message}";
         }
     }
+
+    private async Task TestLOGIN()
+    {
+        try
+        {
+            var aluno = await ApiService.CheckAlunosAsync("JoaoPera", "oila");
+            await UserSession.Login(aluno);
+            apiResponse = $"Login successful as:\n{JsonSerializer.Serialize(aluno, new JsonSerializerOptions { WriteIndented = true })}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"GET ONE Error: {ex.Message}";
+        }
+    }
+
+    //como usar dps
+    //     da o inject
+    //     @inject UserSessionService UserSession
+
+    //     função exemplo
+    //     @if (UserSession.IsLoggedIn)
+    //     {
+    //         <p>Welcome, @UserSession.CurrentUser.nomeAluno!</p>
+    //     }
+    //     else
+    //     {
+    //         <p>Please log in.</p>
+    //     }
+
+    private async Task TestGetUser()
+    {
+        if (UserSession.IsLoggedIn)
+        {
+            var aluno = UserSession;
+            apiResponse = JsonSerializer.Serialize(aluno, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }); ;
+        }
+        else
+        {
+            apiResponse = $"Você não está logado, ou deu erro ¯\\_(ツ)_/¯";
+        }
+    }
+
+        private async Task TestLOGOUT()
+    {
+        try
+        {
+            if (UserSession.IsLoggedIn)
+            {
+                UserSession.Logout();
+                apiResponse = "Logut successful";
+            }
+            else
+            {
+                apiResponse = "Make Login First";
+            }
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"GET ONE Error: {ex.Message}";
+        }
+    }
 }
+

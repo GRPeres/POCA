@@ -3,27 +3,32 @@
 @using POCA.Web
 @using POCA.Web.Utils
 @inject POCA.Web.Services.AlunosAPI AlunosAPI
-@inject UserSessionService UserSessionInstance
+@inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 
 <h1>Página de Login</h1>
 
-@if (LoginFalha)
+@if (!UserSession.IsLoggedIn)
 {
-    <MudAlert>@mensagemfalha</MudAlert>
-}
+    @if (LoginFalha)
+    {
+        <MudAlert>Erro ao fazer login, login ou senha errado</MudAlert>
+    }
 
-<MudTextField @bind-Value="usuario.User" Label="Usuário" Variant="Variant.Filled" />
-<MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
-<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
+    <MudTextField @bind-Value="usuario.User" Label="Usuário" Variant="Variant.Filled" />
+    <MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
+}else
+{
+    <MudText>Você já está logado</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="Voltar">Voltar</MudButton>
+}
 
 @code {
     private Usuario usuario = new Usuario();
-    private LoginService login;
     private bool LoginSucesso = false;
     private bool LoginFalha = false;
-    private string mensagemfalha;
 
     private class Usuario
     {
@@ -39,46 +44,23 @@
 
             if (login != null)
             {
-                await UserSessionInstance.Login(login);
-                MostrarMensagem("Login bem-sucedido!", 2);
+                await UserSession.Login(login);
+                Snackbar.Add("Login bem-sucedido!", Severity.Success);
                 NavigationManager.NavigateTo("/");
             }
             else
             {
                 LoginFalha = true;
-                mensagemfalha = "Erro ao fazer login. O login ou senha errado";
             }
         }
         else
         {
-            MostrarMensagem("Coloque a senha", 1);
+            Snackbar.Add("Coloque um login ou senha", Severity.Info);
         }
-
-    //como usar dps 
-        //      @inject UserSessionService UserSession
-
-        //     @if (UserSession.IsLoggedIn)
-        //     {
-        //         <p>Welcome, @UserSession.CurrentUser.nomeAluno!</p>
-        //     }
-        //     else
-        //     {
-        //         <p>Please log in.</p>
-        //     }
     }
 
-    private void MostrarMensagem(string mensagem, int codigoSeveridade)
+    private void Voltar()
     {
-        var severidade = codigoSeveridade switch
-        {
-            0 => Severity.Normal,
-            1 => Severity.Info,
-            2 => Severity.Success,
-            3 => Severity.Warning,
-            4 => Severity.Error,
-            _ => Severity.Normal
-        };
-
-        Snackbar.Add(mensagem, severidade);
+        NavigationManager.NavigateTo("/");
     }
 }
