@@ -13,6 +13,7 @@ builder.Services.AddTransient<AlunosAPI>();
 builder.Services.AddTransient<MateriaAPI>();
 builder.Services.AddTransient<ProfessorAPI>();
 builder.Services.AddTransient<QuestoesAPI>();
+builder.Services.AddSingleton<AtividadeState>();
 
 builder.Services.AddScoped<UserSessionService>();
 
