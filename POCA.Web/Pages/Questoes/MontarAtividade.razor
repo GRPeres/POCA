@@ -24,17 +24,15 @@
                        Label="Dificuldade"
                        Variant="Variant.Outlined"
                        Style="min-width: 150px;">
-                <MudSelectItem Value="">Todas</MudSelectItem>
-                <MudSelectItem Value="Fácil">Fácil</MudSelectItem>
-                <MudSelectItem Value="Média">Média</MudSelectItem>
-                <MudSelectItem Value="Difícil">Difícil</MudSelectItem>
+                <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
+                <MudSelectItem Value="@("Média")">Média</MudSelectItem>
+                <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
             </MudSelect>
 
             <MudSelect @bind-Value="_selectedTema"
                        Label="Tema"
                        Variant="Variant.Outlined"
                        Style="min-width: 150px;">
-                <MudSelectItem Value="">Todos</MudSelectItem>
                 @foreach (var tema in _temasUnicos)
                 {
                     <MudSelectItem Value="@tema">@tema</MudSelectItem>
@@ -53,7 +51,7 @@
         </HeaderContent>
         <RowTemplate Context="q">
             <MudTd>
-                <MudCheckBox @bind-Checked="_selectedQuestoesLookup[q.IdQuestao]" />
+                <MudCheckBox @bind-Checked="_selectedQuestoesLookup[q.IdQuestao]" T="string" />
             </MudTd>
             <MudTd>@q.EnunciadoQuestao</MudTd>
             <MudTd>@q.DificuldadeQuestao</MudTd>
@@ -98,7 +96,7 @@
 
     private void IrParaVisualizar()
     {
-        AtividadeState.QuestoesSelecionadas = _selectedQuestoes.ToList();
+        AtividadeState.SetQuestoes(_selectedQuestoes.ToList());
         Navigation.NavigateTo("/atividade");
     }
 }

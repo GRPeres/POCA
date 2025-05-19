@@ -6,7 +6,7 @@
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
     <MudText Typo="Typo.h5" Class="mb-4">Atividade Criada</MudText>
 
-    @if (AtividadeState.QuestoesSelecionadas is null || !AtividadeState.QuestoesSelecionadas.Any())
+    @if (AtividadeState.GetQuestoes() is null || !AtividadeState.GetQuestoes().Any())
     {
         <MudAlert Severity="Severity.Warning">
             Nenhuma questão foi selecionada. Volte à montagem para criar uma atividade.
@@ -14,7 +14,7 @@
     }
     else
     {
-        <MudTable Items="AtividadeState.QuestoesSelecionadas" Dense="true" Hover="true" Bordered="true">
+        <MudTable Items="AtividadeState.GetQuestoes()" Dense="true" Hover="true" Bordered="true">
             <HeaderContent>
                 <MudTh>#</MudTh>
                 <MudTh>Enunciado</MudTh>
@@ -22,7 +22,7 @@
                 <MudTh>Tema</MudTh>
             </HeaderContent>
             <RowTemplate Context="questao">
-                <MudTd>@(AtividadeState.QuestoesSelecionadas.IndexOf(questao) + 1)</MudTd>
+                <MudTd>@(AtividadeState.GetQuestoes().IndexOf(questao) + 1)</MudTd>
                 <MudTd>@questao.EnunciadoQuestao</MudTd>
                 <MudTd>@questao.DificuldadeQuestao</MudTd>
                 <MudTd>@questao.TemaQuestao</MudTd>
