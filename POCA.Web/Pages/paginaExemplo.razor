@@ -1,8 +1,14 @@
-﻿@page "/aluno"
+﻿@page "/pag-exemplo"
 @using MudBlazor
 @using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
+
+<h3>Pagína de Exemplo</h3>
+
+<!--
+	Esse documento serve para ser um exemplo para ajudar em futuras páginas
+-->
 
 @if (UserSession.IsLoggedIn)
 {
@@ -17,6 +23,6 @@ else
 @code {
 	private void Voltar()
 	{
-		NavigationManager.NavigateTo("/login");
+		NavigationManager.NavigateTo("/");
 	}
 }
