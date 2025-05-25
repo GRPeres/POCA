@@ -15,9 +15,7 @@ public partial class TbAluno
 
     public string ContatoAluno { get; set; } = null!;
 
-    public string LoginAluno { get; set; } = null!;
+    public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
 
-    public string SenhaAluno { get; set; } = null!;
-
-    public virtual ICollection<TbMateria> TbMateria { get; set; } = new List<TbMateria>();
+    public virtual ICollection<TbPessoa> TbPessoasIdPessoas { get; set; } = new List<TbPessoa>();
 }

@@ -32,7 +32,7 @@ namespace POCA.API.Endpoints
             group.MapPost("/", async ([FromServices] DbPocaContext context,
                                     [FromBody] QuestaoRequest request) =>
             {
-                var questao = new TbQuestoes
+                var questao = new TbQuesto
                 {
                     EnunciadoQuestao = request.EnunciadoQuestao,
                     RespostacertaQuestao = request.RespostaCertaQuestao,
@@ -107,7 +107,7 @@ namespace POCA.API.Endpoints
                     return Results.BadRequest("Nenhuma questão fornecida para importação.");
                 }
 
-                var importedQuestions = new List<TbQuestoes>();
+                var importedQuestions = new List<TbQuesto>();
                 var errors = new List<string>();
                 var rowNumber = 1;
 
@@ -129,7 +129,7 @@ namespace POCA.API.Endpoints
                     }
 
                     // Create the entity
-                    var newQuestao = new TbQuestoes
+                    var newQuestao = new TbQuesto
                     {
                         EnunciadoQuestao = questao.EnunciadoQuestao,
                         RespostacertaQuestao = questao.RespostaCertaQuestao,

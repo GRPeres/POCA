@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace POCA.Banco.Model;
 
-public partial class TbQuestoes
+public partial class TbQuesto
 {
     public int IdQuestao { get; set; }
 
@@ -20,4 +20,6 @@ public partial class TbQuestoes
     public string DificuldadeQuestao { get; set; } = null!;
 
     public string TemaQuestao { get; set; } = null!;
+
+    public virtual ICollection<TbAtividade> TbAtividadesIdAtividades { get; set; } = new List<TbAtividade>();
 }

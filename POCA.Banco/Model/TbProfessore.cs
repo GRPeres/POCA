@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace POCA.Banco.Model;
 
-public partial class TbProfessores
+public partial class TbProfessore
 {
     public int IdProfessor { get; set; }
 
@@ -13,9 +13,7 @@ public partial class TbProfessores
 
     public string ContatoProfessor { get; set; } = null!;
 
-    public string LoginProfessor { get; set; } = null!;
+    public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
 
-    public string SenhaProfessor { get; set; } = null!;
-
-    public virtual ICollection<TbMateria> TbMateria { get; set; } = new List<TbMateria>();
+    public virtual ICollection<TbPessoa> TbPessoasIdPessoas { get; set; } = new List<TbPessoa>();
 }

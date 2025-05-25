@@ -7,11 +7,11 @@ public partial class TbMateria
 {
     public int IdMateria { get; set; }
 
-    public int? IdProfessorMateria { get; set; }
+    public string? NomeMateria { get; set; }
 
-    public int? IdAlunoMateria { get; set; }
+    public virtual ICollection<TbAluno> TbAlunosIdAlunos { get; set; } = new List<TbAluno>();
 
-    public virtual TbAluno? IdAlunoMateriaNavigation { get; set; }
+    public virtual ICollection<TbAtividade> TbAtividadesIdAtividades { get; set; } = new List<TbAtividade>();
 
-    public virtual TbProfessores? IdProfessorMateriaNavigation { get; set; }
+    public virtual ICollection<TbProfessore> TbProfessoresIdProfessors { get; set; } = new List<TbProfessore>();
 }
