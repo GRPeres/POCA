@@ -29,7 +29,7 @@ namespace POCA.API.EndPoints
             group.MapPost("/", async ([FromServices] DbPocaContext context,
                                     [FromBody] ProfessorRequest request) =>
             {
-                var professor = new TbProfessores
+                var professor = new TbProfessore
                 {
                     NomeProfessor = request.NomeProfessor,
                     MateriaProfessor = request.MateriaProfessor,

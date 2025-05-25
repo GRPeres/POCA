@@ -35,8 +35,6 @@ namespace POCA.API.EndPoints
                     IdadeAluno = request.IdadeAluno,
                     ProgressoAluno = request.ProgressoAluno,
                     ContatoAluno = request.ContatoAluno,
-                    LoginAluno = request.LoginAluno,
-                    SenhaAluno = request.SenhaAluno
                 };
 
                 context.TbAlunos.Add(aluno);
@@ -56,8 +54,6 @@ namespace POCA.API.EndPoints
                 aluno.IdadeAluno = request.IdadeAluno;
                 aluno.ProgressoAluno = request.ProgressoAluno;
                 aluno.ContatoAluno = request.ContatoAluno;
-                aluno.LoginAluno = request.LoginAluno;
-                aluno.SenhaAluno = request.SenhaAluno;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();
