@@ -1,11 +1,16 @@
 ﻿@page "/login"
 @using MudBlazor
 @using POCA.Web
+@using POCA.Web.Requests.Pessoa
+@using POCA.Web.Services
 @using POCA.Web.Utils
-@inject POCA.Web.Services.AlunosAPI AlunosAPI
+@using System.Security.Cryptography
+@using System.Text
+@inject PessoasAPI PessoasAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
+@inject IConfiguration Configuration
 
 <h1>Página de Login</h1>
 
@@ -13,49 +18,102 @@
 {
     @if (LoginFalha)
     {
-        <MudAlert>Erro ao fazer login, login ou senha errado</MudAlert>
+        <MudAlert Severity="Severity.Error">Erro ao fazer login, credenciais inválidas</MudAlert>
     }
 
-    <MudTextField @bind-Value="usuario.User" Label="Usuário" Variant="Variant.Filled" />
-    <MudTextField @bind-Value="usuario.Senha" Label="Senha" Variant="Variant.Filled" InputType="InputType.Password" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="EfetuarLogin">Entrar</MudButton>
-}else
+    <MudTextField @bind-Value="Credenciais.Login"
+                  Label="Usuário"
+                  Variant="Variant.Filled"
+                  Required
+                  RequiredError="Por favor insira seu usuário" />
+
+    <MudTextField @bind-Value="Credenciais.Senha"
+                  Label="Senha"
+                  Variant="Variant.Filled"
+                  InputType="InputType.Password"
+                  Required
+                  RequiredError="Por favor insira sua senha"
+                  Class="mt-3" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Class="mt-4"
+               OnClick="EfetuarLogin"
+               Disabled="@(!IsFormValid)">
+        Entrar
+    </MudButton>
+}
+else
 {
     <MudText>Você já está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="Voltar">Voltar</MudButton>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Class="mt-4"
+               OnClick="Voltar">
+        Voltar
+    </MudButton>
 }
 
 @code {
-    private Usuario usuario = new Usuario();
-    private bool LoginSucesso = false;
+    private LoginModel Credenciais = new();
     private bool LoginFalha = false;
+    private bool IsLoading = false;
 
-    private class Usuario
+    private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.Login) &&
+                              !string.IsNullOrWhiteSpace(Credenciais.Senha);
+
+    private class LoginModel
     {
-        public string User { get; set; }
-        public string Senha { get; set; }
+        public string Login { get; set; } = string.Empty;
+        public string Senha { get; set; } = string.Empty;
+    }
+
+    private string HashPassword(string password)
+    {
+        // Get pepper from configuration
+        var pepper = Configuration["Security:Pepper"] ?? string.Empty;
+
+        using var sha256 = SHA256.Create();
+        byte[] hashedBytes = sha256.ComputeHash(
+            Encoding.UTF8.GetBytes(password + pepper));
+        return Convert.ToBase64String(hashedBytes);
     }
 
     private async Task EfetuarLogin()
     {
-        if (usuario.User != "" && usuario.Senha != "")
-        {
-            var login = await AlunosAPI.CheckAlunosAsync(usuario.User, usuario.Senha);
+        IsLoading = true;
+        LoginFalha = false;
 
-            if (login != null)
+        try
+        {
+            // Hash the password before sending
+            var hashedPassword = HashPassword(Credenciais.Senha);
+
+            var authResponse = await PessoasAPI.LoginAsync(new PessoaLoginRequest(
+                Login: Credenciais.Login,
+                Senha: hashedPassword
+            ));
+
+            if (authResponse != null)
             {
-                await UserSession.Login(login);
+                await UserSession.Login(authResponse);
                 Snackbar.Add("Login bem-sucedido!", Severity.Success);
                 NavigationManager.NavigateTo("/");
             }
             else
             {
                 LoginFalha = true;
+                Snackbar.Add("Credenciais inválidas", Severity.Error);
             }
         }
-        else
+        catch (Exception ex)
         {
-            Snackbar.Add("Coloque um login ou senha", Severity.Info);
+            LoginFalha = true;
+            Snackbar.Add($"Erro durante o login: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

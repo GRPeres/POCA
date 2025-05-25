@@ -34,8 +34,6 @@ namespace POCA.API.EndPoints
                     NomeProfessor = request.NomeProfessor,
                     MateriaProfessor = request.MateriaProfessor,
                     ContatoProfessor = request.ContatoProfessor,
-                    LoginProfessor = request.LoginProfessor,
-                    SenhaProfessor = request.SenhaProfessor
                 };
 
                 context.TbProfessores.Add(professor);
@@ -54,8 +52,6 @@ namespace POCA.API.EndPoints
                 professor.NomeProfessor = request.NomeProfessor;
                 professor.MateriaProfessor = request.MateriaProfessor;
                 professor.ContatoProfessor = request.ContatoProfessor;
-                professor.LoginProfessor = request.LoginProfessor;
-                professor.SenhaProfessor = request.SenhaProfessor;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();

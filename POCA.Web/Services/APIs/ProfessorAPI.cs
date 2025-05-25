@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
 
-namespace POCA.Web.Services
+namespace POCA.Web.Services.APIs
 {
     public class ProfessorAPI
     {

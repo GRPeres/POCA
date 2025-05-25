@@ -31,8 +31,6 @@ namespace POCA.API.EndPoints
             {
                 var materia = new TbMateria
                 {
-                    IdProfessorMateria = request.IdProfessorMateria,
-                    IdAlunoMateria = request.IdAlunoMateria
                 };
 
                 context.TbMaterias.Add(materia);
@@ -48,8 +46,6 @@ namespace POCA.API.EndPoints
                 var materia = await context.TbMaterias.FindAsync(id);
                 if (materia is null) return Results.NotFound();
 
-                materia.IdProfessorMateria = request.IdProfessorMateria;
-                materia.IdAlunoMateria = request.IdAlunoMateria;
                 await context.SaveChangesAsync();
                 return Results.NoContent();
             });

@@ -5,6 +5,6 @@ public record AlunoResponse(
     int IdadeAluno,
     int ProgressoAluno,
     string ContatoAluno,
-    string LoginAluno,
-    string SenhaAluno
+    IEnumerable<int>? MateriasIds,
+    IEnumerable<int>? PessoasIds
 );

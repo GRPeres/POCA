@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace POCA.API.Requests;
+namespace POCA.API.Requests.Aluno;
 
 public record AlunoRequest(
     [Required] string NomeAluno,
     [Required] int IdadeAluno,
     [Required] int ProgressoAluno,
-    [Required] string ContatoAluno,
-    [Required] string LoginAluno,
-    [Required] string SenhaAluno
+    [Required] string ContatoAluno
 );

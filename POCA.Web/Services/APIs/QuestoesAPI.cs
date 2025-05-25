@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using static POCA.Web.Pages.Questoes.ImportarQuestoes;
 
-namespace POCA.Web.Services
+namespace POCA.Web.Services.APIs
 {
     public class QuestoesAPI
     {
