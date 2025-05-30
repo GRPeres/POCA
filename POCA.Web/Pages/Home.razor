@@ -1,11 +1,29 @@
 ﻿@page "/"
-@inject UserSessionService userSession
+@inject UserSessionService UserSession
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-@if (userSession.IsLoggedIn)
+@if (UserSession.IsLoggedIn)
 {
-	<p> hi!</p>
+    <p> hi!</p>
+}
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
 }
