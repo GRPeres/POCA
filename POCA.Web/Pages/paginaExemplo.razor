@@ -4,25 +4,30 @@
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 
-<h3>Pagína de Exemplo</h3>
+<h2>Pagína de Exemplo</h2>
 
 <!--
 	Esse documento serve para ser um exemplo para ajudar em futuras páginas
 -->
-
+@if (teste)
+{
+    <MudText>tseste</MudText>
+}
 @if (UserSession.IsLoggedIn)
 {
-	<h3>Logado</h3>
+    <MudText>Você já está logado</MudText>
 }
 else
 {
-	<h3>Loge imediatamente</h3>
-	<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="Voltar">Voltar</MudButton>
+    <MudText>Você já não está logado</MudText>
 }
-
 @code {
-	private void Voltar()
-	{
-		NavigationManager.NavigateTo("/");
-	}
+    public bool teste;
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserSession.IsLoggedIn)
+        {
+            teste = true;
+        }
+    }
 }
