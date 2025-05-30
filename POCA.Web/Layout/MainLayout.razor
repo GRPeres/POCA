@@ -186,4 +186,19 @@
     {
         await UserSession.InitializeAsync();
     }
+
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
 }

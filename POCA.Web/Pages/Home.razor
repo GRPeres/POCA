@@ -1,7 +1,11 @@
 ﻿@page "/"
+@inject UserSessionService userSession
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+@if (userSession.IsLoggedIn)
+{
+	<p> hi!</p>
+}
