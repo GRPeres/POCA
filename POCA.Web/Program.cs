@@ -16,6 +16,7 @@ builder.Services.AddScoped<MateriaAPI>();
 builder.Services.AddScoped<ProfessorAPI>();
 builder.Services.AddScoped<QuestoesAPI>();
 builder.Services.AddScoped<PessoasAPI>();
+builder.Services.AddScoped<AtividadesAPI>();
 
 builder.Services.AddSingleton<AtividadeState>();
 
