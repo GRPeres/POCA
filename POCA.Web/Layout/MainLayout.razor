@@ -24,7 +24,7 @@
         </MudLink>
 
         <!-- Center - Main Navigation Dropdowns -->
-        @if (UserSession.IsLoggedIn)
+        @if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
         {
             <div class="d-flex align-center flex-grow-1 justify-center">
                 <!-- Questions Dropdown -->
@@ -106,18 +106,21 @@
             @if (UserSession.IsLoggedIn)
             {
                 <!-- Quick Create Dropdown -->
-                <MudMenu Direction="Direction.Left">
-                    <ActivatorContent>
-                        <MudIconButton Icon="@Icons.Material.Filled.Add"
-                        Color="Color.Primary"
-                        Class="mr-2" />
-                    </ActivatorContent>
-                    <ChildContent>
-                        <MudMenuItem Href="/adicionar-questao" Icon="@Icons.Material.Filled.Quiz">Nova Questão</MudMenuItem>
-                        <MudMenuItem Href="/nova-atividade" Icon="@Icons.Material.Filled.Assignment">Nova Atividade</MudMenuItem>
-                        <MudMenuItem Href="/adicionar-materia" Icon="@Icons.Material.Filled.School">Nova Disciplina</MudMenuItem>
-                    </ChildContent>
-                </MudMenu>
+                @if (UserSession.CurrentUser.IsProfessor)
+                {
+                    <MudMenu Direction="Direction.Left">
+                        <ActivatorContent>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add"
+                            Color="Color.Primary"
+                            Class="mr-2" />
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Href="/adicionar-questao" Icon="@Icons.Material.Filled.Quiz">Nova Questão</MudMenuItem>
+                            <MudMenuItem Href="/nova-atividade" Icon="@Icons.Material.Filled.Assignment">Nova Atividade</MudMenuItem>
+                            <MudMenuItem Href="/adicionar-materia" Icon="@Icons.Material.Filled.School">Nova Disciplina</MudMenuItem>
+                        </ChildContent>
+                    </MudMenu>
+                }
 
                 <!-- Dark Mode Toggle -->
                 <MudTooltip Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" Placement="Placement.Bottom">
