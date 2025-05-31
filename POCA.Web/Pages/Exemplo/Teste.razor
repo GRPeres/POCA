@@ -1,0 +1,23 @@
+﻿@page "/teste"
+@using MudBlazor
+@using POCA.Web
+
+<MudButton Variant="Variant.Filled" Color="@(_option == "A" ? Color.Primary : Color.Default)" OnClick="@(() => ChooseOption("A"))">
+    Opção A
+</MudButton>
+
+<MudButton Variant="Variant.Filled" Color="@(_option == "B" ? Color.Primary : Color.Default)" OnClick="@(() => ChooseOption("B"))">
+    Opção B
+</MudButton>
+
+<p>Opção escolhida: @_option</p>
+
+@code {
+    private string _option = "A";
+
+    void ChooseOption(string opt)
+    {
+        _option = opt;
+    }
+}
+
