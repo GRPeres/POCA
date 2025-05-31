@@ -1,0 +1,184 @@
+﻿@page "/cadastro"
+@using MudBlazor
+@using POCA.Web
+@using POCA.Web.Requests.Pessoa
+@using POCA.Web.Services
+@using POCA.Web.Requests.Aluno
+@using System.Security.Cryptography
+@using System.Text
+@using POCA.Web.Services.APIs
+@inject PessoasAPI PessoasAPI
+@inject AlunosAPI AlunosAPI
+@inject UserSessionService UserSession
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+
+<MudText>Cadastro</MudText>
+
+<MudText>@apiResponse</MudText>
+
+<MudTextField @bind-Value="Credenciais.nomeUsuario"
+              Label="Nome"
+              Variant="Variant.Filled"
+              Required
+              RequiredError="Por favor insira seu Nome" />
+
+<MudTextField @bind-Value="Credenciais.SenhaUsuario"
+              Label="Senha"
+              Variant="Variant.Filled"
+              InputType="InputType.Password"
+              Required
+              RequiredError="Por favor insira sua senha"
+              Class="mt-3" />
+
+@if (SenhaErrada)
+{
+    <MudAlert>As senhas não são iguais</MudAlert>
+}
+
+<MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
+              Label="confirmarSenha"
+              Variant="Variant.Filled"
+              InputType="InputType.Password"
+              Required
+              RequiredError="Por favor insira sua senha"
+              Class="mt-3" />
+
+<MudTextField @bind-Value="Credenciais.IdadeUsuario"
+              Label="Idade"
+              Variant="Variant.Filled"
+              InputType="InputType.Number"
+              Required
+              RequiredError="Por favor insira sua Idade"
+              Class="mt-3" />
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Primary"
+           Class="mt-4"
+           OnClick="EfetuarCadastro"
+           Disabled="@(!IsFormValid)">
+    Entrar
+</MudButton>
+
+@if (teste)
+{
+    <MudAlert>foi</MudAlert>
+}
+
+@code
+{
+    public string apiResponse = "";
+    private bool teste = false;
+    private bool SenhaErrada = false;
+
+    private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.nomeUsuario) &&
+                            !string.IsNullOrWhiteSpace(Credenciais.SenhaUsuario) &&
+                            !string.IsNullOrWhiteSpace(Credenciais.confirmarSenhaUsuario) &&
+                            !int.IsNegative(Credenciais.IdadeUsuario) &&
+                            Credenciais.IdadeUsuario >= 1;
+
+    private CadastroModel Credenciais = new();
+
+    // Obrigatorio para usar o UserSession
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
+
+    // Para o cadastro
+
+    private class CadastroModel
+    {
+        public string nomeUsuario { get; set; } = string.Empty;
+        public string SenhaUsuario { get; set; } = string.Empty;
+        public string confirmarSenhaUsuario { get; set; } = string.Empty;
+        public int IdadeUsuario { get; set; } = 0;
+        public bool isProfessorUsuario { get; set; } = false;
+    }
+
+    public async Task EfetuarCadastro()
+    {
+        if (Credenciais.SenhaUsuario == Credenciais.confirmarSenhaUsuario)
+        {
+            teste = true;
+            SenhaErrada = false;
+            await TestCreateAluno();
+        }
+        else
+        {
+            SenhaErrada = true;
+        }
+    }
+
+    public void NavigateMain()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task TestCreateAluno()
+    {
+        try
+        {
+            // First create aluno
+            var alunoRequest = new AlunoCreateRequest(
+                NomeAluno: "Test User",
+                IdadeAluno: 25,
+                ProgressoAluno: 0,
+                ContatoAluno: "test@example.com"
+            );
+
+            var createdAluno = await AlunosAPI.AddAlunosAsync(alunoRequest);
+
+            if (createdAluno == null)
+            {
+                apiResponse = "Failed to create aluno";
+                return;
+            }
+
+            // Then create pessoa account for this aluno
+            var pessoaRequest = new PessoaCreateRequest(
+                LoginPessoa: Credenciais.nomeUsuario,
+                SenhaPessoa: HashPassword(Credenciais.SenhaUsuario),
+                IsProfessor: false,
+                IdAluno: createdAluno.IdAluno
+            );
+
+            var createdPessoa = await PessoasAPI.CreatePessoaAsync(pessoaRequest);
+
+            apiResponse = $"Created aluno and pessoa accounts:\n" +
+                         $"Aluno: {FormatJsonResponse(createdAluno)}\n" +
+                         $"Pessoa: {FormatJsonResponse(createdPessoa)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private string HashPassword(string password)
+    {
+        var pepper = Configuration["Security:Pepper"] ?? string.Empty;
+        using var sha256 = SHA256.Create();
+        byte[] hashedBytes = sha256.ComputeHash(
+            Encoding.UTF8.GetBytes(password + pepper));
+        return Convert.ToBase64String(hashedBytes);
+    }
+
+    private string FormatJsonResponse(object obj)
+    {
+        return JsonSerializer.Serialize(obj, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+    }
+}

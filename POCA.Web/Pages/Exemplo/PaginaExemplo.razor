@@ -1,4 +1,4 @@
-﻿@page "/aluno"
+﻿@page "/pag-exemplo"
 @using MudBlazor
 @using POCA.Web
 @inject UserSessionService UserSession
@@ -7,9 +7,14 @@
 <h2>Pagína de Exemplo</h2>
 
 <!--
-    Esse documento serve para ser um exemplo para ajudar em futuras páginas
+	Esse documento serve para ser um exemplo para ajudar em futuras páginas
 -->
-@if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
+
+@if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
+{
+    <MudText>Você já está logado como professor</MudText>
+}
+else if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
 {
     <MudText>Você já está logado como aluno</MudText>
 }
@@ -18,12 +23,17 @@ else
     <MudText>Você já não está logado</MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
 }
+
 @code
 {
     // Obrigatorio para usar o UserSession
     protected override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
+        if (!UserSession.IsLoggedIn)
+        {
+            NavigateLogin();
+        }
     }
 
     private void HandleUserSessionChanged()
@@ -39,5 +49,4 @@ else
     {
         NavigationManager.NavigateTo("/login");
     }
-
 }
