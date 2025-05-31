@@ -1,4 +1,4 @@
-﻿namespace POCA.Web.Response
+﻿namespace POCA.Web.Response.Login
 {
     public record PessoaAuthResponse(
         int IdPessoa,

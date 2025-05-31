@@ -6,6 +6,7 @@ using MudBlazor.Services;
 using POCA.Web;
 using POCA.Web.Services;
 using POCA.Web.Services.APIs;
+using POCA.Web.Services.N_Sei_Nomear;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

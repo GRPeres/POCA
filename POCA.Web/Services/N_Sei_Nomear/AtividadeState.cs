@@ -1,6 +1,6 @@
 using POCA.Web.Pages.Questoes;
 
-namespace POCA.Web.Services
+namespace POCA.Web.Services.N_Sei_Nomear
 {
     public class AtividadeState
     {

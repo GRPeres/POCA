@@ -3,7 +3,6 @@
 @using POCA.Web
 @using POCA.Web.Requests.Pessoa
 @using POCA.Web.Services
-@using POCA.Web.Utils
 @using System.Security.Cryptography
 @using System.Text
 @inject PessoasAPI PessoasAPI
@@ -42,6 +41,14 @@
                Disabled="@(!IsFormValid)">
         Entrar
     </MudButton>
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Class="mt-4"
+               OnClick="navigateCadastro">
+        Criar conta
+    </MudButton>
+
 }
 else
 {
@@ -49,7 +56,7 @@ else
     <MudButton Variant="Variant.Filled"
                Color="Color.Primary"
                Class="mt-4"
-               OnClick="Voltar">
+               OnClick="navigateMain">
         Voltar
     </MudButton>
 }
@@ -61,6 +68,20 @@ else
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.Login) &&
                               !string.IsNullOrWhiteSpace(Credenciais.Senha);
+
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+
+    }
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
 
     private class LoginModel
     {
@@ -117,8 +138,13 @@ else
         }
     }
 
-    private void Voltar()
+    private void navigateMain()
     {
         NavigationManager.NavigateTo("/");
+    }
+
+    private void navigateCadastro()
+    {
+        NavigationManager.NavigateTo("/cadastro");
     }
 }

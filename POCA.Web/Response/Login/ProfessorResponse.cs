@@ -1,4 +1,5 @@
-﻿public record ProfessorResponse(
+﻿// POCA.Web.Responses.ProfessorResponse
+public record ProfessorResponse(
     int IdProfessor,
     string NomeProfessor,
     string MateriaProfessor,

@@ -12,57 +12,88 @@
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 @inject IConfiguration Configuration
+@inject ISnackbar Snackbar
 
 <MudText>Cadastro</MudText>
-
-<MudText>@apiResponse</MudText>
-
-<MudTextField @bind-Value="Credenciais.nomeUsuario"
-              Label="Nome"
-              Variant="Variant.Filled"
-              Required
-              RequiredError="Por favor insira seu Nome" />
-
-<MudTextField @bind-Value="Credenciais.SenhaUsuario"
-              Label="Senha"
-              Variant="Variant.Filled"
-              InputType="InputType.Password"
-              Required
-              RequiredError="Por favor insira sua senha"
-              Class="mt-3" />
-
-@if (SenhaErrada)
+@if (!UserSession.IsLoggedIn)
 {
-    <MudAlert>As senhas não são iguais</MudAlert>
+    @if (deuErro)
+    {
+        <MudAlert>@apiResponse</MudAlert>
+    }
+
+    <MudTextField @bind-Value="Credenciais.LoginUsuario"
+                  Label="Login"
+                  Variant="Variant.Filled"
+                  Required
+                  RequiredError="Coloque um Nome" />
+
+    <MudTextField @bind-Value="Credenciais.nomeUsuario"
+                  Label="Nome"
+                  Variant="Variant.Filled"
+                  Required
+                  RequiredError="Coloque seu Nome" />
+
+    <MudTextField @bind-Value="Credenciais.ContatoUsuario"
+                  Label="Contato"
+                  Variant="Variant.Filled"
+                  InputType="InputType.Email"
+                  Required
+                  RequiredError="Coloque seu email"
+                  Class="mt-3" />
+
+    <MudTextField @bind-Value="Credenciais.SenhaUsuario"
+                  Label="Senha"
+                  Variant="Variant.Filled"
+                  InputType="InputType.Password"
+                  Required
+                  RequiredError="Coloque sua senha"
+                  Class="mt-3" />
+
+    @if (SenhaErrada)
+    {
+        <MudAlert>As senhas não são iguais</MudAlert>
+    }
+
+    <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
+                  Label="ConfirmarSenha"
+                  Variant="Variant.Filled"
+                  InputType="InputType.Password"
+                  Required
+                  RequiredError="Confirme a senha"
+                  Class="mt-3" />
+
+    <MudTextField @bind-Value="Credenciais.IdadeUsuario"
+                  Label="Idade"
+                  Variant="Variant.Filled"
+                  InputType="InputType.Number"
+                  Required
+                  RequiredError="Coloque sua Idade"
+                  Class="mt-3" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Class="mt-4"
+               OnClick="EfetuarCadastro"
+               Disabled="@(!IsFormValid)">
+        Entrar
+    </MudButton>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Class="mt-4"
+               OnClick="NavigateLogin">
+        Logar
+    </MudButton>
+
+    @if (teste)
+    {
+        <MudAlert>foi</MudAlert>
+    }
 }
-
-<MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
-              Label="confirmarSenha"
-              Variant="Variant.Filled"
-              InputType="InputType.Password"
-              Required
-              RequiredError="Por favor insira sua senha"
-              Class="mt-3" />
-
-<MudTextField @bind-Value="Credenciais.IdadeUsuario"
-              Label="Idade"
-              Variant="Variant.Filled"
-              InputType="InputType.Number"
-              Required
-              RequiredError="Por favor insira sua Idade"
-              Class="mt-3" />
-
-<MudButton Variant="Variant.Filled"
-           Color="Color.Primary"
-           Class="mt-4"
-           OnClick="EfetuarCadastro"
-           Disabled="@(!IsFormValid)">
-    Entrar
-</MudButton>
-
-@if (teste)
+else
 {
-    <MudAlert>foi</MudAlert>
+    <MudText>Você já está logado</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateMain">Voltar</MudButton>
 }
 
 @code
@@ -70,6 +101,7 @@
     public string apiResponse = "";
     private bool teste = false;
     private bool SenhaErrada = false;
+    private bool deuErro = false;
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.nomeUsuario) &&
                             !string.IsNullOrWhiteSpace(Credenciais.SenhaUsuario) &&
@@ -97,9 +129,21 @@
 
     // Para o cadastro
 
+    public void NavigateMain()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    public void NavigateLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+
     private class CadastroModel
     {
+        public string LoginUsuario { get; set; } = string.Empty;
         public string nomeUsuario { get; set; } = string.Empty;
+        public string ContatoUsuario { get; set; } = string.Empty;
         public string SenhaUsuario { get; set; } = string.Empty;
         public string confirmarSenhaUsuario { get; set; } = string.Empty;
         public int IdadeUsuario { get; set; } = 0;
@@ -110,19 +154,15 @@
     {
         if (Credenciais.SenhaUsuario == Credenciais.confirmarSenhaUsuario)
         {
-            teste = true;
-            SenhaErrada = false;
             await TestCreateAluno();
+            teste = true;
+
+            await  EfetuarLogin();
         }
         else
         {
             SenhaErrada = true;
         }
-    }
-
-    public void NavigateMain()
-    {
-        NavigationManager.NavigateTo("/");
     }
 
     private async Task TestCreateAluno()
@@ -131,10 +171,10 @@
         {
             // First create aluno
             var alunoRequest = new AlunoCreateRequest(
-                NomeAluno: "Test User",
-                IdadeAluno: 25,
+                NomeAluno: Credenciais.nomeUsuario,
+                IdadeAluno: Credenciais.IdadeUsuario,
                 ProgressoAluno: 0,
-                ContatoAluno: "test@example.com"
+                ContatoAluno: Credenciais.ContatoUsuario
             );
 
             var createdAluno = await AlunosAPI.AddAlunosAsync(alunoRequest);
@@ -161,6 +201,7 @@
         }
         catch (Exception ex)
         {
+            deuErro = true;
             apiResponse = $"Error: {ex.Message}";
         }
     }
@@ -180,5 +221,35 @@
             {
                 WriteIndented = true
             });
+    }
+
+    private async Task EfetuarLogin()
+    {
+        try
+        {
+            // Hash the password before sending
+            var hashedPassword = HashPassword(Credenciais.SenhaUsuario);
+
+            var authResponse = await PessoasAPI.LoginAsync(new PessoaLoginRequest(
+                Login: Credenciais.LoginUsuario,
+                Senha: hashedPassword
+            ));
+
+            if (authResponse != null)
+            {
+                await UserSession.Login(authResponse);
+                Snackbar.Add("Cadastro Bem sucessido", Severity.Success);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                apiResponse = "Credenciais inválidas";
+            }
+        }
+        catch (Exception ex)
+        {
+            deuErro = true;
+            apiResponse = $"Erro durante o login: {ex.Message}";
+        }
     }
 }

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Componentes\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 
   <ItemGroup>

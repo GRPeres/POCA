@@ -1,7 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System.Security.Claims;
 using System.Text.Json;
-using POCA.Web.Response;
+using POCA.Web.Response.Login;
 
 public class UserSessionService
 {
