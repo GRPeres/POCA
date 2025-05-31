@@ -187,7 +187,7 @@ else
 
             // Then create pessoa account for this aluno
             var pessoaRequest = new PessoaCreateRequest(
-                LoginPessoa: Credenciais.nomeUsuario,
+                LoginPessoa: Credenciais.LoginUsuario,
                 SenhaPessoa: HashPassword(Credenciais.SenhaUsuario),
                 IsProfessor: false,
                 IdAluno: createdAluno.IdAluno
