@@ -1,9 +1,8 @@
-﻿// POCA.Web.Responses.ProfessorResponse
-public record ProfessorResponse(
+﻿public record ProfessorResponse(
     int IdProfessor,
     string NomeProfessor,
     string MateriaProfessor,
     string ContatoProfessor,
-    string LoginProfessor,
-    string SenhaProfessor
+    IEnumerable<int>? IdsMaterias = null,
+    IEnumerable<int>? IdsPessoas = null
 );

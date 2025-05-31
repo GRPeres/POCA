@@ -1,5 +1,4 @@
-﻿public record ProfessorEditRequest(
-    int IdProfessor,
+﻿public record ProfessorCreateRequest(
     string NomeProfessor,
     string MateriaProfessor,
     string ContatoProfessor

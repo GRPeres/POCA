@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Json;
+using POCA.Web.Requests;
+using POCA.Web.Response;
 
 namespace POCA.Web.Services.APIs
 {
@@ -8,32 +10,80 @@ namespace POCA.Web.Services.APIs
 
         public ProfessorAPI(IHttpClientFactory factory)
         {
-            _httpClient = factory.CreateClient("API"); // Using the same named client
+            _httpClient = factory.CreateClient("API");
         }
 
-        public async Task<ICollection<ProfessorResponse>?> GetProfessoresAsync()
+        public async Task<ICollection<ProfessorResponse>?> GetProfessoresAsync(CancellationToken cancellationToken = default)
         {
-            return await _httpClient.GetFromJsonAsync<ICollection<ProfessorResponse>>("professores");
+            return await _httpClient.GetFromJsonAsync<ICollection<ProfessorResponse>>("professores", cancellationToken);
         }
 
-        public async Task<ProfessorResponse?> GetProfessorAsync(int idProfessor)
+        public async Task<ProfessorResponse?> GetProfessorAsync(int idProfessor, CancellationToken cancellationToken = default)
         {
-            return await _httpClient.GetFromJsonAsync<ProfessorResponse>($"professores/{idProfessor}");
+            return await _httpClient.GetFromJsonAsync<ProfessorResponse>($"professores/{idProfessor}", cancellationToken);
         }
 
-        public async Task AddProfessorAsync(ProfessorRequest professor)
+        public async Task<ProfessorResponse?> AddProfessorAsync(ProfessorCreateRequest professor, CancellationToken cancellationToken = default)
         {
-            await _httpClient.PostAsJsonAsync("professores", professor);
+            var response = await _httpClient.PostAsJsonAsync("professores", professor, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ProfessorResponse>(cancellationToken: cancellationToken);
+            }
+
+            // Handle error cases
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException($"Failed to add professor. Status: {response.StatusCode}. Message: {errorContent}");
         }
 
-        public async Task UpdateProfessorAsync(ProfessorEditRequest professor)
+        public async Task UpdateProfessorAsync(ProfessorEditRequest professor, CancellationToken cancellationToken = default)
         {
-            await _httpClient.PutAsJsonAsync($"professores/{professor.IdProfessor}", professor);
+            var response = await _httpClient.PutAsJsonAsync($"professores/{professor.IdProfessor}", professor, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException($"Failed to update professor. Status: {response.StatusCode}. Message: {errorContent}");
+            }
         }
 
-        public async Task DeleteProfessorAsync(int idProfessor)
+        public async Task DeleteProfessorAsync(int idProfessor, CancellationToken cancellationToken = default)
         {
-            await _httpClient.DeleteAsync($"professores/{idProfessor}");
+            var response = await _httpClient.DeleteAsync($"professores/{idProfessor}", cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException($"Failed to delete professor. Status: {response.StatusCode}. Message: {errorContent}");
+            }
+        }
+
+        public async Task AddMateriaToProfessorAsync(int idProfessor, int idMateria, CancellationToken cancellationToken = default)
+        {
+            var response = await _httpClient.PostAsync(
+                $"professores/{idProfessor}/materias/{idMateria}",
+                null,
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException($"Failed to add materia to professor. Status: {response.StatusCode}. Message: {errorContent}");
+            }
+        }
+
+        public async Task RemoveMateriaFromProfessorAsync(int idProfessor, int idMateria, CancellationToken cancellationToken = default)
+        {
+            var response = await _httpClient.DeleteAsync(
+                $"professores/{idProfessor}/materias/{idMateria}",
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException($"Failed to remove materia from professor. Status: {response.StatusCode}. Message: {errorContent}");
+            }
         }
     }
 }
