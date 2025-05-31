@@ -9,7 +9,11 @@
 <!--
     Esse documento serve para ser um exemplo para ajudar em futuras páginas
 -->
-@if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
+@if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
+{
+    <MudText>Você já está logado como professor</MudText>
+}
+else if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
 {
     <MudText>Você já está logado como aluno</MudText>
 }

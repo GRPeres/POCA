@@ -1,0 +1,179 @@
+﻿@page "/test-professor-api"
+@using POCA.Web.Requests.Pessoa
+@using POCA.Web.Services
+@using POCA.Web.Requests
+@using System.Security.Cryptography
+@using System.Text
+@using POCA.Web.Services.APIs
+@inject PessoasAPI PessoasAPI
+@inject ProfessorAPI ProfessorAPI
+@inject UserSessionService UserSession
+@inject IConfiguration Configuration
+
+<h3>API Login Test</h3>
+
+<div class="mb-3">
+    <button @onclick="TestGetAllProfessores" class="btn btn-success me-2">Test GET All Professores</button>
+    <button @onclick="TestCreateProfessor" class="btn btn-success me-2">Test Create Professor</button>
+    <button @onclick="TestLogin" class="btn btn-success me-2">Test Login as Professor</button>
+    <button @onclick="TestGetCurrentUser" class="btn btn-success me-2">Test Get User</button>
+    <button @onclick="TestLogout" class="btn btn-danger">Test Logout</button>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        API Response
+    </div>
+    <div class="card-body">
+        <pre>@apiResponse</pre>
+    </div>
+</div>
+
+@code {
+    private string apiResponse = "Click buttons to test API endpoints";
+    private readonly int testProfessorId = 1; // Test ID to use
+    private readonly string testLogin = "testprofessor";
+    private readonly string testPassword = "testprofessor123";
+
+    private string HashPassword(string password)
+    {
+        var pepper = Configuration["Security:Pepper"] ?? string.Empty;
+        using var sha256 = SHA256.Create();
+        byte[] hashedBytes = sha256.ComputeHash(
+            Encoding.UTF8.GetBytes(password + pepper));
+        return Convert.ToBase64String(hashedBytes);
+    }
+
+    private async Task TestGetAllProfessores()
+    {
+        try
+        {
+            var professores = await ProfessorAPI.GetProfessoresAsync();
+            apiResponse = FormatJsonResponse(professores);
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestCreateProfessor()
+    {
+        try
+        {
+            // First create professor
+            var professorRequest = new ProfessorCreateRequest(
+                NomeProfessor: "Test User",
+                MateriaProfessor: "teste",
+                ContatoProfessor: "test@example.com"
+            );
+
+            var createdProfessor = await ProfessorAPI.AddProfessorAsync(professorRequest);
+
+            if (createdProfessor == null)
+            {
+                apiResponse = "Failed to create aluno";
+                return;
+            }
+
+            // Then create pessoa account for this aluno
+            var pessoaRequest = new PessoaCreateRequest(
+                LoginPessoa: testLogin,
+                SenhaPessoa: HashPassword(testPassword),
+                IsProfessor: true,
+                IdProfessor: createdProfessor.IdProfessor
+            );
+
+            var createdPessoa = await PessoasAPI.CreatePessoaAsync(pessoaRequest);
+
+            if (createdProfessor == null)
+            {
+                apiResponse = "Failed to create pessoa";
+                return;
+            }
+
+            apiResponse = $"Created aluno and pessoa accounts:\n" +
+                         $"Professor: {FormatJsonResponse(createdProfessor)}\n" +
+                         $"Pessoa: {FormatJsonResponse(createdPessoa)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestLogin()
+    {
+        try
+        {
+            var hashedPassword = HashPassword(testPassword);
+            var authResponse = await PessoasAPI.LoginAsync(new PessoaLoginRequest(
+                Login: testLogin,
+                Senha: hashedPassword
+            ));
+
+            if (authResponse != null)
+            {
+                await UserSession.Login(authResponse);
+                apiResponse = $"Login successful!\n" +
+                             $"Token: {authResponse.Token}\n" +
+                             $"User Info: {FormatJsonResponse(authResponse)}";
+            }
+            else
+            {
+                apiResponse = "Login failed - invalid credentials";
+            }
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Login error: {ex.Message}";
+        }
+    }
+
+    private async Task TestGetCurrentUser()
+    {
+        try
+        {
+            if (UserSession.IsLoggedIn)
+            {
+                var userInfo = new
+                {
+                    CurrentUser = UserSession.CurrentUser,
+                    Token = UserSession.AuthToken,
+                    Claims = UserSession.GetClaimsPrincipal().Claims.Select(c => new { c.Type, c.Value })
+                };
+
+                apiResponse = $"Current User:\n{FormatJsonResponse(userInfo)}";
+            }
+            else
+            {
+                apiResponse = "No user currently logged in";
+            }
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestLogout()
+    {
+        try
+        {
+            await UserSession.Logout();
+            apiResponse = "Logout successful";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Logout error: {ex.Message}";
+        }
+    }
+
+    private string FormatJsonResponse(object obj)
+    {
+        return JsonSerializer.Serialize(obj, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+    }
+}
