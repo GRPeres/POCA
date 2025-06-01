@@ -177,6 +177,52 @@ namespace POCA.API.Endpoints
               .Produces(StatusCodes.Status200OK)
               .Produces(StatusCodes.Status400BadRequest)
               .Produces(StatusCodes.Status500InternalServerError);
+
+            // ASSOCIAR questão a uma atividade
+            group.MapPost("/{idQuestao}/atividades/{idAtividade}",
+                async ([FromServices] DbPocaContext context, int idQuestao, int idAtividade) =>
+                {
+                    var questao = await context.TbQuestoes
+                        .Include(q => q.TbAtividadesIdAtividades)
+                        .FirstOrDefaultAsync(q => q.IdQuestao == idQuestao);
+
+                    if (questao is null)
+                        return Results.NotFound("Questão não encontrada");
+
+                    var atividade = await context.TbAtividades.FindAsync(idAtividade);
+                    if (atividade is null)
+                        return Results.NotFound("Atividade não encontrada");
+
+                    if (!questao.TbAtividadesIdAtividades.Any(a => a.IdAtividade == idAtividade))
+                    {
+                        questao.TbAtividadesIdAtividades.Add(atividade);
+                        await context.SaveChangesAsync();
+                    }
+
+                    return Results.NoContent();
+                });
+
+            // DESASSOCIAR questão de uma atividade
+            group.MapDelete("/{idQuestao}/atividades/{idAtividade}",
+                async ([FromServices] DbPocaContext context, int idQuestao, int idAtividade) =>
+                {
+                    var questao = await context.TbQuestoes
+                        .Include(q => q.TbAtividadesIdAtividades)
+                        .FirstOrDefaultAsync(q => q.IdQuestao == idQuestao);
+
+                    if (questao is null)
+                        return Results.NotFound("Questão não encontrada");
+
+                    var atividade = questao.TbAtividadesIdAtividades
+                        .FirstOrDefault(a => a.IdAtividade == idAtividade);
+
+                    if (atividade is null)
+                        return Results.NotFound("Atividade não associada à questão");
+
+                    questao.TbAtividadesIdAtividades.Remove(atividade);
+                    await context.SaveChangesAsync();
+                    return Results.NoContent();
+                });
         }
     }
 }
