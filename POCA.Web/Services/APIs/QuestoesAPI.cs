@@ -67,5 +67,19 @@ namespace POCA.Web.Services.APIs
         {
             await _httpClient.DeleteAsync($"questoes/{idQuestao}");
         }
+
+        // Associa uma questão a uma atividade
+        public async Task<bool> AddAtividadeToQuestaoAsync(int idQuestao, int idAtividade)
+        {
+            var response = await _httpClient.PostAsync($"questoes/{idQuestao}/atividades/{idAtividade}", null);
+            return response.IsSuccessStatusCode;
+        }
+
+        // Remove a associação de uma questão com uma atividade
+        public async Task<bool> RemoveAtividadeFromQuestaoAsync(int idQuestao, int idAtividade)
+        {
+            var response = await _httpClient.DeleteAsync($"questoes/{idQuestao}/atividades/{idAtividade}");
+            return response.IsSuccessStatusCode;
+        }
     }
 }
