@@ -1,9 +1,12 @@
-﻿// POCA.Web.Requests.MateriaEditRequest
+﻿
 public record MateriaEditRequest(
     int IdMateria,
     int IdProfessorMateria,
-    int IdAlunoMateria
+    int IdAlunoMateria,
+    string? NomeMateria
 ) : MateriaRequest(
+
+    NomeMateria,
     IdProfessorMateria,
     IdAlunoMateria
 );

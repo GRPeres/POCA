@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using POCA.API.Requests.Materia;
 
 public record MateriaEditRequest(
-    [Required]int IdMateria,
+    [Required] int IdMateria,
     int IdProfessorMateria,
-    int IdAlunoMateria
+    int IdAlunoMateria,
+    string? NomeMateria
 ) : MateriaRequest(
     IdProfessorMateria,
-    IdAlunoMateria
+    IdAlunoMateria,
+    NomeMateria
 );

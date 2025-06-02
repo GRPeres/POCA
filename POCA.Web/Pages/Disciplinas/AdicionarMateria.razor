@@ -1,12 +1,13 @@
 ﻿@page "/adicionar-materia"
 @using POCA.Web.Services.APIs
+@using POCA.Web.Requests
 @inject MateriaAPI MateriaService
 @inject NavigationManager NavManager
 @inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
     <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-        <!-- Header with back button -->
+        <!-- Header -->
         <div class="d-flex align-center mb-4">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                            Color="Color.Primary"
@@ -17,25 +18,33 @@
         </div>
 
         <MudForm @ref="_form" @bind-IsValid="_isValid" @bind-Errors="_errors">
-            <!-- Teacher ID -->
+            <!-- Nome da Matéria -->
+            <MudTextField @bind-Value="materiaModelo.NomeMateria"
+                          Label="Nome da Matéria *"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="O nome da matéria é obrigatório"
+                          Class="mb-4" />
+
+            <!-- Professor ID -->
             <MudTextField @bind-Value="materiaModelo.IdProfessorMateria"
                           Label="ID do Professor *"
                           Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="O ID do professor é obrigatório"
                           HelperText="Insira o ID numérico do professor"
-                          Class="mb-4"
-                          InputType="InputType.Number" />
+                          InputType="InputType.Number"
+                          Class="mb-4" />
 
-            <!-- Student ID -->
+            <!-- Aluno ID -->
             <MudTextField @bind-Value="materiaModelo.IdAlunoMateria"
                           Label="ID do Aluno *"
                           Variant="Variant.Outlined"
                           Required="true"
                           RequiredError="O ID do aluno é obrigatório"
                           HelperText="Insira o ID numérico do aluno"
-                          Class="mb-4"
-                          InputType="InputType.Number" />
+                          InputType="InputType.Number"
+                          Class="mb-4" />
 
             <!-- Action Buttons -->
             <MudDivider Class="my-4" />
@@ -70,7 +79,6 @@
     private async Task HandleSubmit()
     {
         await _form.Validate();
-
         if (!_isValid) return;
 
         _isSubmitting = true;
@@ -78,13 +86,23 @@
         try
         {
             var materiaRequest = new MateriaRequest(
+                materiaModelo.NomeMateria,
                 materiaModelo.IdProfessorMateria,
                 materiaModelo.IdAlunoMateria
             );
 
-            await MateriaService.AddMateriaAsync(materiaRequest);
-            Snackbar.Add("Matéria adicionada com sucesso!", Severity.Success);
-            NavManager.NavigateTo("/materias");
+            var result = await MateriaService.AddMateriaAsync(materiaRequest);
+
+            if (result != null)
+            {
+                Snackbar.Add("Matéria adicionada com sucesso!", Severity.Success);
+                NavManager.NavigateTo("/materias");
+            }
+            else
+            {
+                Snackbar.Add("Erro ao adicionar matéria.", Severity.Error);
+                _isSubmitting = false;
+            }
         }
         catch (Exception ex)
         {
@@ -95,6 +113,7 @@
 
     public class MateriaModelo
     {
+        public string NomeMateria { get; set; } = string.Empty;
         public int IdProfessorMateria { get; set; }
         public int IdAlunoMateria { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using POCA.Web.Requests;
 
 namespace POCA.Web.Services.APIs
 {
@@ -13,65 +14,107 @@ namespace POCA.Web.Services.APIs
 
         public async Task<ICollection<MateriaResponse>?> GetMateriasAsync()
         {
-            return await _httpClient.GetFromJsonAsync<ICollection<MateriaResponse>>("materias");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<ICollection<MateriaResponse>>("materias");
+            }
+            catch (HttpRequestException)
+            {
+                // Handle error or log
+                return null;
+            }
         }
 
         public async Task<MateriaResponse?> GetMateriaAsync(int idMateria)
         {
-            return await _httpClient.GetFromJsonAsync<MateriaResponse>($"materias/{idMateria}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<MateriaResponse>($"materias/{idMateria}");
+            }
+            catch (HttpRequestException)
+            {
+                // Handle error or log
+                return null;
+            }
         }
 
-        public async Task AddMateriaAsync(MateriaRequest materia)
+        public async Task<MateriaResponse?> AddMateriaAsync(MateriaRequest request)
         {
-            await _httpClient.PostAsJsonAsync("materias", materia);
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("materias", request);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<MateriaResponse>();
+                }
+                return null;
+            }
+            catch (HttpRequestException)
+            {
+                // Handle error or log
+                return null;
+            }
         }
 
-        public async Task UpdateMateriaAsync(MateriaEditRequest materia)
+        public async Task<bool> UpdateMateriaAsync(MateriaEditRequest request)
         {
-            await _httpClient.PutAsJsonAsync($"materias/{materia.IdMateria}", materia);
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync($"materias/{request.IdMateria}", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException)
+            {
+                // Handle error or log
+                return false;
+            }
         }
 
-        public async Task DeleteMateriaAsync(int idMateria)
+        public async Task<bool> DeleteMateriaAsync(int idMateria)
         {
-            await _httpClient.DeleteAsync($"materias/{idMateria}");
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"materias/{idMateria}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException)
+            {
+                // Handle error or log
+                return false;
+            }
         }
 
-        // Associa um professor a uma matéria
+        // The relationship methods remain the same as they're still valid
         public async Task<bool> AddProfessorToMateriaAsync(int idMateria, int idProfessor)
         {
             var response = await _httpClient.PostAsync($"materias/{idMateria}/professores/{idProfessor}", null);
             return response.IsSuccessStatusCode;
         }
 
-        // Remove a associação de um professor com uma matéria
         public async Task<bool> RemoveProfessorFromMateriaAsync(int idMateria, int idProfessor)
         {
             var response = await _httpClient.DeleteAsync($"materias/{idMateria}/professores/{idProfessor}");
             return response.IsSuccessStatusCode;
         }
 
-        // Associa um aluno a uma matéria
         public async Task<bool> AddAlunoToMateriaAsync(int idMateria, int idAluno)
         {
             var response = await _httpClient.PostAsync($"materias/{idMateria}/alunos/{idAluno}", null);
             return response.IsSuccessStatusCode;
         }
 
-        // Remove a associação de um aluno com uma matéria
         public async Task<bool> RemoveAlunoFromMateriaAsync(int idMateria, int idAluno)
         {
             var response = await _httpClient.DeleteAsync($"materias/{idMateria}/alunos/{idAluno}");
             return response.IsSuccessStatusCode;
         }
 
-        // Associa uma atividade a uma matéria
         public async Task<bool> AddAtividadeToMateriaAsync(int idMateria, int idAtividade)
         {
             var response = await _httpClient.PostAsync($"materias/{idMateria}/atividades/{idAtividade}", null);
             return response.IsSuccessStatusCode;
         }
 
-        // Remove a associação de uma atividade com uma matéria
         public async Task<bool> RemoveAtividadeFromMateriaAsync(int idMateria, int idAtividade)
         {
             var response = await _httpClient.DeleteAsync($"materias/{idMateria}/atividades/{idAtividade}");

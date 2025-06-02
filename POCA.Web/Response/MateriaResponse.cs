@@ -1,6 +1,9 @@
-﻿// POCA.Web.Responses.MateriaResponse
+﻿using POCA.API.Responses;
+
 public record MateriaResponse(
     int IdMateria,
-    int IdProfessorMateria,
-    int IdAlunoMateria
+    string? NomeMateria,
+    IEnumerable<ProfessorResponse>? Professores,
+    IEnumerable<AlunoResponse>? Alunos,
+    IEnumerable<AtividadeResponse>? Atividades
 );

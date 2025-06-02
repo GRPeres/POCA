@@ -63,18 +63,12 @@
             <HeaderContent>
                 <MudTh>ID</MudTh>
                 <MudTh>Nome</MudTh>
-                <MudTh>Alunos</MudTh>
-                <MudTh>Atividades</MudTh>
-                <MudTh>Professores</MudTh>
                 <MudTh Style="width: 160px;">Ações</MudTh>
             </HeaderContent>
 
             <RowTemplate Context="materia">
                 <MudTd>@materia.IdMateria</MudTd>
                 <MudTd>@materia.NomeMateria</MudTd>
-                <MudTd>@materia.TotalAlunos</MudTd>
-                <MudTd>@materia.TotalAtividades</MudTd>
-                <MudTd>@materia.TotalProfessores</MudTd>
                 <MudTd>
                     <div class="d-flex">
                         <MudTooltip Text="Visualizar">
@@ -143,11 +137,12 @@
         try
         {
             var response = await MateriaAPI.GetMateriasAsync();
-            // _materias = response?.ToList() ?? new();
+            _materias = response?.ToList() ?? new List<MateriaResponse>();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Erro ao carregar matérias: {ex.Message}", Severity.Error);
+            _materias = new List<MateriaResponse>();
         }
         finally
         {
@@ -163,7 +158,7 @@
 
     private IEnumerable<MateriaResponse> FilteredMaterias => _materias
         .Where(m => string.IsNullOrWhiteSpace(_searchString) ||
-                    (m.NomeMateria?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false))
+                   (m.NomeMateria?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false))
         .ToList();
 
     private void ClearFilters()
@@ -183,7 +178,7 @@
         {
             await MateriaAPI.DeleteMateriaAsync(_materiaToDeleteId);
             Snackbar.Add("Matéria excluída com sucesso!", Severity.Success);
-            await LoadMaterias(); // Refresh the list after deletion
+            await LoadMaterias();
             await deleteDialog.CloseAsync();
         }
         catch (Exception ex)
@@ -191,14 +186,5 @@
             Snackbar.Add($"Erro ao excluir matéria: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
         }
-    }
-
-    public class MateriaResponse
-    {
-        public int IdMateria { get; set; }
-        public string? NomeMateria { get; set; }
-        public int TotalAlunos { get; set; }
-        public int TotalAtividades { get; set; }
-        public int TotalProfessores { get; set; }
     }
 }
