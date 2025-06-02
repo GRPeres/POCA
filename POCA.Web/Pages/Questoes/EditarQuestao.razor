@@ -83,7 +83,7 @@
                                    AnchorOrigin="Origin.BottomRight"
                                    FullWidth="true">
                             <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
-                            <MudSelectItem Value="@("Média")">Média</MudSelectItem>
+                            <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
                             <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
                         </MudSelect>
                     </MudItem>
@@ -135,10 +135,17 @@
     private bool _isSubmitting = false;
     private string[] _errors = Array.Empty<string>();
 
-    private QuestaoModelo questaoModelo;
+    private QuestaoModelo questaoModelo = new();
 
     protected override async Task OnInitializedAsync()
     {
+        if (!int.TryParse(IdQuestao, out _))
+        {
+            Snackbar.Add("ID da questão inválido", Severity.Error);
+            NavManager.NavigateTo("/questoes");
+            return;
+        }
+
         await LoadQuestion();
     }
 
@@ -160,6 +167,11 @@
                         TemaQuestao = questao.TemaQuestao
                     };
             }
+            else
+            {
+                Snackbar.Add("Questão não encontrada", Severity.Error);
+                NavManager.NavigateTo("/questoes");
+            }
         }
         catch (Exception ex)
         {
@@ -172,19 +184,24 @@
     {
         await _form.Validate();
 
-        if (!_isValid) return;
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Por favor, corrija os erros no formulário", Severity.Warning);
+            return;
+        }
 
         _isSubmitting = true;
+        StateHasChanged(); // Force UI update
 
         try
         {
             var request = new QuestaoEditRequest(
                 IdQuestao: int.Parse(IdQuestao),
                 EnunciadoQuestao: questaoModelo.EnunciadoQuestao,
-                RespostaCertaQuestao: questaoModelo.RespostaCertaQuestao,
-                RespostaErrada1Questao: questaoModelo.RespostaErrada1Questao,
-                RespostaErrada2Questao: questaoModelo.RespostaErrada2Questao,
-                RespostaErrada3Questao: questaoModelo.RespostaErrada3Questao,
+                RespostacertaQuestao: questaoModelo.RespostaCertaQuestao,
+                Respostaerrada1Questao: questaoModelo.RespostaErrada1Questao,
+                Respostaerrada2Questao: questaoModelo.RespostaErrada2Questao,
+                Respostaerrada3Questao: questaoModelo.RespostaErrada3Questao,
                 DificuldadeQuestao: questaoModelo.DificuldadeQuestao,
                 TemaQuestao: questaoModelo.TemaQuestao
             );
@@ -197,17 +214,18 @@
         {
             Snackbar.Add($"Erro ao atualizar questão: {ex.Message}", Severity.Error);
             _isSubmitting = false;
+            StateHasChanged(); // Force UI update
         }
     }
 
     public class QuestaoModelo
     {
-        public string EnunciadoQuestao { get; set; }
-        public string RespostaCertaQuestao { get; set; }
-        public string RespostaErrada1Questao { get; set; }
-        public string RespostaErrada2Questao { get; set; }
-        public string RespostaErrada3Questao { get; set; }
-        public string DificuldadeQuestao { get; set; }
-        public string TemaQuestao { get; set; }
+        public string EnunciadoQuestao { get; set; } = "";
+        public string RespostaCertaQuestao { get; set; } = "";
+        public string RespostaErrada1Questao { get; set; } = "";
+        public string RespostaErrada2Questao { get; set; } = "";
+        public string RespostaErrada3Questao { get; set; } = "";
+        public string DificuldadeQuestao { get; set; } = "Média";
+        public string TemaQuestao { get; set; } = "Teoria";
     }
 }

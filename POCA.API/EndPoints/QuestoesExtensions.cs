@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using POCA.API.Requests;
+using POCA.API.Requests.NewFolder;
 using POCA.API.Response;
 using POCA.API.Services;
 using POCA.Banco;
@@ -71,12 +71,33 @@ namespace POCA.API.Endpoints
             // DELETE question
             group.MapDelete("/{id}", async ([FromServices] DbPocaContext context, int id) =>
             {
-                var questao = await context.TbQuestoes.FindAsync(id);
+                // Include related activities when loading the question
+                var questao = await context.TbQuestoes
+                    .Include(q => q.TbAtividadesIdAtividades)
+                    .FirstOrDefaultAsync(q => q.IdQuestao == id);
+
                 if (questao is null) return Results.NotFound();
 
-                context.TbQuestoes.Remove(questao);
-                await context.SaveChangesAsync();
-                return Results.NoContent();
+                try
+                {
+                    // Remove all activity associations first
+                    foreach (var atividade in questao.TbAtividadesIdAtividades.ToList())
+                    {
+                        questao.TbAtividadesIdAtividades.Remove(atividade);
+                    }
+
+                    // Now delete the question
+                    context.TbQuestoes.Remove(questao);
+                    await context.SaveChangesAsync();
+
+                    return Results.NoContent();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Log the error details
+                    Console.WriteLine($"Error deleting question: {ex.InnerException?.Message}");
+                    return Results.Problem("Could not delete question due to database constraints");
+                }
             });
 
             //Cria Atividade de forma automatica

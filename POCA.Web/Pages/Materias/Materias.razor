@@ -1,19 +1,19 @@
-@page "/questoes"
+Ôªø@page "/materias"
 @using POCA.Web.Services.APIs
-@inject QuestoesAPI QuestoesAPI
+@inject MateriaAPI MateriaAPI
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
     <!-- Page Header with Action Button -->
     <div class="d-flex align-center justify-space-between mb-6">
-        <MudText Typo="Typo.h4" Class="mb-0">Lista de Questıes</MudText>
+        <MudText Typo="Typo.h4" Class="mb-0">Lista de Mat√©rias</MudText>
         <MudButton Color="Color.Primary"
                    Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Add"
-                   Href="/adicionar-questao"
+                   Href="/adicionar-materia"
                    Size="Size.Small">
-            Nova Quest„o
+            Nova Mat√©ria
         </MudButton>
     </div>
 
@@ -21,7 +21,7 @@
     <MudPaper Class="pa-4 mb-4" Elevation="1">
         <div class="d-flex align-center">
             <MudTextField @bind-Value="_searchString"
-                          Placeholder="Pesquisar questıes..."
+                          Placeholder="Pesquisar mat√©rias..."
                           Variant="Variant.Outlined"
                           AdornmentIcon="@Icons.Material.Filled.Search"
                           Adornment="Adornment.Start"
@@ -29,29 +29,7 @@
                           Class="mr-4"
                           Style="flex-grow: 1;" />
 
-            <MudSelect @bind-Value="_selectedDifficulty"
-                       Label="Dificuldade"
-                       Variant="Variant.Outlined"
-                       AnchorOrigin="Origin.BottomRight"
-                       Class="mr-4"
-                       Style="min-width: 150px;">
-                <MudSelectItem Value="@( "F·cil" )">F·cil</MudSelectItem>
-                <MudSelectItem Value="@( "MÈdio" )">MÈdio</MudSelectItem>
-                <MudSelectItem Value="@( "DifÌcil" )">DifÌcil</MudSelectItem>
-            </MudSelect>
-
-            <MudSelect @bind-Value="_selectedTopic"
-                       Label="Assunto"
-                       Variant="Variant.Outlined"
-                       AnchorOrigin="Origin.BottomRight"
-                       Style="min-width: 150px;">
-                @foreach (var topic in _uniqueTopics)
-                {
-                    <MudSelectItem Value="@topic">@topic</MudSelectItem>
-                }
-            </MudSelect>
-
-            <MudTooltip Text="Limpar todos filtros">
+            <MudTooltip Text="Limpar filtros">
                 <MudIconButton Icon="@Icons.Material.Filled.Clear"
                                Color="Color.Primary"
                                OnClick="ClearFilters"
@@ -60,9 +38,9 @@
         </div>
     </MudPaper>
 
-    <!-- Questions Table -->
+    <!-- Materias Table -->
     <MudPaper Elevation="2" Class="overflow-hidden">
-        <MudTable Items="@FilteredQuestions"
+        <MudTable Items="@FilteredMaterias"
                   Dense="true"
                   Hover="true"
                   Striped="false"
@@ -70,7 +48,7 @@
                   Loading="@_isLoading">
             <ToolBarContent>
                 <MudText Typo="Typo.body2" Class="ml-2">
-                    Total: @FilteredQuestions.Count() questıes
+                    Total: @FilteredMaterias.Count() mat√©rias
                 </MudText>
                 <MudSpacer />
                 <MudButton Variant="Variant.Text"
@@ -83,36 +61,34 @@
             </ToolBarContent>
 
             <HeaderContent>
-                <MudTh>Enunciado</MudTh>
-                <MudTh>Assunto</MudTh>
-                <MudTh>Dificuldade</MudTh>
-                <MudTh Style="width: 160px;">AÁıes</MudTh>
+                <MudTh>ID</MudTh>
+                <MudTh>Nome</MudTh>
+                <MudTh>Alunos</MudTh>
+                <MudTh>Atividades</MudTh>
+                <MudTh>Professores</MudTh>
+                <MudTh Style="width: 160px;">A√ß√µes</MudTh>
             </HeaderContent>
 
-            <RowTemplate Context="questao">
-                <MudTd Style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    @questao.EnunciadoQuestao
-                </MudTd>
-                <MudTd>@questao.TemaQuestao</MudTd>
-                <MudTd>
-                    <MudChip T="string" Text="@questao.DificuldadeQuestao"
-                             Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
-                             Size="Size.Small" />
-                </MudTd>
+            <RowTemplate Context="materia">
+                <MudTd>@materia.IdMateria</MudTd>
+                <MudTd>@materia.NomeMateria</MudTd>
+                <MudTd>@materia.TotalAlunos</MudTd>
+                <MudTd>@materia.TotalAtividades</MudTd>
+                <MudTd>@materia.TotalProfessores</MudTd>
                 <MudTd>
                     <div class="d-flex">
                         <MudTooltip Text="Visualizar">
                             <MudIconButton Icon="@Icons.Material.Filled.Visibility"
                                            Color="Color.Primary"
                                            Size="Size.Small"
-                                           Href="@($"/questao/{questao.IdQuestao}")" />
+                                           Href="@($"/materia/{materia.IdMateria}")" />
                         </MudTooltip>
 
                         <MudTooltip Text="Editar">
                             <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                            Color="Color.Secondary"
                                            Size="Size.Small"
-                                           Href="@($"/editar-questao/{questao.IdQuestao}")"
+                                           Href="@($"/editar-materia/{materia.IdMateria}")"
                                            Class="ml-2" />
                         </MudTooltip>
 
@@ -120,7 +96,7 @@
                             <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                            Color="Color.Error"
                                            Size="Size.Small"
-                                           OnClick="@(() => OpenDeleteDialog(questao.IdQuestao))"
+                                           OnClick="@(() => OpenDeleteDialog(materia.IdMateria))"
                                            Class="ml-2" />
                         </MudTooltip>
                     </div>
@@ -137,11 +113,11 @@
 <!-- Delete Confirmation Dialog -->
 <MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
     <TitleContent>
-        <MudText Typo="Typo.h6">Confirmar Exclus„o</MudText>
+        <MudText Typo="Typo.h6">Confirmar Exclus√£o</MudText>
     </TitleContent>
     <DialogContent>
-        <MudText>Deseja realmente excluir esta quest„o?</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Error">Esta aÁ„o n„o pode ser desfeita.</MudText>
+        <MudText>Deseja realmente excluir esta mat√©ria?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">Esta a√ß√£o n√£o pode ser desfeita.</MudText>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
@@ -150,32 +126,28 @@
 </MudDialog>
 
 @code {
-    private List<QuestaoResponse> _questoes = new();
+    private List<MateriaResponse> _materias = new();
     private bool _isLoading = true;
     private string _searchString = "";
-    private string _selectedDifficulty = "";
-    private string _selectedTopic = "";
-    private List<string> _uniqueTopics = new();
     private MudDialog deleteDialog;
-    private int _questionToDeleteId;
+    private int _materiaToDeleteId;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadQuestions();
+        await LoadMaterias();
     }
 
-    private async Task LoadQuestions()
+    private async Task LoadMaterias()
     {
         _isLoading = true;
         try
         {
-            var response = await QuestoesAPI.GetQuestoesAsync();
-            _questoes = response?.ToList() ?? new();
-            _uniqueTopics = _questoes.Select(q => q.TemaQuestao).Distinct().ToList();
+            var response = await MateriaAPI.GetMateriasAsync();
+            // _materias = response?.ToList() ?? new();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar questıes: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Erro ao carregar mat√©rias: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -186,40 +158,22 @@
 
     private async Task RefreshData()
     {
-        await LoadQuestions();
+        await LoadMaterias();
     }
 
-    private IEnumerable<QuestaoResponse> FilteredQuestions => _questoes
-        .Where(q => string.IsNullOrWhiteSpace(_searchString) ||
-                    q.EnunciadoQuestao.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
-                    q.TemaQuestao.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        .Where(q => string.IsNullOrEmpty(_selectedDifficulty) ||
-                    q.DificuldadeQuestao == _selectedDifficulty)
-        .Where(q => string.IsNullOrEmpty(_selectedTopic) ||
-                    q.TemaQuestao == _selectedTopic)
+    private IEnumerable<MateriaResponse> FilteredMaterias => _materias
+        .Where(m => string.IsNullOrWhiteSpace(_searchString) ||
+                    (m.NomeMateria?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false))
         .ToList();
-
-    private Color GetDifficultyColor(string difficulty)
-    {
-        return difficulty switch
-        {
-            "F·cil" => Color.Success,
-            "MÈdio" => Color.Warning,
-            "DifÌcil" => Color.Error,
-            _ => Color.Default
-        };
-    }
 
     private void ClearFilters()
     {
         _searchString = "";
-        _selectedDifficulty = "";
-        _selectedTopic = "";
     }
 
-    private void OpenDeleteDialog(int questionId)
+    private void OpenDeleteDialog(int materiaId)
     {
-        _questionToDeleteId = questionId;
+        _materiaToDeleteId = materiaId;
         deleteDialog.ShowAsync();
     }
 
@@ -227,15 +181,24 @@
     {
         try
         {
-            await QuestoesAPI.DeleteQuestaoAsync(_questionToDeleteId);
-            Snackbar.Add("Quest„o excluÌda com sucesso!", Severity.Success);
-            await LoadQuestions(); // Refresh the list after deletion
+            await MateriaAPI.DeleteMateriaAsync(_materiaToDeleteId);
+            Snackbar.Add("Mat√©ria exclu√≠da com sucesso!", Severity.Success);
+            await LoadMaterias(); // Refresh the list after deletion
             await deleteDialog.CloseAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao excluir quest„o: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Erro ao excluir mat√©ria: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
         }
+    }
+
+    public class MateriaResponse
+    {
+        public int IdMateria { get; set; }
+        public string? NomeMateria { get; set; }
+        public int TotalAlunos { get; set; }
+        public int TotalAtividades { get; set; }
+        public int TotalProfessores { get; set; }
     }
 }

@@ -1,19 +1,11 @@
-﻿// POCA.Web.Requests.QuestaoEditRequest
+﻿// Frontend QuestaoEditRequest
 public record QuestaoEditRequest(
     int IdQuestao,
     string EnunciadoQuestao,
-    string RespostaCertaQuestao,
-    string RespostaErrada1Questao,
-    string RespostaErrada2Questao,
-    string RespostaErrada3Questao,
+    string RespostacertaQuestao,  // Changed to match backend
+    string Respostaerrada1Questao, // Changed to match backend
+    string Respostaerrada2Questao, // Changed to match backend
+    string Respostaerrada3Questao, // Changed to match backend
     string DificuldadeQuestao,
     string TemaQuestao
-) : QuestaoRequest(
-    EnunciadoQuestao,
-    RespostaCertaQuestao,
-    RespostaErrada1Questao,
-    RespostaErrada2Questao,
-    RespostaErrada3Questao,
-    DificuldadeQuestao,
-    TemaQuestao
 );

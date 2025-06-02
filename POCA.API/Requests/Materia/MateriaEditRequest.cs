@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using POCA.API.Requests;
+using POCA.API.Requests.Materia;
 
 public record MateriaEditRequest(
     [Required]int IdMateria,

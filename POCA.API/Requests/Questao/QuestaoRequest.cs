@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace POCA.API.Requests;
+namespace POCA.API.Requests.NewFolder;
 
 public record QuestaoRequest(
     [Required] string EnunciadoQuestao,
