@@ -41,7 +41,7 @@
     public bool paginicial = false;
 
     // Obrigatorio para usar o UserSession
-    protected  override void OnInitialized()
+    protected override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
 
