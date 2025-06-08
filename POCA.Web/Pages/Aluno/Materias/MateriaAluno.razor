@@ -1,0 +1,56 @@
+﻿@page "/materias-alunos"
+
+@using MudBlazor
+@using POCA.Web
+@inject UserSessionService UserSession
+@inject NavigationManager NavigationManager
+
+<h2>Materias Alunos</h2>
+
+<!--
+    Esse documento serve para ser um exemplo para ajudar em futuras páginas
+-->
+@if (UserSession.IsLoggedIn)
+{
+    @if (UserSession.CurrentUser.IsProfessor)
+    {
+        <MudText>Você já está logado como professor</MudText>
+
+    }
+    else
+    {
+        <MudText>Você já está logado como aluno</MudText>
+    }
+}
+else
+{
+    <MudText>Você já não está logado</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
+}
+
+@code
+{
+    // Obrigatorio para usar o UserSession
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+        if (!UserSession.IsLoggedIn)
+        {
+            NavigateLogin();
+        }
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
+    public void NavigateLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -133,13 +133,12 @@
                 <!-- User Profile Dropdown -->
                 <MudMenu Direction="Direction.Left">
                     <ActivatorContent>
-                        <MudText Text="@(_isDarkMode ? "Dark Mode" : "Light Mode")">@UserSession.CurrentUser.Login</MudText>
+                        <MudText Class="d-flex justify-center align-center" Text="@(_isDarkMode ? "Light Mode" : "Dark Mode")" >@UserSession.CurrentUser.Login</MudText>
                         <MudAvatar Color="Color.Primary" Class="ml-2">
                             <MudIcon Icon="@Icons.Material.Filled.Person" />
                         </MudAvatar>
                     </ActivatorContent>
                     <ChildContent>
-                        <MudText Text="@(_isDarkMode ? "Dark Mode" : "Light Mode")">@UserSession.CurrentUser.Login</MudText>
                         <MudMenuItem Href="/perfil" Icon="@Icons.Material.Filled.AccountCircle">Meu Perfil</MudMenuItem>
                         <MudMenuItem Href="/configuracoes" Icon="@Icons.Material.Filled.Settings">Configurações</MudMenuItem>
                         <MudDivider />
