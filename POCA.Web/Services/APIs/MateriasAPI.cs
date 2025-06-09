@@ -3,11 +3,11 @@ using POCA.Web.Requests;
 
 namespace POCA.Web.Services.APIs
 {
-    public class MateriaAPI
+    public class MateriasAPI
     {
         private readonly HttpClient _httpClient;
 
-        public MateriaAPI(IHttpClientFactory factory)
+        public MateriasAPI(IHttpClientFactory factory)
         {
             _httpClient = factory.CreateClient("API");
         }
@@ -120,5 +120,6 @@ namespace POCA.Web.Services.APIs
             var response = await _httpClient.DeleteAsync($"materias/{idMateria}/atividades/{idAtividade}");
             return response.IsSuccessStatusCode;
         }
+
     }
 }

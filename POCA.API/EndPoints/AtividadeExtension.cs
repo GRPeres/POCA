@@ -94,14 +94,25 @@ namespace POCA.API.EndPoints
             // DELETE atividade
             group.MapDelete("/{id}", async ([FromServices] DbPocaContext context, int id) =>
             {
-                var atividade = await context.TbAtividades.FindAsync(id);
+                var atividade = await context.TbAtividades
+                    .Include(a => a.TbMateriasIdMateria)
+                    .Include(a => a.TbQuestoesIdQuestaos)
+                    .FirstOrDefaultAsync(a => a.IdAtividade == id);
+
                 if (atividade is null)
                     return Results.NotFound();
 
+                atividade.TbMateriasIdMateria.Clear();
+                atividade.TbQuestoesIdQuestaos.Clear();
+
+                await context.SaveChangesAsync();
+
                 context.TbAtividades.Remove(atividade);
                 await context.SaveChangesAsync();
+
                 return Results.NoContent();
             });
+
 
             // Additional endpoints for relationships
             group.MapPost("/{idAtividade}/questoes/{idQuestao}",

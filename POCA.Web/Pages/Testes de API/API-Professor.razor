@@ -6,7 +6,7 @@
 @using System.Text
 @using POCA.Web.Services.APIs
 @inject PessoasAPI PessoasAPI
-@inject ProfessorAPI ProfessorAPI
+@inject ProfessoresAPI ProfessoresAPI
 @inject UserSessionService UserSession
 @inject IConfiguration Configuration
 
@@ -59,7 +59,7 @@ quanto tiver o (teorico) final
     {
         try
         {
-            var professores = await ProfessorAPI.GetProfessoresAsync();
+            var professores = await ProfessoresAPI.GetProfessoresAsync();
             apiResponse = FormatJsonResponse(professores);
         }
         catch (Exception ex)
@@ -79,7 +79,7 @@ quanto tiver o (teorico) final
                 ContatoProfessor: "test@example.com"
             );
 
-            var createdProfessor = await ProfessorAPI.AddProfessorAsync(professorRequest);
+            var createdProfessor = await ProfessoresAPI.AddProfessorAsync(professorRequest);
 
             if (createdProfessor == null)
             {

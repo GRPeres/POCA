@@ -1,0 +1,181 @@
+﻿@page "/materia/{id:int}"
+@using POCA.Web.Services.APIs
+@inject MateriasAPI MateriasAPI
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    @if (materia == null)
+    {
+        <MudPaper Elevation="2" Class="pa-8 d-flex justify-center align-center" style="height: 300px;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Book" Size="Size.Large" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h5" Class="mb-0">@materia.NomeMateria</MudText>
+            </div>
+
+            <!-- Professores -->
+            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
+                <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Professores</MudText>
+                @if (materia.Professores?.Any() == true)
+                {
+                    @foreach (var prof in materia.Professores)
+                    {
+                        <MudChip T="string"
+                                 Href="@($"/professor/{prof.IdProfessor}")"
+                                 Color="Color.Secondary"
+                                 Variant="Variant.Outlined"
+                                 Class="mr-2 mb-2"
+                                 Target="_blank">
+                            @prof.NomeProfessor
+                        </MudChip>
+                    }
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">Nenhum professor associado</MudText>
+                }
+            </MudPaper>
+
+            <!-- Alunos -->
+            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
+                <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Alunos</MudText>
+                @if (materia.Alunos?.Any() == true)
+                {
+                    <MudList T="AlunoResponse" Dense="true">
+                        @foreach (var aluno in materia.Alunos)
+                        {
+                            <MudListItem>
+                                <MudListItemText>
+                                    <MudText Typo="Typo.body1">@aluno.NomeAluno</MudText>
+                                </MudListItemText>
+                                <MudListItemIcon>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small"
+                                                   Href="@($"/aluno/{aluno.IdAluno}")" />
+                                </MudListItemIcon>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">Nenhum aluno associado</MudText>
+                }
+            </MudPaper>
+
+            <!-- Atividades -->
+            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
+                <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Atividades</MudText>
+                @if (materia.Atividades?.Any() == true)
+                {
+                    <MudList T="AtividadeResponse" Dense="true">
+                        @foreach (var atividade in materia.Atividades)
+                        {
+                            <MudListItem>
+                                <MudListItemText>
+                                    <MudText Typo="Typo.body1">@atividade.NomeAtividade</MudText>
+                                </MudListItemText>
+                                <MudListItemIcon>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small"
+                                                   Href="@($"/atividade/{atividade.IdAtividade}")" />
+                                </MudListItemIcon>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">Nenhuma atividade cadastrada</MudText>
+                }
+            </MudPaper>
+
+            <!-- Action Buttons -->
+            <MudDivider Class="my-6" />
+            <div class="d-flex justify-space-between">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Href="/materias"
+                           StartIcon="@Icons.Material.Filled.ArrowBack">
+                    Voltar
+                </MudButton>
+                <div>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               Href="@($"/editar-materia/{materia.IdMateria}")"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               Class="mr-2">
+                        Editar
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="() => deleteDialog.ShowAsync()">
+                        Excluir
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+</MudContainer>
+
+<!-- Delete Confirmation Dialog -->
+<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Confirmar Exclusão</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Deseja realmente excluir esta matéria?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteMateriaAsync">Excluir</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private MateriaResponse? materia;
+    private MudDialog deleteDialog = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            materia = await MateriasAPI.GetMateriaAsync(id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao carregar matéria: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteMateriaAsync()
+    {
+        try
+        {
+            await MateriasAPI.DeleteMateriaAsync(id);
+            Snackbar.Add("Matéria excluída com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/materias");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao excluir matéria: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            await deleteDialog.CloseAsync();
+        }
+    }
+}
