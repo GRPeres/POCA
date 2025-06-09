@@ -38,7 +38,7 @@ namespace POCA.Web.Services.APIs
             }
         }
 
-        public async Task<MateriaResponse?> AddMateriaAsync(MateriaRequest request)
+        public async Task<MateriaResponse?> AddMateriaAsync(MateriaCreateRequest request)
         {
             try
             {

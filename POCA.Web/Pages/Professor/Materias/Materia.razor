@@ -1,6 +1,9 @@
 ﻿@page "/materia/{id:int}"
 @using POCA.Web.Services.APIs
 @inject MateriasAPI MateriasAPI
+@inject ProfessoresAPI ProfessoresAPI
+@inject AlunosAPI AlunosAPI
+@inject AtividadesAPI AtividadesAPI
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
@@ -22,16 +25,16 @@
             <!-- Professores -->
             <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
                 <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Professores</MudText>
-                @if (materia.Professores?.Any() == true)
+                @if (materia.tbProfessoresIdProfessors?.Any() == true)
                 {
-                    @foreach (var prof in materia.Professores)
+                    @foreach (var prof in Professores)
                     {
                         <MudChip T="string"
-                                 Href="@($"/professor/{prof.IdProfessor}")"
-                                 Color="Color.Secondary"
-                                 Variant="Variant.Outlined"
-                                 Class="mr-2 mb-2"
-                                 Target="_blank">
+                        Href="@($"/professor/{prof.IdProfessor}")"
+                        Color="Color.Secondary"
+                        Variant="Variant.Outlined"
+                        Class="mr-2 mb-2"
+                        Target="_blank">
                             @prof.NomeProfessor
                         </MudChip>
                     }
@@ -45,10 +48,10 @@
             <!-- Alunos -->
             <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
                 <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Alunos</MudText>
-                @if (materia.Alunos?.Any() == true)
+                @if (materia.tbAlunosIdAlunos?.Any() == true)
                 {
                     <MudList T="AlunoResponse" Dense="true">
-                        @foreach (var aluno in materia.Alunos)
+                        @foreach (var aluno in Alunos)
                         {
                             <MudListItem>
                                 <MudListItemText>
@@ -56,9 +59,9 @@
                                 </MudListItemText>
                                 <MudListItemIcon>
                                     <MudIconButton Icon="@Icons.Material.Filled.Visibility"
-                                                   Color="Color.Primary"
-                                                   Size="Size.Small"
-                                                   Href="@($"/aluno/{aluno.IdAluno}")" />
+                                    Color="Color.Primary"
+                                    Size="Size.Small"
+                                    Href="@($"/aluno/{aluno.IdAluno}")" />
                                 </MudListItemIcon>
                             </MudListItem>
                         }
@@ -73,10 +76,10 @@
             <!-- Atividades -->
             <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg">
                 <MudText Typo="Typo.subtitle1" Color="Color.Primary" Class="mb-2">Atividades</MudText>
-                @if (materia.Atividades?.Any() == true)
+                @if (materia.tbAtividadesIdAtividades?.Any() == true)
                 {
                     <MudList T="AtividadeResponse" Dense="true">
-                        @foreach (var atividade in materia.Atividades)
+                        @foreach (var atividade in Atividades)
                         {
                             <MudListItem>
                                 <MudListItemText>
@@ -84,9 +87,9 @@
                                 </MudListItemText>
                                 <MudListItemIcon>
                                     <MudIconButton Icon="@Icons.Material.Filled.Visibility"
-                                                   Color="Color.Primary"
-                                                   Size="Size.Small"
-                                                   Href="@($"/atividade/{atividade.IdAtividade}")" />
+                                    Color="Color.Primary"
+                                    Size="Size.Small"
+                                    Href="@($"/atividade/{atividade.IdAtividade}")" />
                                 </MudListItemIcon>
                             </MudListItem>
                         }
@@ -102,23 +105,23 @@
             <MudDivider Class="my-6" />
             <div class="d-flex justify-space-between">
                 <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           Href="/materias"
-                           StartIcon="@Icons.Material.Filled.ArrowBack">
+                Color="Color.Primary"
+                Href="/materias"
+                StartIcon="@Icons.Material.Filled.ArrowBack">
                     Voltar
                 </MudButton>
                 <div>
                     <MudButton Variant="Variant.Outlined"
-                               Color="Color.Secondary"
-                               Href="@($"/editar-materia/{materia.IdMateria}")"
-                               StartIcon="@Icons.Material.Filled.Edit"
-                               Class="mr-2">
+                    Color="Color.Secondary"
+                    Href="@($"/editar-materia/{materia.IdMateria}")"
+                    StartIcon="@Icons.Material.Filled.Edit"
+                    Class="mr-2">
                         Editar
                     </MudButton>
                     <MudButton Variant="Variant.Outlined"
-                               Color="Color.Error"
-                               StartIcon="@Icons.Material.Filled.Delete"
-                               OnClick="() => deleteDialog.ShowAsync()">
+                    Color="Color.Error"
+                    StartIcon="@Icons.Material.Filled.Delete"
+                    OnClick="() => deleteDialog.ShowAsync()">
                         Excluir
                     </MudButton>
                 </div>
@@ -149,17 +152,43 @@
     private MateriaResponse? materia;
     private MudDialog deleteDialog = new();
 
+    private List<ProfessorResponse> Professores = new();
+    private List<AlunoResponse> Alunos = new();
+    private List<AtividadeResponse> Atividades = new();
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             materia = await MateriasAPI.GetMateriaAsync(id);
+
+            if (materia != null)
+            {
+                if (materia.tbProfessoresIdProfessors?.Any() == true)
+                {
+                    var profTasks = materia.tbProfessoresIdProfessors.Select(id => ProfessoresAPI.GetProfessorbyidAsync(id));
+                    Professores = (await Task.WhenAll(profTasks)).Where(p => p != null).ToList();
+                }
+
+                if (materia.tbAlunosIdAlunos?.Any() == true)
+                {
+                    var alunoTasks = materia.tbAlunosIdAlunos.Select(id => AlunosAPI.GetAlunosbyIDAsync(id));
+                    Alunos = (await Task.WhenAll(alunoTasks)).Where(a => a != null).ToList();
+                }
+
+                if (materia.tbAtividadesIdAtividades?.Any() == true)
+                {
+                    var atividadeTasks = materia.tbAtividadesIdAtividades.Select(id => AtividadesAPI.GetAtividadeByIdAsync(id));
+                    Atividades = (await Task.WhenAll(atividadeTasks)).Where(atv => atv != null).ToList();
+                }
+            }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Erro ao carregar matéria: {ex.Message}", Severity.Error);
         }
     }
+
 
     private async Task DeleteMateriaAsync()
     {

@@ -1,4 +1,4 @@
-﻿@page "/adicionar-materia"
+﻿@page "/editar-materia/{id:int}"
 @using POCA.Web.Services.APIs
 @using POCA.API.Responses
 @inject MateriasAPI MateriasAPI
@@ -10,7 +10,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
     <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-        <MudText Typo="Typo.h4" Class="mb-4">Adicionar Nova Matéria</MudText>
+        <MudText Typo="Typo.h4" Class="mb-4">Editar Matéria</MudText>
 
         <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Linear="true" HideNavigation="true">
             <MudStep Label="Nome da Matéria" Completed="_currentStep > 0">
@@ -93,6 +93,8 @@
 </MudContainer>
 
 @code {
+    [Parameter] public int id { get; set; }
+
     private int _currentStep = 0;
     private bool _isValidStep1 = false;
     private bool _isSubmitting = false;
@@ -118,9 +120,36 @@
         _alunos = await AlunosAPI.GetAlunosAsync() ?? new List<AlunoResponse>();
         _atividades = await AtividadesAPI.GetAtividadesAsync() ?? new List<AtividadeResponse>();
 
+        var materia = await MateriasAPI.GetMateriaAsync(id);
+        if (materia is null)
+        {
+            Snackbar.Add("Matéria não encontrada.", Severity.Error);
+            NavManager.NavigateTo("/materias");
+            return;
+        }
+
+        _nomeMateriaInput = materia.NomeMateria;
+
+        // Init selection dictionaries with all false
         IsSelectedProfessor = _professores.ToDictionary(p => p.IdProfessor, _ => false);
         IsSelectedAluno = _alunos.ToDictionary(a => a.IdAluno, _ => false);
         IsSelectedAtividade = _atividades.ToDictionary(a => a.IdAtividade, _ => false);
+
+        // Mark the already selected ones as true
+        if (materia.tbProfessoresIdProfessors is not null)
+            foreach (var pid in materia.tbProfessoresIdProfessors)
+                if (IsSelectedProfessor.ContainsKey(pid))
+                    IsSelectedProfessor[pid] = true;
+
+        if (materia.tbAlunosIdAlunos is not null)
+            foreach (var aid in materia.tbAlunosIdAlunos)
+                if (IsSelectedAluno.ContainsKey(aid))
+                    IsSelectedAluno[aid] = true;
+
+        if (materia.tbAtividadesIdAtividades is not null)
+            foreach (var atid in materia.tbAtividadesIdAtividades)
+                if (IsSelectedAtividade.ContainsKey(atid))
+                    IsSelectedAtividade[atid] = true;
     }
 
     private IEnumerable<ProfessorResponse> FilteredProfessores =>
@@ -139,30 +168,11 @@
             _currentStep = 1;
     }
 
-    private void GoToStep3()
-    {
-        _currentStep = 2;
-    }
-
-    private void GoToStep4()
-    {
-        _currentStep = 3;
-    }
-
-    private void BackToStep1()
-    {
-        _currentStep = 0;
-    }
-
-    private void BackToStep2()
-    {
-        _currentStep = 1;
-    }
-
-    private void BackToStep3()
-    {
-        _currentStep = 2;
-    }
+    private void GoToStep3() => _currentStep = 2;
+    private void GoToStep4() => _currentStep = 3;
+    private void BackToStep1() => _currentStep = 0;
+    private void BackToStep2() => _currentStep = 1;
+    private void BackToStep3() => _currentStep = 2;
 
     private async Task HandleSubmit()
     {
@@ -170,60 +180,56 @@
 
         try
         {
-            var materiaRequest = new MateriaCreateRequest
-                {
-                    NomeMateria = _nomeMateriaInput
-                };
+            // Update Materia name
+            var materiaUpdateRequest = new MateriaEditRequest(
+                id,
+                _nomeMateriaInput
+            );
 
-            var createdMateria = await MateriasAPI.AddMateriaAsync(materiaRequest);
-
-            if (createdMateria != null)
+            var updatedMateria = await MateriasAPI.UpdateMateriaAsync(materiaUpdateRequest);
+            if (updatedMateria == null)
             {
-                var idMateria = createdMateria.IdMateria;
-                Console.WriteLine($"Created Materia with Id: {idMateria}");
-
-                // Associate selected Professores
-                foreach (var professorId in IsSelectedProfessor.Where(p => p.Value).Select(p => p.Key))
-                {
-                    Console.WriteLine($"Adding Professor Id: {professorId} to Materia Id: {idMateria}");
-                    var success = await MateriasAPI.AddProfessorToMateriaAsync(idMateria, professorId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Professor {professorId}"
-                        : $"Failed to add Professor {professorId}");
-                }
-
-                // Associate selected Alunos
-                foreach (var alunoId in IsSelectedAluno.Where(a => a.Value).Select(a => a.Key))
-                {
-                    Console.WriteLine($"Adding Aluno Id: {alunoId} to Materia Id: {idMateria}");
-                    var success = await MateriasAPI.AddAlunoToMateriaAsync(idMateria, alunoId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Aluno {alunoId}"
-                        : $"Failed to add Aluno {alunoId}");
-                }
-
-                // Associate selected Atividades
-                foreach (var atividadeId in IsSelectedAtividade.Where(a => a.Value).Select(a => a.Key))
-                {
-                    Console.WriteLine($"Adding Atividade Id: {atividadeId} to Materia Id: {idMateria}");
-                    var success = await MateriasAPI.AddAtividadeToMateriaAsync(idMateria, atividadeId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Atividade {atividadeId}"
-                        : $"Failed to add Atividade {atividadeId}");
-                }
-
-                Snackbar.Add("Matéria criada com sucesso!", Severity.Success);
-                NavManager.NavigateTo("/materias");
+                Snackbar.Add("Erro ao atualizar matéria.", Severity.Error);
+                return;
             }
-            else
+
+            // Load current associations (if your API supports getting full related IDs)
+            var currentMateria = await MateriasAPI.GetMateriaAsync(id);
+            if (currentMateria == null)
             {
-                Console.WriteLine("Failed to create Materia.");
-                Snackbar.Add("Erro ao criar matéria.", Severity.Error);
+                Snackbar.Add("Erro ao obter matéria atualizada.", Severity.Error);
+                return;
             }
+
+            // Update Professores associations
+            await UpdateAssociations(
+                id,
+                currentMateria.tbProfessoresIdProfessors ?? Enumerable.Empty<int>(),
+                IsSelectedProfessor.Where(kvp => kvp.Value).Select(kvp => kvp.Key),
+                MateriasAPI.AddProfessorToMateriaAsync,
+                MateriasAPI.RemoveProfessorFromMateriaAsync);
+
+            // Update Alunos associations
+            await UpdateAssociations(
+                id,
+                currentMateria.tbAlunosIdAlunos ?? Enumerable.Empty<int>(),
+                IsSelectedAluno.Where(kvp => kvp.Value).Select(kvp => kvp.Key),
+                MateriasAPI.AddAlunoToMateriaAsync,
+                MateriasAPI.RemoveAlunoFromMateriaAsync);
+
+            // Update Atividades associations
+            await UpdateAssociations(
+                id,
+                currentMateria.tbAtividadesIdAtividades ?? Enumerable.Empty<int>(),
+                IsSelectedAtividade.Where(kvp => kvp.Value).Select(kvp => kvp.Key),
+                MateriasAPI.AddAtividadeToMateriaAsync,
+                MateriasAPI.RemoveAtividadeFromMateriaAsync);
+
+            Snackbar.Add("Matéria atualizada com sucesso!", Severity.Success);
+            NavManager.NavigateTo("/materias");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception: {ex.Message}");
             Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
         }
         finally
@@ -232,4 +238,24 @@
         }
     }
 
+    private async Task UpdateAssociations(
+        int materiaId,
+        IEnumerable<int> currentIds,
+        IEnumerable<int> selectedIds,
+        Func<int, int, Task<bool>> addFunc,
+        Func<int, int, Task<bool>> removeFunc)
+    {
+        var toAdd = selectedIds.Except(currentIds);
+        var toRemove = currentIds.Except(selectedIds);
+
+        foreach (var idToRemove in toRemove)
+        {
+            await removeFunc(materiaId, idToRemove);
+        }
+
+        foreach (var idToAdd in toAdd)
+        {
+            await addFunc(materiaId, idToAdd);
+        }
+    }
 }

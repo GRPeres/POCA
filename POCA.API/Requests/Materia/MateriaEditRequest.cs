@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-public record MateriaEditRequest(
-    [Required] int IdMateria,
-    int IdProfessorMateria,
-    int IdAlunoMateria,
-    string? NomeMateria
-) : MateriaRequest(
-    IdProfessorMateria,
-    IdAlunoMateria,
-    NomeMateria
-);
+public record MateriaEditRequest : MateriaRequest
+{
+    [Required]
+    public int IdMateria { get; init; }
+
+    public List<int>? IdsProfessores { get; init; } = new();
+    public List<int>? IdsAlunos { get; init; } = new();
+    public List<int>? IdsAtividades { get; init; } = new();
+
+}

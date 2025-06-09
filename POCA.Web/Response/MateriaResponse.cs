@@ -3,7 +3,7 @@
 public record MateriaResponse(
     int IdMateria,
     string? NomeMateria,
-    IEnumerable<ProfessorResponse>? Professores,
-    IEnumerable<AlunoResponse>? Alunos,
-    IEnumerable<AtividadeResponse>? Atividades
+    IEnumerable<int>? tbProfessoresIdProfessors,
+    IEnumerable<int>? tbAlunosIdAlunos,
+    IEnumerable<int>? tbAtividadesIdAtividades
 );

@@ -2,6 +2,9 @@
 @using POCA.Web.Services.APIs
 @using POCA.API.Responses
 @inject MateriasAPI MateriasAPI
+@inject ProfessoresAPI ProfessoresAPI
+@inject AlunosAPI AlunosAPI
+@inject AtividadesAPI AtividadesAPI
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
@@ -74,49 +77,58 @@
                 <MudTd>@materia.IdMateria</MudTd>
                 <MudTd>@materia.NomeMateria</MudTd>
                 <MudTd>
-                    @if (materia.Professores is not null)
+                    @if (materia.tbProfessoresIdProfessors is not null)
                     {
-                        foreach (var prof in materia.Professores)
+                        foreach (var profId in materia.tbProfessoresIdProfessors)
                         {
-                            <MudButton Variant="Variant.Outlined"
-                                       Color="Color.Primary"
-                                       Size="Size.Small"
-                                       Href="@($"/professor/{prof.IdProfessor}")"
-                                       Class="mr-1 mb-1 px-2">
-                                @prof.NomeProfessor
-                            </MudButton>
+                            if (_professoresCache.TryGetValue(profId, out var prof))
+                            {
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           Href="@($"/professor/{prof.IdProfessor}")"
+                                           Class="mr-1 mb-1 px-2">
+                                    @prof.NomeProfessor
+                                </MudButton>
+                            }
                         }
                     }
                 </MudTd>
 
                 <MudTd>
-                    @if (materia.Alunos is not null)
+                    @if (materia.tbAlunosIdAlunos is not null)
                     {
-                        foreach (var aluno in materia.Alunos)
+                        foreach (var alunoId in materia.tbAlunosIdAlunos)
                         {
-                            <MudButton Variant="Variant.Outlined"
-                                       Color="Color.Info"
-                                       Size="Size.Small"
-                                       Href="@($"/aluno/{aluno.IdAluno}")"
-                                       Class="mr-1 mb-1 px-2">
-                                @aluno.NomeAluno
-                            </MudButton>
+                            if (_alunosCache.TryGetValue(alunoId, out var aluno))
+                            {
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Info"
+                                           Size="Size.Small"
+                                           Href="@($"/aluno/{aluno.IdAluno}")"
+                                           Class="mr-1 mb-1 px-2">
+                                    @aluno.NomeAluno
+                                </MudButton>
+                            }
                         }
                     }
                 </MudTd>
 
                 <MudTd>
-                    @if (materia.Atividades is not null)
+                    @if (materia.tbAtividadesIdAtividades is not null)
                     {
-                        @foreach (var ativ in materia.Atividades)
+                        foreach (var ativId in materia.tbAtividadesIdAtividades)
                         {
-                            <MudButton Size="Size.Small"
-                                       Variant="Variant.Outlined"
-                                       Color="Color.Secondary"
-                                       Href="@($"/atividade/{ativ.IdAtividade}")"
-                                       Class="mr-1 mb-1">
-                                @ativ.NomeAtividade
-                            </MudButton>
+                            if (_atividadesCache.TryGetValue(ativId, out var ativ))
+                            {
+                                <MudButton Size="Size.Small"
+                                           Variant="Variant.Outlined"
+                                           Color="Color.Secondary"
+                                           Href="@($"/atividade/{ativ.IdAtividade}")"
+                                           Class="mr-1 mb-1">
+                                    @ativ.NomeAtividade
+                                </MudButton>
+                            }
                         }
                     }
                 </MudTd>
@@ -173,6 +185,11 @@
 
 @code {
     private List<MateriaResponse> _materias = new();
+
+    private Dictionary<int, ProfessorResponse> _professoresCache = new();
+    private Dictionary<int, AlunoResponse> _alunosCache = new();
+    private Dictionary<int, AtividadeResponse> _atividadesCache = new();
+
     private bool _isLoading = true;
     private string _searchString = "";
     private MudDialog deleteDialog;
@@ -188,13 +205,36 @@
         _isLoading = true;
         try
         {
-            var response = await MateriasAPI.GetMateriasAsync();
-            _materias = response?.ToList() ?? new List<MateriaResponse>();
+            var materiasList = await MateriasAPI.GetMateriasAsync();
+            _materias = materiasList?.ToList() ?? new List<MateriaResponse>();
+
+            // Extract all unique related IDs to load their full data once
+            var allProfessorIds = _materias.SelectMany(m => m.tbProfessoresIdProfessors ?? Enumerable.Empty<int>()).Distinct();
+            var allAlunoIds = _materias.SelectMany(m => m.tbAlunosIdAlunos ?? Enumerable.Empty<int>()).Distinct();
+            var allAtividadeIds = _materias.SelectMany(m => m.tbAtividadesIdAtividades ?? Enumerable.Empty<int>()).Distinct();
+
+            // Fetch professors in parallel
+            var profTasks = allProfessorIds.Select(id => ProfessoresAPI.GetProfessorbyidAsync(id));
+            var profs = (await Task.WhenAll(profTasks)).Where(p => p != null);
+            _professoresCache = profs.ToDictionary(p => p.IdProfessor);
+
+            // Fetch alunos in parallel
+            var alunoTasks = allAlunoIds.Select(id => AlunosAPI.GetAlunosbyIDAsync(id));
+            var alunos = (await Task.WhenAll(alunoTasks)).Where(a => a != null);
+            _alunosCache = alunos.ToDictionary(a => a.IdAluno);
+
+            // Fetch atividades in parallel
+            var atividadeTasks = allAtividadeIds.Select(id => AtividadesAPI.GetAtividadeByIdAsync(id));
+            var atividades = (await Task.WhenAll(atividadeTasks)).Where(a => a != null);
+            _atividadesCache = atividades.ToDictionary(a => a.IdAtividade);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Erro ao carregar matérias: {ex.Message}", Severity.Error);
             _materias = new List<MateriaResponse>();
+            _professoresCache.Clear();
+            _alunosCache.Clear();
+            _atividadesCache.Clear();
         }
         finally
         {
@@ -209,13 +249,15 @@
     }
 
     private IEnumerable<MateriaResponse> FilteredMaterias => _materias
-        .Where(m =>
-            string.IsNullOrWhiteSpace(_searchString) ||
-            (m.NomeMateria?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-            (m.Professores?.Any(p => p.NomeProfessor?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true) ?? false) ||
-            (m.Alunos?.Any(a => a.NomeAluno?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true) ?? false)
-        )
-        .ToList();
+    .Where(m =>
+        string.IsNullOrWhiteSpace(_searchString) ||
+        (m.NomeMateria?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+        (m.tbProfessoresIdProfessors?.Any(profId =>
+            _professoresCache.TryGetValue(profId, out var prof) && prof.NomeProfessor?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true) ?? false) ||
+        (m.tbAlunosIdAlunos?.Any(alunoId =>
+            _alunosCache.TryGetValue(alunoId, out var aluno) && aluno.NomeAluno?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true) ?? false)
+    )
+    .ToList();
 
     private void ClearFilters()
     {

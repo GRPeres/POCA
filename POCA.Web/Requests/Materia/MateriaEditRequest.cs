@@ -1,12 +1,6 @@
-﻿
-public record MateriaEditRequest(
+﻿public record MateriaEditRequest(
     int IdMateria,
-    int IdProfessorMateria,
-    int IdAlunoMateria,
-    string? NomeMateria
-) : MateriaRequest(
-
-    NomeMateria,
-    IdProfessorMateria,
-    IdAlunoMateria
+    string? NomeMateria,
+    List<int>? IdProfessoresMateria = null,
+    List<int>? IdAlunosMateria = null
 );
