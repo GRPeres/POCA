@@ -36,16 +36,16 @@
 @code
 {
     public string Erro = "";
-    public ProfessorResponse Professor = new ProfessorResponse(0,null,null,null);
-    public AlunoResponse Aluno = new AlunoResponse(0,null,0,0,null,null,null);
+    public ProfessorResponse Professor = new ProfessorResponse(0,"","","");
+    public AlunoResponse Aluno = new AlunoResponse(0,"",0,0,"",null,null);
     public bool paginicial = false;
 
     // Obrigatorio para usar o UserSession
-    protected override void OnInitialized()
+    protected async override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
 
-        GetCurrentUser();
+        await GetCurrentUser();
     }
 
     private void HandleUserSessionChanged()
