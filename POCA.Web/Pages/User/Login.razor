@@ -29,8 +29,12 @@
     <MudTextField @bind-Value="Credenciais.Senha"
                   Label="Senha"
                   Variant="Variant.Filled"
-                  InputType="InputType.Password"
-                  Required
+                  InputType="(_showPassword ? InputType.Text : InputType.Password)"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                  OnAdornmentClick="TogglePasswordVisibility"
+                  Touched="true"
+                  Required="true"
                   RequiredError="Por favor insira sua senha"
                   Class="mt-3" />
 
@@ -65,6 +69,7 @@ else
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
     private bool IsLoading = false;
+    private bool _showPassword = false;
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.Login) &&
                               !string.IsNullOrWhiteSpace(Credenciais.Senha);
@@ -136,6 +141,11 @@ else
         {
             IsLoading = false;
         }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
     }
 
     private void navigateMain()

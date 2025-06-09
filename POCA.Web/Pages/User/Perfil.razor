@@ -1,0 +1,98 @@
+﻿@page "/perfil"
+@using MudBlazor
+@using POCA.Web
+@inject PessoasAPI PessoasAPI
+@inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
+@inject POCA.Web.Services.APIs.ProfessorAPI ProfessorAPI
+@inject UserSessionService UserSession
+@inject NavigationManager NavigationManager
+
+<h2>Perfil</h2>
+
+<MudText>@Erro</MudText>
+
+@if (!paginicial)
+{
+    <MudText>Login: @UserSession.CurrentUser.Login</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="GetCurrentUser">mostrar</MudButton>
+}else
+{
+    @if (UserSession.CurrentUser.IsProfessor)
+    {
+        <MudText>Nome: @Professor.NomeProfessor</MudText>
+        <MudText>Contato: @Professor.ContatoProfessor</MudText>
+        <MudText>Materias: @Professor.MateriaProfessor</MudText>
+    }
+    else
+    {
+        <MudText>Nome: @Aluno.NomeAluno</MudText>
+        <MudText>Contato: @Aluno.ContatoAluno</MudText>
+        <MudText>Materias: @Aluno.MateriasIds</MudText>
+        <MudText>Idade: @Aluno.IdadeAluno</MudText>
+        <MudText>Progresso: @Aluno.ProgressoAluno</MudText>
+    }
+}
+
+@code
+{
+    public string Erro = "";
+    public ProfessorResponse Professor = new ProfessorResponse(0,null,null,null);
+    public AlunoResponse Aluno = new AlunoResponse(0,null,0,0,null,null,null);
+    public bool paginicial = false;
+
+    // Obrigatorio para usar o UserSession
+    protected override void OnInitialized()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+
+        GetCurrentUser();
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
+    public void NavigateLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+
+    // Começa aqui
+
+
+    private async Task GetCurrentUser()
+    {
+        try
+        {
+            if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
+            {
+                int id = (int) UserSession.CurrentUser.IdProfessor!;
+                Professor = await ProfessorAPI.GetProfessorbyidAsync(id);
+                paginicial = true;
+            }
+            else if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
+            {
+                int id = (int)UserSession.CurrentUser.IdAluno!;
+                Aluno = await AlunosAPI.GetAlunosbyIDAsync(id);
+                paginicial = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Error: {ex.Message}";
+        }
+    }
+
+    private string FormatJsonResponse(object obj)
+    {
+        return JsonSerializer.Serialize(obj, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+    }
+}

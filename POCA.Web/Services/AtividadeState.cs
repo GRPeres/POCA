@@ -1,4 +1,4 @@
-using POCA.Web.Pages.Questoes;
+using POCA.Web.Pages.Professor.Questoes;
 
 namespace POCA.Web.Services
 {

@@ -18,7 +18,7 @@ namespace POCA.Web.Services.APIs
             return await _httpClient.GetFromJsonAsync<ICollection<ProfessorResponse>>("professores", cancellationToken);
         }
 
-        public async Task<ProfessorResponse?> GetProfessorAsync(int idProfessor, CancellationToken cancellationToken = default)
+        public async Task<ProfessorResponse?> GetProfessorbyidAsync(int idProfessor, CancellationToken cancellationToken = default)
         {
             return await _httpClient.GetFromJsonAsync<ProfessorResponse>($"professores/{idProfessor}", cancellationToken);
         }

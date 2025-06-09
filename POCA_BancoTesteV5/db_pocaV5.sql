@@ -23,7 +23,7 @@ USE `db_poca` ;
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_alunos` (
   `id_aluno` INT NOT NULL AUTO_INCREMENT,
   `nome_aluno` VARCHAR(45) NOT NULL,
-  `nascimento_aluno` DATE NOT NULL,
+  `idade_aluno` int NOT NULL,
   `progresso_aluno` INT NOT NULL,
   `contato_aluno` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_aluno`),
