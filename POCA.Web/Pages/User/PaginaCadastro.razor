@@ -14,95 +14,120 @@
 @inject IConfiguration Configuration
 @inject ISnackbar Snackbar
 
-<MudText>Cadastro</MudText>
-@if (!UserSession.IsLoggedIn)
-{
-    @if (deuErro)
+<MudPaper Class="pa-6 mx-auto mt-12" Elevation="10" MaxWidth="500px">
+    <MudText Typo="Typo.h5" Class="mb-4 text-center">Cadastro</MudText>
+
+    @if (!UserSession.IsLoggedIn)
     {
-        <MudAlert>@apiResponse</MudAlert>
+        @if (deuErro)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+                @apiResponse
+            </MudAlert>
+        }
+
+        <MudTextField @bind-Value="Credenciais.LoginUsuario"
+                      Label="Login"
+                      Variant="Variant.Outlined"
+                      Required
+                      RequiredError="Coloque um nome de usuário"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.AccountCircle"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.nomeUsuario"
+                      Label="Nome"
+                      Variant="Variant.Outlined"
+                      Required
+                      RequiredError="Coloque seu nome"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Person"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.ContatoUsuario"
+                      Label="Email"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Email"
+                      Required
+                      RequiredError="Coloque seu email"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Email"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.SenhaUsuario"
+                      Label="Senha"
+                      Variant="Variant.Outlined"
+                      InputType="(_showPassword ? InputType.Text : InputType.Password)"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      OnAdornmentClick="TogglePasswordVisibility"
+                      Required
+                      RequiredError="Coloque sua senha"
+                      Class="mb-3" />
+
+        @if (SenhaErrada)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                As senhas não são iguais
+            </MudAlert>
+        }
+
+        <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
+                      Label="Confirme sua Senha"
+                      Variant="Variant.Outlined"
+                      InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPasswordConfirmation ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      OnAdornmentClick="TogglePasswordConfirmationVisibility"
+                      Required
+                      RequiredError="Confirme a senha"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.IdadeUsuario"
+                      Label="Idade"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Number"
+                      Required
+                      RequiredError="Coloque sua idade"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.CalendarToday"
+                      Class="mb-4" />
+
+        <MudStack Direction="Column" Spacing="2">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="EfetuarCadastro"
+                       Disabled="@(!IsFormValid)"
+                       FullWidth="true">
+                Criar Conta
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="NavigateLogin"
+                       FullWidth="true">
+                Já tenho uma conta
+            </MudButton>
+        </MudStack>
+
+        @if (teste)
+        {
+            <MudAlert Severity="Severity.Success" Dense="true" Class="mt-3">
+                Cadastro realizado com sucesso!
+            </MudAlert>
+        }
     }
-
-    <MudTextField @bind-Value="Credenciais.LoginUsuario"
-                  Label="Login"
-                  Variant="Variant.Filled"
-                  Required
-                  RequiredError="Coloque um Nome" />
-
-    <MudTextField @bind-Value="Credenciais.nomeUsuario"
-                  Label="Nome"
-                  Variant="Variant.Filled"
-                  Required
-                  RequiredError="Coloque seu Nome" />
-
-    <MudTextField @bind-Value="Credenciais.ContatoUsuario"
-                  Label="Contato"
-                  Variant="Variant.Filled"
-                  InputType="InputType.Email"
-                  Required
-                  RequiredError="Coloque seu email"
-                  Class="mt-3" />
-
-    <MudTextField @bind-Value="Credenciais.SenhaUsuario"
-                  Label="Senha"
-                  Variant="Variant.Filled"
-                  InputType="(_showPassword ? InputType.Text : InputType.Password)"
-                  Adornment="Adornment.End"
-                  AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                  OnAdornmentClick="TogglePasswordVisibility"
-                  Touched="true"
-                  Required="true"
-                  RequiredError="Coloque sua senha"
-                  Class="mt-3" />
-
-    @if (SenhaErrada)
+    else
     {
-        <MudAlert>As senhas não são iguais</MudAlert>
+        <MudText Typo="Typo.h6" Class="text-center mb-4">Você já está logado</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="NavigateMain"
+                   FullWidth="true">
+            Voltar
+        </MudButton>
     }
-
-    <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
-                  Label="Confirme sua Senha"
-                  Variant="Variant.Filled"
-                  InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
-                  Adornment="Adornment.End"
-                  AdornmentIcon="@(_showPasswordConfirmation? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                  OnAdornmentClick="TogglePasswordVisibility"
-                  Touched="true"
-                  Required="true"
-                  RequiredError="Confirme a senha"
-                  Class="mt-3" />
-
-    <MudTextField @bind-Value="Credenciais.IdadeUsuario"
-                  Label="Idade"
-                  Variant="Variant.Filled"
-                  InputType="InputType.Number"
-                  Required
-                  RequiredError="Coloque sua Idade"
-                  Class="mt-3" />
-
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="mt-4"
-               OnClick="EfetuarCadastro"
-               Disabled="@(!IsFormValid)">
-        Entrar
-    </MudButton>
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="mt-4"
-               OnClick="NavigateLogin">
-        Logar
-    </MudButton>
-
-    @if (teste)
-    {
-        <MudAlert>foi</MudAlert>
-    }
-}
-else
-{
-    <MudText>Você já está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateMain">Voltar</MudButton>
-}
+</MudPaper>
 
 @code
 {
@@ -147,7 +172,7 @@ else
 
     private void TogglePasswordConfirmationVisibility()
     {
-        _showPassword = !_showPasswordConfirmation;
+        _showPasswordConfirmation = !_showPasswordConfirmation;
     }
 
     public void NavigateMain()

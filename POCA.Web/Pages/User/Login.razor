@@ -11,59 +11,67 @@
 @inject ISnackbar Snackbar
 @inject IConfiguration Configuration
 
-<h1>Página de Login</h1>
-
-@if (!UserSession.IsLoggedIn)
-{
-    @if (LoginFalha)
+<MudPaper Class="pa-6 mx-auto mt-12" Elevation="10" MaxWidth="400px">
+    @if (!UserSession.IsLoggedIn)
     {
-        <MudAlert Severity="Severity.Error">Erro ao fazer login, credenciais inválidas</MudAlert>
+        <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
+
+        @if (LoginFalha)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+                Erro ao fazer login, credenciais inválidas.
+            </MudAlert>
+        }
+
+        <MudTextField @bind-Value="Credenciais.Login"
+                      Label="Usuário"
+                      Variant="Variant.Outlined"
+                      Required
+                      RequiredError="Por favor insira seu usuário"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Person"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.Senha"
+                      Label="Senha"
+                      Variant="Variant.Outlined"
+                      InputType="(_showPassword ? InputType.Text : InputType.Password)"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      OnAdornmentClick="TogglePasswordVisibility"
+                      Required
+                      RequiredError="Por favor insira sua senha"
+                      Class="mb-4" />
+
+        <MudStack Direction="Column" Spacing="2">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="EfetuarLogin"
+                       Disabled="@(!IsFormValid)"
+                       FullWidth="true">
+                Entrar
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="navigateCadastro"
+                       FullWidth="true">
+                Criar conta
+            </MudButton>
+        </MudStack>
     }
+    else
+    {
+        <MudText Typo="Typo.h6" Class="text-center mb-4">Você já está logado</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="navigateMain"
+                   FullWidth="true">
+            Voltar
+        </MudButton>
+    }
+</MudPaper>
 
-    <MudTextField @bind-Value="Credenciais.Login"
-                  Label="Usuário"
-                  Variant="Variant.Filled"
-                  Required
-                  RequiredError="Por favor insira seu usuário" />
-
-    <MudTextField @bind-Value="Credenciais.Senha"
-                  Label="Senha"
-                  Variant="Variant.Filled"
-                  InputType="(_showPassword ? InputType.Text : InputType.Password)"
-                  Adornment="Adornment.End"
-                  AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                  OnAdornmentClick="TogglePasswordVisibility"
-                  Touched="true"
-                  Required="true"
-                  RequiredError="Por favor insira sua senha"
-                  Class="mt-3" />
-
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="mt-4"
-               OnClick="EfetuarLogin"
-               Disabled="@(!IsFormValid)">
-        Entrar
-    </MudButton>
-
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="mt-4"
-               OnClick="navigateCadastro">
-        Criar conta
-    </MudButton>
-
-}
-else
-{
-    <MudText>Você já está logado</MudText>
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="mt-4"
-               OnClick="navigateMain">
-        Voltar
-    </MudButton>
-}
 
 @code {
     private LoginModel Credenciais = new();
