@@ -3,7 +3,7 @@
 @using POCA.Web
 @inject PessoasAPI PessoasAPI
 @inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
-@inject POCA.Web.Services.APIs.ProfessorAPI ProfessorAPI
+@inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 
@@ -72,7 +72,7 @@
             if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
             {
                 int id = (int) UserSession.CurrentUser.IdProfessor!;
-                Professor = await ProfessorAPI.GetProfessorbyidAsync(id);
+                Professor = await ProfessoresAPI.GetProfessorbyidAsync(id);
                 paginicial = true;
             }
             else if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
