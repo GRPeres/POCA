@@ -4,11 +4,11 @@ using POCA.Web.Response;
 
 namespace POCA.Web.Services.APIs
 {
-    public class ProfessorAPI
+    public class ProfessoresAPI
     {
         private readonly HttpClient _httpClient;
 
-        public ProfessorAPI(IHttpClientFactory factory)
+        public ProfessoresAPI(IHttpClientFactory factory)
         {
             _httpClient = factory.CreateClient("API");
         }

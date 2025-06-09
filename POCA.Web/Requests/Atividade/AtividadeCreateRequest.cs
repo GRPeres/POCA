@@ -1,11 +1,7 @@
-﻿using POCA.Banco.Model;
-using System.ComponentModel.DataAnnotations;
-
+﻿// AtividadeCreateRequest.cs (updated)
 namespace POCA.API.Requests.Atividade
 {
     public record AtividadeCreateRequest(
-        int IdAtividade,
-        string NomeAtividade,
-        int? TbQuestoesIdQuestaos
+        string NomeAtividade
     );
 }

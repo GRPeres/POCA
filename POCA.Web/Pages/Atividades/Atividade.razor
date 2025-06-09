@@ -1,0 +1,194 @@
+﻿@page "/atividade/{id:int}"
+@using POCA.Web.Services.APIs
+@inject AtividadesAPI AtividadesAPI
+@inject QuestoesAPI QuestoesAPI
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    @if (atividade == null)
+    {
+        <MudPaper Elevation="2" Class="pa-8 d-flex justify-center align-center" style="height: 300px;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Large" />
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+            <!-- Header with activity name -->
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h5" Class="mb-0">@atividade.NomeAtividade</MudText>
+            </div>
+
+            <!-- Questions Section -->
+            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary);">
+                <div class="d-flex align-center mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Color="Color.Primary" Class="mr-2" />
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Questões Associadas</MudText>
+                </div>
+
+                @if (questoes?.Count > 0)
+                {
+                    <MudList T="string" Dense="true" Class="py-0">
+                        @foreach (var questao in questoes)
+                        {
+                            <MudListItem T="string" Class="px-0">
+                                <MudPaper Elevation="0" Class="pa-3 mb-2 rounded" Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1); width: 100%;">
+                                    <div class="d-flex justify-space-between align-center">
+                                        <div>
+                                            <MudText Typo="Typo.body1">@questao.EnunciadoQuestao</MudText>
+                                            <div class="d-flex gap-2 mt-1">
+                                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Size="Size.Small">
+                                                    @questao.TemaQuestao
+                                                </MudChip>
+                                                <MudChip T="string" Color="@GetDifficultyColor(questao.DificuldadeQuestao)" 
+                                                         Variant="Variant.Outlined" Size="Size.Small">
+                                                    @questao.DificuldadeQuestao
+                                                </MudChip>
+                                            </div>
+                                        </div>
+                                        <MudButton Variant="Variant.Text"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small"
+                                                   Href="@($"/questao/{questao.IdQuestao}")"
+                                                   EndIcon="@Icons.Material.Filled.ArrowForward">
+                                            Ver
+                                        </MudButton>
+                                    </div>
+                                </MudPaper>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Transparent">Nenhuma questão associada</MudText>
+                }
+            </MudPaper>
+
+            <!-- Action Buttons -->
+            <MudDivider Class="my-6" />
+            <div class="d-flex justify-space-between">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Href="/atividades"
+                           StartIcon="@Icons.Material.Filled.ArrowBack">
+                    Voltar
+                </MudButton>
+                <div>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               Href="@($"/editar-atividade/{atividade.IdAtividade}")"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               Class="mr-2">
+                        Editar
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="() => deleteDialog.ShowAsync()">
+                        Excluir
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+</MudContainer>
+
+<!-- Delete Confirmation Dialog -->
+<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Confirmar Exclusão</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Deseja realmente excluir esta atividade?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteAtividadeAsync">Excluir</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AtividadeResponse? atividade;
+    private List<QuestaoResponse>? questoes;
+    private MudDialog deleteDialog = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load the activity
+            atividade = await AtividadesAPI.GetAtividadeByIdAsync(id);
+            
+            // Load associated questions if they exist
+            if (atividade?.TbQuestoesIdQuestaos?.Count() > 0)
+            {
+                var questions = new List<QuestaoResponse>();
+                foreach (var questionId in atividade.TbQuestoesIdQuestaos)
+                {
+                    var question = await QuestoesAPI.GetQuestaoByIdAsync(questionId);
+                    if (question != null)
+                    {
+                        questions.Add(question);
+                    }
+                }
+                questoes = questions;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao carregar atividade: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private Color GetDifficultyColor(string difficulty) =>
+        difficulty switch
+        {
+            "Fácil" => Color.Success,
+            "Média" => Color.Warning,
+            "Difícil" => Color.Error,
+            _ => Color.Default
+        };
+
+    private async Task DeleteAtividadeAsync()
+    {
+        try
+        {
+            // First remove all question associations
+            if (atividade?.TbQuestoesIdQuestaos?.Count() > 0)
+            {
+                foreach (var questaoId in atividade.TbQuestoesIdQuestaos)
+                {
+                    try
+                    {
+                        await AtividadesAPI.RemoveQuestaoFromAtividadeAsync(atividade.IdAtividade, questaoId);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log but continue with deletion
+                        Console.WriteLine($"Error removing question {questaoId} from activity: {ex.Message}");
+                    }
+                }
+            }
+
+            // Then delete the activity
+            await AtividadesAPI.DeleteAtividadeAsync(atividade.IdAtividade);
+            Snackbar.Add("Atividade excluída com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/atividades");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao excluir atividade: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            await deleteDialog.CloseAsync();
+        }
+    }
+}

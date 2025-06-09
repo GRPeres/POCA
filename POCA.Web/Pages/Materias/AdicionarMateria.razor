@@ -1,0 +1,168 @@
+﻿@* @page "/adicionar-materia"
+@using POCA.Web.Services.APIs
+@using POCA.API.Responses
+@inject MateriasAPI MateriasAPI
+@inject ProfessoresAPI ProfessoresAPI
+@inject AlunosAPI AlunosAPI
+@inject AtividadesAPI AtividadesAPI
+@inject NavigationManager NavManager
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+        <MudText Typo="Typo.h4" Class="mb-4">Adicionar Nova Matéria</MudText>
+
+        <MudStepper @bind-ActiveStep="_currentStep" Elevation="0">
+            <MudStep Label="Informações Básicas" Completed="_currentStep > 0">
+                <MudStepContent>
+                    <MudForm @ref="_formStep1" @bind-IsValid="_isValidStep1">
+                        <MudTextField @bind-Value="_nomeMateriaInput"
+                                      Label="Nome da Matéria *"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true" />
+                    </MudForm>
+                    <MudButton OnClick="GoToStep2" Disabled="@(!_isValidStep1)" Color="Color.Primary" Class="mt-4">Próximo</MudButton>
+                </MudStepContent>
+            </MudStep>
+
+            <MudStep Label="Selecionar Professores" Completed="_currentStep > 1">
+                <MudStepContent>
+                    <MudList T="bool">
+                        @foreach (var professor in _professores)
+                        {
+                            <MudListItem>
+                                <MudCheckBox T="bool" @bind-Value="IsSelectedProfessor[professor.IdProfessor]" />
+                                <MudText Class="ml-2">@professor.Nome</MudText>
+                            </MudListItem>
+                        }
+                    </MudList>
+                    <MudButton OnClick="GoToStep3" Disabled="@(!IsSelectedProfessor.Values.Any(v => v))" Color="Color.Primary" Class="mt-4">Próximo</MudButton>
+                </MudStepContent>
+            </MudStep>
+
+            <MudStep Label="Selecionar Alunos e Atividades">
+                <MudStepContent>
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.h6">Alunos</MudText>
+                            <MudList T="bool">
+                                @foreach (var aluno in _alunos)
+                                {
+                                    <MudListItem>
+                                        <MudCheckBox T="bool" @bind-Value="IsSelectedAluno[aluno.IdAluno]" />
+                                        <MudText Class="ml-2">@aluno.Nome</MudText>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.h6">Atividades</MudText>
+                            <MudList T="bool">
+                                @foreach (var atividade in _atividades)
+                                {
+                                    <MudListItem>
+                                        <MudCheckBox T="bool" @bind-Value="IsSelectedAtividade[atividade.IdAtividade]" />
+                                        <MudText Class="ml-2">@atividade.NomeAtividade</MudText>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudButton OnClick="HandleSubmit" Disabled="@_isSubmitting" Class="mt-4" Variant="Variant.Filled" Color="Color.Primary">
+                        @(_isSubmitting ? "Salvando..." : "Salvar Matéria")
+                    </MudButton>
+                </MudStepContent>
+            </MudStep>
+        </MudStepper>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private int _currentStep = 0;
+    private bool _isValidStep1 = false;
+    private bool _isSubmitting = false;
+
+    private MudForm _formStep1;
+
+    // Instead of binding directly to a model with init-only props:
+    private string _nomeMateriaInput;
+
+    // Data loaded from APIs
+    private List<ProfessorResponse> _professores = new();
+    private List<AlunoResponse> _alunos = new();
+    private List<AtividadeResponse> _atividades = new();
+
+    // Checkboxes state
+    private Dictionary<int, bool> IsSelectedProfessor = new();
+    private Dictionary<int, bool> IsSelectedAluno = new();
+    private Dictionary<int, bool> IsSelectedAtividade = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _professores = await ProfessoresAPI.GetProfessoresAsync() ?? new();
+        _alunos = await AlunosAPI.GetAlunosAsync() ?? new();
+        _atividades = await AtividadesAPI.GetAtividadesAsync() ?? new();
+
+        IsSelectedProfessor = _professores.ToDictionary(p => p.IdProfessor, _ => false);
+        IsSelectedAluno = _alunos.ToDictionary(a => a.IdAluno, _ => false);
+        IsSelectedAtividade = _atividades.ToDictionary(a => a.IdAtividade, _ => false);
+    }
+
+    private async Task GoToStep2()
+    {
+        await _formStep1.Validate();
+        if (_isValidStep1)
+            _currentStep = 1;
+    }
+
+    private void GoToStep3()
+    {
+        _currentStep = 2;
+    }
+
+    private async Task HandleSubmit()
+    {
+        _isSubmitting = true;
+
+        try
+        {
+            var materiaRequest = new MateriaRequest
+            {
+                NomeMateria = _nomeMateriaInput
+            };
+
+            var createdMateria = await MateriasAPI.AddMateriaAsync(materiaRequest);
+
+            if (createdMateria is not null)
+            {
+                var id = createdMateria.IdMateria;
+
+                foreach (var kv in IsSelectedProfessor.Where(kv => kv.Value))
+                    await MateriasAPI.AddProfessorToMateriaAsync(id, kv.Key);
+
+                foreach (var kv in IsSelectedAluno.Where(kv => kv.Value))
+                    await MateriasAPI.AddAlunoToMateriaAsync(id, kv.Key);
+
+                foreach (var kv in IsSelectedAtividade.Where(kv => kv.Value))
+                    await MateriasAPI.AddAtividadeToMateriaAsync(id, kv.Key);
+
+                Snackbar.Add("Matéria criada com sucesso!", Severity.Success);
+                NavManager.NavigateTo("/materias");
+            }
+            else
+            {
+                Snackbar.Add("Erro ao criar matéria.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
+        }
+
+        _isSubmitting = false;
+    }
+}
+ *@
