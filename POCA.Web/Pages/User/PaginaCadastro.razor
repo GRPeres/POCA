@@ -45,8 +45,12 @@
     <MudTextField @bind-Value="Credenciais.SenhaUsuario"
                   Label="Senha"
                   Variant="Variant.Filled"
-                  InputType="InputType.Password"
-                  Required
+                  InputType="(_showPassword ? InputType.Text : InputType.Password)"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                  OnAdornmentClick="TogglePasswordVisibility"
+                  Touched="true"
+                  Required="true"
                   RequiredError="Coloque sua senha"
                   Class="mt-3" />
 
@@ -56,10 +60,14 @@
     }
 
     <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
-                  Label="ConfirmarSenha"
+                  Label="Confirme sua Senha"
                   Variant="Variant.Filled"
-                  InputType="InputType.Password"
-                  Required
+                  InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="@(_showPasswordConfirmation? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                  OnAdornmentClick="TogglePasswordVisibility"
+                  Touched="true"
+                  Required="true"
                   RequiredError="Confirme a senha"
                   Class="mt-3" />
 
@@ -102,6 +110,9 @@ else
     private bool teste = false;
     private bool SenhaErrada = false;
     private bool deuErro = false;
+    private bool _showPassword = false;
+    private bool _showPasswordConfirmation = false;
+
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.nomeUsuario) &&
                             !string.IsNullOrWhiteSpace(Credenciais.SenhaUsuario) &&
@@ -128,6 +139,16 @@ else
     }
 
     // Para o cadastro
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    private void TogglePasswordConfirmationVisibility()
+    {
+        _showPassword = !_showPasswordConfirmation;
+    }
 
     public void NavigateMain()
     {
