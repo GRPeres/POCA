@@ -4,6 +4,7 @@
 @using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
+@inject Services.APIs.AlunosAPI AlunosAPI;
 
 <h2>Materias Alunos</h2>
 
@@ -12,15 +13,7 @@
 -->
 @if (UserSession.IsLoggedIn)
 {
-    @if (UserSession.CurrentUser.IsProfessor)
-    {
-        <MudText>Você já está logado como professor</MudText>
-
-    }
-    else
-    {
-        <MudText>Você já está logado como aluno</MudText>
-    }
+    <MudText>@materiasID</MudText>
 }
 else
 {
@@ -30,13 +23,21 @@ else
 
 @code
 {
+    public AlunoResponse? aluno;
+    public List<string> materiasID;
+
     // Obrigatorio para usar o UserSession
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
-        if (!UserSession.IsLoggedIn)
+
+        var aluno = await AlunosAPI.GetAlunosbyIDAsync((int) UserSession.CurrentUser.IdAluno!);
+        int y = 0;
+
+        foreach (var campo in aluno.MateriasIds.ToString())
         {
-            NavigateLogin();
+            materiasID[y] = campo.ToString();
+            y++;
         }
     }
 
@@ -53,4 +54,9 @@ else
     {
         NavigationManager.NavigateTo("/login");
     }
+
+    // aqui
+
+
+
 }

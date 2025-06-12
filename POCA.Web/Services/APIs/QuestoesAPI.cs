@@ -1,6 +1,5 @@
 ﻿// POCA.Web.Services.QuestoesAPI
 using System.Net.Http.Json;
-using static POCA.Web.Pages.Professor.Questoes.ImportarQuestoes;
 
 namespace POCA.Web.Services.APIs
 {

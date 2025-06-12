@@ -23,7 +23,7 @@
 }
 else
 {
-    <MudText>Você já não está logado</MudText>
+    <MudText>Você não está logado</MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
 }
 
@@ -33,10 +33,6 @@ else
     protected override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
-        if (!UserSession.IsLoggedIn)
-        {
-            NavigateLogin();
-        }
     }
 
     private void HandleUserSessionChanged()

@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
 using POCA.Web.Requests;
 
 namespace POCA.Web.Services.APIs
@@ -120,6 +121,5 @@ namespace POCA.Web.Services.APIs
             var response = await _httpClient.DeleteAsync($"materias/{idMateria}/atividades/{idAtividade}");
             return response.IsSuccessStatusCode;
         }
-
     }
 }
