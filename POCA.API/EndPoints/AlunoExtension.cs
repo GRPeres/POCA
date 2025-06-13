@@ -117,6 +117,33 @@ namespace POCA.API.EndPoints
                 return Results.NoContent();
             });
 
+            // GET all matérias for an aluno
+            group.MapGet("/{idAluno}/materias",
+                async ([FromServices] DbPocaContext context, int idAluno) =>
+                {
+                    var aluno = await context.TbAlunos
+                        .Include(a => a.TbMateriasIdMateria)
+                            .ThenInclude(m => m.TbProfessoresIdProfessors)
+                        .Include(a => a.TbMateriasIdMateria)
+                            .ThenInclude(m => m.TbAlunosIdAlunos)
+                        .Include(a => a.TbMateriasIdMateria)
+                            .ThenInclude(m => m.TbAtividadesIdAtividades)
+                        .FirstOrDefaultAsync(a => a.IdAluno == idAluno);
+
+                    if (aluno is null)
+                        return Results.NotFound("Aluno not found");
+
+                    var response = aluno.TbMateriasIdMateria.Select(m => new MateriaResponse(
+                        m.IdMateria,
+                        m.NomeMateria,
+                        m.TbProfessoresIdProfessors?.Select(p => p.IdProfessor),
+                        m.TbAlunosIdAlunos?.Select(a => a.IdAluno),
+                        m.TbAtividadesIdAtividades?.Select(at => at.IdAtividade)
+                    ));
+
+                    return Results.Ok(response);
+                });
+
             // Additional endpoints for relationships
             group.MapPost("/{idAluno}/materias/{idMateria}",
                 async ([FromServices] DbPocaContext context, int idAluno, int idMateria) =>

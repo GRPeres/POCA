@@ -94,26 +94,40 @@ namespace POCA.API.EndPoints
             // DELETE atividade
             group.MapDelete("/{id}", async ([FromServices] DbPocaContext context, int id) =>
             {
-                var materia = await context.TbMaterias
-                    .Include(m => m.TbProfessoresIdProfessors)
-                    .Include(m => m.TbAlunosIdAlunos)
-                    .Include(m => m.TbAtividadesIdAtividades)
-                    .FirstOrDefaultAsync(m => m.IdMateria == id);
+                // Include related materias and questions when loading the activity
+                var atividade = await context.TbAtividades
+                    .Include(a => a.TbMateriasIdMateria)
+                    .Include(a => a.TbQuestoesIdQuestaos)
+                    .FirstOrDefaultAsync(a => a.IdAtividade == id);
 
-                if (materia is null)
-                    return Results.NotFound();
+                if (atividade is null) return Results.NotFound();
 
-                // Remove relationships
-                materia.TbProfessoresIdProfessors.Clear();
-                materia.TbAlunosIdAlunos.Clear();
-                materia.TbAtividadesIdAtividades.Clear();
+                try
+                {
+                    // Remove all materia associations first
+                    foreach (var materia in atividade.TbMateriasIdMateria.ToList())
+                    {
+                        atividade.TbMateriasIdMateria.Remove(materia);
+                    }
 
-                await context.SaveChangesAsync(); // Save after clearing relationships
+                    // Remove all question associations
+                    foreach (var questao in atividade.TbQuestoesIdQuestaos.ToList())
+                    {
+                        atividade.TbQuestoesIdQuestaos.Remove(questao);
+                    }
 
-                context.TbMaterias.Remove(materia);
-                await context.SaveChangesAsync(); // Save after removing entity
+                    // Now delete the activity
+                    context.TbAtividades.Remove(atividade);
+                    await context.SaveChangesAsync();
 
-                return Results.NoContent();
+                    return Results.NoContent();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Log the error details
+                    Console.WriteLine($"Error deleting activity: {ex.InnerException?.Message}");
+                    return Results.Problem("Could not delete activity due to database constraints");
+                }
             });
 
             // Additional endpoints for relationships

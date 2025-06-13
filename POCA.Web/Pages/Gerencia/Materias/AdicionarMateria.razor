@@ -17,11 +17,11 @@
                 <MudStepContent>
                     <MudForm @ref="_formStep1" @bind-IsValid="_isValidStep1">
                         <MudTextField @bind-Value="_nomeMateriaInput"
-                                      Label="Nome da Matéria *"
-                                      Required="true"
-                                      RequiredError="O nome é obrigatório"
-                                      Variant="Variant.Outlined"
-                                      FullWidth="true" />
+                        Label="Nome da Matéria *"
+                        Required="true"
+                        RequiredError="O nome é obrigatório"
+                        Variant="Variant.Outlined"
+                        FullWidth="true" />
                     </MudForm>
                 </MudStepContent>
             </MudStep>
@@ -80,15 +80,18 @@
                             <MudTd>@atividade.NomeAtividade</MudTd>
                         </RowTemplate>
                     </MudTable>
-
-                    <div class="d-flex justify-space-between mt-4">
-                        <MudButton Color="Color.Success" Disabled="@_isSubmitting" OnClick="HandleSubmit">
-                            @(_isSubmitting ? "Salvando..." : "Salvar Matéria")
-                        </MudButton>
-                    </div>
                 </MudStepContent>
             </MudStep>
         </MudStepper>
+
+        @if (_currentStep > 2)
+        {
+            <div class="d-flex justify-space-between mt-4">
+                <MudButton Color="Color.Success" Disabled="@_isSubmitting" OnClick="HandleSubmit">
+                    @(_isSubmitting ? "Salvando..." : "Salvar Matéria")
+                </MudButton>
+            </div>
+        }
     </MudPaper>
 </MudContainer>
 

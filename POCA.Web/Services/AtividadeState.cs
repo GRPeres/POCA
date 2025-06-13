@@ -1,5 +1,3 @@
-using POCA.Web.Pages.Professor.Questoes;
-
 namespace POCA.Web.Services
 {
     public class AtividadeState
