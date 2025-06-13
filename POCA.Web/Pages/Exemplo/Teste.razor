@@ -2,22 +2,33 @@
 @using MudBlazor
 @using POCA.Web
 
-<MudButton Variant="Variant.Filled" Color="@(_option == "A" ? Color.Primary : Color.Default)" OnClick="@(() => ChooseOption("A"))">
-    Opção A
-</MudButton>
+<MudCard Class="pa-4" Style="width: 320px; border-radius: 20px;">
+    <MudStack Direction="Row" Spacing="2">
+        <MudAvatar Icon="Icons.Material.Filled.School"
+                   Size="Size.Large"
+                   Color="Color.Dark"
+                   Style="background: linear-gradient(135deg, #cb00e4, #5c2d91);" />
+        <MudStack>
+            <MudText Typo="Typo.subtitle1" Class="fw-bold">Computação em Nuvem -</MudText>
+        </MudStack>
+    </MudStack>
 
-<MudButton Variant="Variant.Filled" Color="@(_option == "B" ? Color.Primary : Color.Default)" OnClick="@(() => ChooseOption("B"))">
-    Opção B
-</MudButton>
+    <MudDivider Class="my-2" />
 
-<p>Opção escolhida: @_option</p>
+    <MudStack Direction="Row" JustifyContent="SpaceBetween">
+        <MudText Typo="Typo.caption">Progresso</MudText>
+        <MudText Typo="Typo.caption">@($"{Progresso}%")</MudText>
+    </MudStack>
+
+    <MudProgressLinear Value="@Progresso"
+                       Color="Color.Primary"
+                       Height="10px"
+                       Rounded="true"
+                       Style="margin-top: 4px;" />
+</MudCard>
 
 @code {
-    private string _option = "A";
+    public int Progresso { get; set; } = 62;
 
-    void ChooseOption(string opt)
-    {
-        _option = opt;
-    }
 }
 

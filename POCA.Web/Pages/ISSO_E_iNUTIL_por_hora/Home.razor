@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
+@inject Services.APIs.AlunosAPI AlunosAPI;
 
 <PageTitle>Home</PageTitle>
 
@@ -12,8 +13,41 @@
     }
     else
     {
-        <MudText>Você já está logado como aluno</MudText>
+        <MudNavMenu>
+            <MudText>Quadro de Avisos</MudText>
+            <MudButton OnClick="AvisoVoltar">Voltar</MudButton>
+            <MudButton OnClick="AvisoProximo">Proximo</MudButton>
+        </MudNavMenu>
 
+        <MudText>@Avisos[posicao]</MudText>
+
+        @foreach (int materia in materiasID)
+        {
+            <MudCard Class="pa-4" Style="width: 320px; border-radius: 20px;">
+                <MudStack Direction="Row" Spacing="2">
+                    <MudAvatar Icon="Icons.Material.Filled.School"
+                               Size="Size.Large"
+                               Color="Color.Dark"
+                               Style="background: linear-gradient(135deg, #cb00e4, #5c2d91);" />
+                    <MudStack>
+                        <MudText Typo="Typo.subtitle1" Class="fw-bold">Computação em Nuvem -</MudText>
+                    </MudStack>
+                </MudStack>
+
+                <MudDivider Class="my-2" />
+
+                <MudStack Direction="Row" JustifyContent="SpaceBetween">
+                    <MudText Typo="Typo.caption">Progresso</MudText>
+                    <MudText Typo="Typo.caption">@($"{Progresso}%")</MudText>
+                </MudStack>
+
+                <MudProgressLinear Value="@Progresso"
+                                   Color="Color.Primary"
+                                   Height="10px"
+                                   Rounded="true"
+                                   Style="margin-top: 4px;" />
+            </MudCard>
+        }
     }
 }
 else
@@ -24,9 +58,18 @@ else
 
 @code
 {
-    protected override void OnInitialized()
+    public List<string> Avisos = new() { "Aviso 1", "Aviso 2", "Aviso 3", "Aviso 4" };
+    public int posicao;
+    public int Progresso;
+
+    public List<int> materiasID = new();
+
+    protected override async void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
+        posicao = 0;
+
+        await getMaterias();
     }
 
     private void HandleUserSessionChanged()
@@ -38,9 +81,48 @@ else
     {
         UserSession.OnChange -= HandleUserSessionChanged;
     }
-    
+
     public void NavigateLogin()
     {
         NavigationManager.NavigateTo("/login");
+    }
+
+    // Começo
+    public void AvisoProximo()
+    {
+        if (posicao < Avisos.Count - 1)
+        {
+            posicao++;
+        }else
+        {
+            posicao = 0;
+        }
+    }
+
+    public void AvisoVoltar()
+    {
+        if (posicao > 0)
+        {
+            posicao--;
+        }
+        else
+        {
+            posicao = Avisos.Count - 1;
+        }
+    }
+
+    public async Task getMaterias()
+    {
+        var aluno = await AlunosAPI.GetAlunosbyIDAsync((int)UserSession.CurrentUser.IdAluno!);
+        int y = 0;
+
+        if (aluno.MateriasIds.ToString() != null)
+        {
+            foreach (var campo in aluno.MateriasIds.ToString())
+            {
+                materiasID[y] = campo;
+                y++;
+            }
+        }
     }
 }
