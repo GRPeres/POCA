@@ -24,7 +24,7 @@
 else
 {
     <MudText>Você não está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/login">Logar</MudButton>
 }
 
 @code
@@ -43,9 +43,5 @@ else
     public void Dispose()
     {
         UserSession.OnChange -= HandleUserSessionChanged;
-    }
-    public void NavigateLogin()
-    {
-        NavigationManager.NavigateTo("/login");
     }
 }

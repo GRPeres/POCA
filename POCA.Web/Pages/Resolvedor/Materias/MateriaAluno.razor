@@ -1,5 +1,4 @@
 ﻿@page "/materias-alunos"
-
 @using MudBlazor
 @using POCA.Web
 @inject UserSessionService UserSession
@@ -18,27 +17,17 @@
 else
 {
     <MudText>Você já não está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/login">Logar</MudButton>
 }
 
 @code
 {
-    public AlunoResponse? aluno;
     public List<string> materiasID;
 
     // Obrigatorio para usar o UserSession
     protected override async void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
-
-        var aluno = await AlunosAPI.GetAlunosbyIDAsync((int) UserSession.CurrentUser.IdAluno!);
-        int y = 0;
-
-        foreach (var campo in aluno.MateriasIds.ToString())
-        {
-            materiasID[y] = campo.ToString();
-            y++;
-        }
     }
 
     private void HandleUserSessionChanged()
@@ -50,13 +39,21 @@ else
     {
         UserSession.OnChange -= HandleUserSessionChanged;
     }
-    public void NavigateLogin()
+
+    // Aqui começa
+
+    public async void getMaterias()
     {
-        NavigationManager.NavigateTo("/login");
+        var aluno = await AlunosAPI.GetAlunosbyIDAsync((int)UserSession.CurrentUser.IdAluno!);
+        int y = 0;
+
+        if (aluno.MateriasIds.ToString() != null)
+        {
+            foreach (var campo in aluno.MateriasIds.ToString())
+            {
+                materiasID[y] = campo.ToString();
+                y++;
+            }
+        }
     }
-
-    // aqui
-
-
-
 }
