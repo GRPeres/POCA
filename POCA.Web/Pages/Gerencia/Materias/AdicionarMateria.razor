@@ -80,18 +80,22 @@
                             <MudTd>@atividade.NomeAtividade</MudTd>
                         </RowTemplate>
                     </MudTable>
+
+
+                    <MudButton OnClick="HandleSubmit" Disabled="_isSubmitting" Variant="Variant.Filled" Color="Color.Primary">
+                        @if (_isSubmitting)
+                        {
+                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Inherit" Class="me-2" />
+                            <MudText>Salvando...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Salvar</MudText>
+                        }
+                    </MudButton>
                 </MudStepContent>
             </MudStep>
         </MudStepper>
-
-        @if (_currentStep > 2)
-        {
-            <div class="d-flex justify-space-between mt-4">
-                <MudButton Color="Color.Success" Disabled="@_isSubmitting" OnClick="HandleSubmit">
-                    @(_isSubmitting ? "Salvando..." : "Salvar Matéria")
-                </MudButton>
-            </div>
-        }
     </MudPaper>
 </MudContainer>
 
