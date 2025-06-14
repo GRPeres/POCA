@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `tb_alunos`;
 CREATE TABLE `tb_alunos` (
   `id_aluno` int NOT NULL AUTO_INCREMENT,
   `nome_aluno` varchar(45) NOT NULL,
-  `nascimento_aluno` date NOT NULL,
+  `idade_aluno` int NOT NULL,
   `progresso_aluno` int NOT NULL,
   `contato_aluno` varchar(45) NOT NULL,
   PRIMARY KEY (`id_aluno`),
@@ -42,7 +42,7 @@ CREATE TABLE `tb_alunos` (
 
 LOCK TABLES `tb_alunos` WRITE;
 /*!40000 ALTER TABLE `tb_alunos` DISABLE KEYS */;
-INSERT INTO `tb_alunos` VALUES (1,'Alice Silva','2002-02-02',40,'alice@email.com'),(2,'Carla Souza','2003-03-03',60,'carla@email.com'),(3,'Ellen Moura','2004-04-04',75,'ellen@email.com'),(4,'Felipe Costa','2001-05-10',30,'felipe@email.com'),(5,'Gabriela Martins','2000-07-15',50,'gabriela@email.com'),(6,'Heitor Oliveira','1999-08-20',80,'heitor@email.com');
+INSERT INTO `tb_alunos` VALUES (1,'Alice Silva','15',40,'alice@email.com'),(2,'Carla Souza','25',60,'carla@email.com'),(3,'Ellen Moura','36',75,'ellen@email.com'),(4,'Felipe Costa','84',30,'felipe@email.com'),(5,'Gabriela Martins','10',50,'gabriela@email.com'),(6,'Heitor Oliveira','54',80,'heitor@email.com');
 /*!40000 ALTER TABLE `tb_alunos` ENABLE KEYS */;
 UNLOCK TABLES;
 
