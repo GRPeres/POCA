@@ -60,11 +60,10 @@ namespace POCA.Web.Services.APIs
         }
 
         // Get all matérias for a professor
-        public async Task<ICollection<MateriaResponse>?> GetMateriasByProfessorAsync(int idProfessor, CancellationToken cancellationToken = default)
+        public async Task<ICollection<MateriaResponse>?> GetMateriasByProfessorAsync(int idProfessor)
         {
             return await _httpClient.GetFromJsonAsync<ICollection<MateriaResponse>>(
-                $"professores/{idProfessor}/materias",
-                cancellationToken);
+                $"professores/{idProfessor}/materias");
         }
 
         public async Task AddMateriaToProfessorAsync(int idProfessor, int idMateria, CancellationToken cancellationToken = default)

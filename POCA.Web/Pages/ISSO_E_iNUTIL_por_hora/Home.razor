@@ -21,39 +21,23 @@
 
         <MudText>@Avisos[posicao]</MudText>
 
-        @foreach (int materia in materiasID)
+
+        if (_isLoanding)
         {
-            <MudCard Class="pa-4" Style="width: 320px; border-radius: 20px;">
-                <MudStack Direction="Row" Spacing="2">
-                    <MudAvatar Icon="Icons.Material.Filled.School"
-                               Size="Size.Large"
-                               Color="Color.Dark"
-                               Style="background: linear-gradient(135deg, #cb00e4, #5c2d91);" />
-                    <MudStack>
-                        <MudText Typo="Typo.subtitle1" Class="fw-bold">Computação em Nuvem -</MudText>
-                    </MudStack>
-                </MudStack>
-
-                <MudDivider Class="my-2" />
-
-                <MudStack Direction="Row" JustifyContent="SpaceBetween">
-                    <MudText Typo="Typo.caption">Progresso</MudText>
-                    <MudText Typo="Typo.caption">@($"{Progresso}%")</MudText>
-                </MudStack>
-
-                <MudProgressLinear Value="@Progresso"
-                                   Color="Color.Primary"
-                                   Height="10px"
-                                   Rounded="true"
-                                   Style="margin-top: 4px;" />
-            </MudCard>
+            <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>        
+        }else
+        {
+            @foreach (var materia in TodasMaterias)
+            {
+                <MudText>@materia</MudText>
+            }
         }
     }
 }
 else
 {
     <MudText>Você já não está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="NavigateLogin">Logar</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/login">Logar</MudButton>
 }
 
 @code
@@ -61,8 +45,9 @@ else
     public List<string> Avisos = new() { "Aviso 1", "Aviso 2", "Aviso 3", "Aviso 4" };
     public int posicao;
     public int Progresso;
+    public bool _isLoanding = true;
 
-    public List<int> materiasID = new();
+    public List<MateriaResponse> TodasMaterias = new();
 
     protected override async void OnInitialized()
     {
@@ -70,6 +55,7 @@ else
         posicao = 0;
 
         await getMaterias();
+
     }
 
     private void HandleUserSessionChanged()
@@ -80,11 +66,6 @@ else
     public void Dispose()
     {
         UserSession.OnChange -= HandleUserSessionChanged;
-    }
-
-    public void NavigateLogin()
-    {
-        NavigationManager.NavigateTo("/login");
     }
 
     // Começo
@@ -113,16 +94,18 @@ else
 
     public async Task getMaterias()
     {
-        var aluno = await AlunosAPI.GetAlunosbyIDAsync((int)UserSession.CurrentUser.IdAluno!);
-        int y = 0;
+        _isLoanding = true;
+        var aluno = await AlunosAPI.GetMateriasByAlunoAsync((int)UserSession.CurrentUser.IdAluno!);
 
-        if (aluno.MateriasIds.ToString() != null)
+
+        if(aluno != null)
         {
-            foreach (var campo in aluno.MateriasIds.ToString())
+            foreach (var materia in aluno)
             {
-                materiasID[y] = campo;
-                y++;
+                TodasMaterias.Add(materia);
             }
         }
+        
+        _isLoanding = false;
     }
 }

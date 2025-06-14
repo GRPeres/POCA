@@ -133,7 +133,7 @@
                 <!-- User Profile Dropdown -->
                 <MudMenu Direction="Direction.Left">
                     <ActivatorContent>
-                        <MudText Text="@(_isDarkMode ? "blue" : "red")" Class="d-flex justify-center align-center" >@UserSession.CurrentUser.Login</MudText>
+                        <MudText Text="@(_isDarkMode ? Color.Primary : Color.Dark)" Class="d-flex justify-center align-center" >@UserSession.CurrentUser.Login</MudText>
                         <MudAvatar Color="Color.Primary" Class="ml-2">
                             <MudIcon Icon="@Icons.Material.Filled.Person" />
                         </MudAvatar>

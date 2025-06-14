@@ -54,7 +54,7 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
-                       OnClick="navigateCadastro"
+                       Href="/cadastro"
                        FullWidth="true">
                 Criar conta
             </MudButton>
@@ -65,7 +65,7 @@
         <MudText Typo="Typo.h6" Class="text-center mb-4">Você já está logado</MudText>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
-                   OnClick="navigateMain"
+                   Href="/"
                    FullWidth="true">
             Voltar
         </MudButton>
@@ -153,15 +153,5 @@
     private void TogglePasswordVisibility()
     {
         _showPassword = !_showPassword;
-    }
-
-    private void navigateMain()
-    {
-        NavigationManager.NavigateTo("/");
-    }
-
-    private void navigateCadastro()
-    {
-        NavigationManager.NavigateTo("/cadastro");
     }
 }
