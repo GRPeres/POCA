@@ -13,6 +13,7 @@
         <MudText Typo="Typo.h4" Class="mb-4">Editar Matéria</MudText>
 
         <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Linear="true" HideNavigation="true">
+            <!-- Step 1: Nome da Matéria -->
             <MudStep Label="Nome da Matéria" Completed="_currentStep > 0">
                 <MudStepContent>
                     <MudForm @ref="_formStep1" @bind-IsValid="_isValidStep1">
@@ -26,6 +27,7 @@
                 </MudStepContent>
             </MudStep>
 
+            <!-- Step 2: Selecionar Professores -->
             <MudStep Label="Selecionar Professores" Completed="_currentStep > 1">
                 <MudStepContent>
                     <MudTextField @bind-Value="_searchProfessor" Placeholder="Pesquisar professores..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
@@ -45,6 +47,7 @@
                 </MudStepContent>
             </MudStep>
 
+            <!-- Step 3: Selecionar Alunos -->
             <MudStep Label="Selecionar Alunos" Completed="_currentStep > 2">
                 <MudStepContent>
                     <MudTextField @bind-Value="_searchAluno" Placeholder="Pesquisar alunos..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
@@ -64,6 +67,7 @@
                 </MudStepContent>
             </MudStep>
 
+            <!-- Step 4: Selecionar Atividades -->
             <MudStep Label="Selecionar Atividades" Completed="_currentStep > 3">
                 <MudStepContent>
                     <MudTextField @bind-Value="_searchAtividade" Placeholder="Pesquisar atividades..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
@@ -81,11 +85,19 @@
                         </RowTemplate>
                     </MudTable>
 
-                    <div class="d-flex justify-space-between mt-4">
-                        <MudButton Color="Color.Success" Disabled="@_isSubmitting" OnClick="HandleSubmit">
-                            @(_isSubmitting ? "Salvando..." : "Salvar Matéria")
+                    <MudStack Direction="Row" Justify="Justify.SpaceBetween" Spacing="2" Class="mt-6">
+                        <MudButton OnClick="HandleSubmit" Disabled="_isSubmitting" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">
+                            @if (_isSubmitting)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Inherit" Class="me-2" />
+                                <MudText>Salvando...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Salvar</MudText>
+                            }
                         </MudButton>
-                    </div>
+                    </MudStack>
                 </MudStepContent>
             </MudStep>
         </MudStepper>

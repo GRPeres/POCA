@@ -9,35 +9,40 @@
 @inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
-    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-        <MudText Typo="Typo.h4" Class="mb-4">Adicionar Nova Matéria</MudText>
+    <MudPaper Elevation="6" Class="pa-6 rounded-lg">
 
-        <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Linear="true" HideNavigation="true">
+        <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Adicionar Nova Matéria</MudText>
+
+        <MudStepper @bind-ActiveStep="_currentStep" Elevation="1" Linear="true">
             <MudStep Label="Nome da Matéria" Completed="_currentStep > 0">
                 <MudStepContent>
                     <MudForm @ref="_formStep1" @bind-IsValid="_isValidStep1">
                         <MudTextField @bind-Value="_nomeMateriaInput"
-                        Label="Nome da Matéria *"
-                        Required="true"
-                        RequiredError="O nome é obrigatório"
-                        Variant="Variant.Outlined"
-                        FullWidth="true" />
+                                      Label="Nome da Matéria *"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Immediate="true"
+                                      Class="mb-6" />
                     </MudForm>
                 </MudStepContent>
             </MudStep>
 
             <MudStep Label="Selecionar Professores" Completed="_currentStep > 1">
                 <MudStepContent>
-                    <MudTextField @bind-Value="_searchProfessor" Placeholder="Pesquisar professores..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
+                    <MudTextField @bind-Value="_searchProfessor" Placeholder="Pesquisar professores..."
+                                  Variant="Variant.Outlined" Adornment="Adornment.Start" 
+                                  AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-3" FullWidth="true" />
 
-                    <MudTable Items="@FilteredProfessores" Hover="true" Bordered="true" Dense="true">
+                    <MudTable Items="@FilteredProfessores" Hover="true" Bordered="true" Dense="true" Elevation="0">
                         <HeaderContent>
-                            <MudTh>Selecionar</MudTh>
+                            <MudTh Width="5%">Selecionar</MudTh>
                             <MudTh>Nome</MudTh>
                         </HeaderContent>
                         <RowTemplate Context="professor">
                             <MudTd>
-                                <MudCheckBox T="bool" @bind-Value="IsSelectedProfessor[professor.IdProfessor]" />
+                                <MudCheckBox T="bool" @bind-Value="IsSelectedProfessor[professor.IdProfessor]" Color="Color.Primary" />
                             </MudTd>
                             <MudTd>@professor.NomeProfessor</MudTd>
                         </RowTemplate>
@@ -47,16 +52,18 @@
 
             <MudStep Label="Selecionar Alunos" Completed="_currentStep > 2">
                 <MudStepContent>
-                    <MudTextField @bind-Value="_searchAluno" Placeholder="Pesquisar alunos..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
+                    <MudTextField @bind-Value="_searchAluno" Placeholder="Pesquisar alunos..."
+                                  Variant="Variant.Outlined" Adornment="Adornment.Start" 
+                                  AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-3" FullWidth="true" />
 
-                    <MudTable Items="@FilteredAlunos" Hover="true" Bordered="true" Dense="true">
+                    <MudTable Items="@FilteredAlunos" Hover="true" Bordered="true" Dense="true" Elevation="0">
                         <HeaderContent>
-                            <MudTh>Selecionar</MudTh>
+                            <MudTh Width="5%">Selecionar</MudTh>
                             <MudTh>Nome</MudTh>
                         </HeaderContent>
                         <RowTemplate Context="aluno">
                             <MudTd>
-                                <MudCheckBox T="bool" @bind-Value="IsSelectedAluno[aluno.IdAluno]" />
+                                <MudCheckBox T="bool" @bind-Value="IsSelectedAluno[aluno.IdAluno]" Color="Color.Primary" />
                             </MudTd>
                             <MudTd>@aluno.NomeAluno</MudTd>
                         </RowTemplate>
@@ -66,33 +73,37 @@
 
             <MudStep Label="Selecionar Atividades" Completed="_currentStep > 3">
                 <MudStepContent>
-                    <MudTextField @bind-Value="_searchAtividade" Placeholder="Pesquisar atividades..." Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-2" FullWidth="true" />
+                    <MudTextField @bind-Value="_searchAtividade" Placeholder="Pesquisar atividades..."
+                                  Variant="Variant.Outlined" Adornment="Adornment.Start" 
+                                  AdornmentIcon="@Icons.Material.Filled.Search" Class="mb-3" FullWidth="true" />
 
-                    <MudTable Items="@FilteredAtividades" Hover="true" Bordered="true" Dense="true">
+                    <MudTable Items="@FilteredAtividades" Hover="true" Bordered="true" Dense="true" Elevation="0">
                         <HeaderContent>
-                            <MudTh>Selecionar</MudTh>
+                            <MudTh Width="5%">Selecionar</MudTh>
                             <MudTh>Nome</MudTh>
                         </HeaderContent>
                         <RowTemplate Context="atividade">
                             <MudTd>
-                                <MudCheckBox T="bool" @bind-Value="IsSelectedAtividade[atividade.IdAtividade]" />
+                                <MudCheckBox T="bool" @bind-Value="IsSelectedAtividade[atividade.IdAtividade]" Color="Color.Primary" />
                             </MudTd>
                             <MudTd>@atividade.NomeAtividade</MudTd>
                         </RowTemplate>
                     </MudTable>
 
-
-                    <MudButton OnClick="HandleSubmit" Disabled="_isSubmitting" Variant="Variant.Filled" Color="Color.Primary">
-                        @if (_isSubmitting)
-                        {
-                            <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Inherit" Class="me-2" />
-                            <MudText>Salvando...</MudText>
-                        }
-                        else
-                        {
-                            <MudText>Salvar</MudText>
-                        }
-                    </MudButton>
+                    <MudStack Direction="Row" Justify="Justify.SpaceBetween" Spacing="2" Class="mt-6">
+                       
+                        <MudButton OnClick="HandleSubmit" Disabled="_isSubmitting" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">
+                            @if (_isSubmitting)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Inherit" Class="me-2" />
+                                <MudText>Salvando...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Salvar</MudText>
+                            }
+                        </MudButton>
+                    </MudStack>
                 </MudStepContent>
             </MudStep>
         </MudStepper>
