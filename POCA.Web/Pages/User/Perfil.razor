@@ -7,84 +7,106 @@
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 
-@if (paginicial)
-{
-    @if (UserSession.CurrentUser.IsProfessor)
+<MudPaper Elevation="4" Class="pa-4 ma-2 rounded">
+    <MudText>@Erro</MudText>
+    @if (paginicial)
     {
-        <MudText>Nome: @Professor.NomeProfessor</MudText>
-        <MudText>Contato: @Professor.ContatoProfessor</MudText>
+        <MudStack Spacing="2">
+            @if (UserSession.CurrentUser != null && UserSession.CurrentUser.IdProfessor.HasValue)
+            {
+                <MudText Typo="Typo.h6" Color="Color.Primary">Informações do Professor</MudText>
+                <MudDivider />
+                <MudText><b>Nome:</b> @Professor.NomeProfessor</MudText>
+                <MudText><b>Contato:</b> @Professor.ContatoProfessor</MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Color="Color.Primary">Informações do Aluno</MudText>
+                <MudDivider />
+                <MudText><b>Nome:</b> @Aluno.NomeAluno</MudText>
+                <MudText><b>Contato:</b> @Aluno.ContatoAluno</MudText>
+                <MudText><b>Idade:</b> @Aluno.IdadeAluno</MudText>
+            }
+        </MudStack>
     }
     else
     {
-        <MudText>Nome: @Aluno.NomeAluno</MudText>
-        <MudText>Contato: @Aluno.ContatoAluno</MudText>
-        <MudText>Idade: @Aluno.IdadeAluno</MudText>
+        <MudText>IsLoggedIn: @UserSession.IsLoggedIn</MudText>
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+        <MudText>Professor: @Professor.NomeProfessor</MudText>
+        <MudText>Aluno: @Aluno.NomeAluno</MudText>
+        <MudText>Page loaded: @paginicial</MudText>
+
     }
-}else
-{
-    <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>
-}
+</MudPaper>
 
 @code
 {
     public string Erro = "";
 
-    public ProfessorResponse Professor = new ProfessorResponse(0, "", "", "");
-    public AlunoResponse Aluno = new AlunoResponse(0,"",0,0,"",null,null);
     public bool paginicial = false;
+    public ProfessorResponse Professor { get; set; } = new ProfessorResponse(0, "", "", "");
+    public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", 0, 0, "", null, null);
 
-    // Obrigatorio para usar o UserSession
-    protected async override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         UserSession.OnChange += HandleUserSessionChanged;
 
-        await GetCurrentUser();
-        paginicial = true;
+        if (UserSession.IsLoggedIn)
+        {
+            await LoadUserDataAsync();
+        }
     }
 
-    private void HandleUserSessionChanged()
+    private async void HandleUserSessionChanged()
     {
-        InvokeAsync(StateHasChanged);
+        if (UserSession.IsLoggedIn)
+        {
+            await LoadUserDataAsync();
+        }
+        else
+        {
+            paginicial = false;
+            Erro = "Usuário não está logado.";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadUserDataAsync()
+    {
+        try
+        {
+            if (UserSession.CurrentUser == null)
+            {
+                Console.WriteLine("UserSession.CurrentUser is null");
+                Erro = "Usuário não encontrado.";
+                return;
+            }
+
+            if (UserSession.CurrentUser.IdProfessor.HasValue)
+            {
+                Professor = await ProfessoresAPI.GetProfessorbyidAsync(UserSession.CurrentUser.IdProfessor.Value);
+            }
+            else
+            {
+                Aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
+            }
+
+
+            paginicial = true;
+            Console.WriteLine("paginicial set to true");
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Erro: {ex.Message}";
+            Console.WriteLine($"Caught exception: {ex}");
+        }
+
+        await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
         UserSession.OnChange -= HandleUserSessionChanged;
-    }
-
-    // Começa aqui
-
-
-    private async Task GetCurrentUser()
-    {
-        try
-        {
-            if (UserSession.IsLoggedIn && UserSession.CurrentUser.IsProfessor)
-            {
-                int id = (int)UserSession.CurrentUser.IdProfessor!;
-                Professor = await ProfessoresAPI.GetProfessorbyidAsync(id);
-                paginicial = true;
-            }
-        else if (UserSession.IsLoggedIn && !UserSession.CurrentUser.IsProfessor)
-            {
-                int id = (int)UserSession.CurrentUser.IdAluno!;
-                Aluno = await AlunosAPI.GetAlunosbyIDAsync(id);
-                paginicial = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Erro = $"Error: {ex.Message}";
-        }
-
-        StateHasChanged();
-    }
-        
-    private string FormatJsonResponse(object obj)
-    {
-        return JsonSerializer.Serialize(obj, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
     }
 }

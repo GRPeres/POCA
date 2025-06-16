@@ -5,6 +5,8 @@
 
 <PageTitle>Home</PageTitle>
 
+<MudText>@Erro</MudText>
+
 @if (UserSession.IsLoggedIn)
 {
     @if (UserSession.CurrentUser.IsProfessor)
@@ -22,15 +24,15 @@
         <MudText>@Avisos[posicao]</MudText>
 
 
-        if (_isLoanding)
-        {
-            <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>        
-        }else
+        if (!_isLoading)
         {
             @foreach (var materia in TodasMaterias)
             {
                 <MudText>@materia</MudText>
             }
+        }else
+        {
+            <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>
         }
     }
 }
@@ -43,19 +45,21 @@ else
 @code
 {
     public List<string> Avisos = new() { "Aviso 1", "Aviso 2", "Aviso 3", "Aviso 4" };
+    public string Erro = "";
     public int posicao;
     public int Progresso;
-    public bool _isLoanding = true;
+    public bool _isLoading = true;
 
     public List<MateriaResponse> TodasMaterias = new();
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         UserSession.OnChange += HandleUserSessionChanged;
-        posicao = 0;
 
-        await getMaterias();
-
+        if (UserSession.IsLoggedIn)
+        {
+            await GetMaterias();
+        }
     }
 
     private void HandleUserSessionChanged()
@@ -92,20 +96,59 @@ else
         }
     }
 
-    public async Task getMaterias()
+    public async Task GetMaterias()
     {
-        _isLoanding = true;
-        var aluno = await AlunosAPI.GetMateriasByAlunoAsync((int)UserSession.CurrentUser.IdAluno!);
-
-
-        if(aluno != null)
+        try
         {
-            foreach (var materia in aluno)
+            if (UserSession.CurrentUser == null)
             {
-                TodasMaterias.Add(materia);
+                Console.WriteLine("Current user is null. Cannot retrieve subjects.");
+                return;
+            }
+
+            _isLoading = true;
+            Console.WriteLine("Loading subjects...");
+
+            if (!UserSession.CurrentUser.IdAluno.HasValue)
+            {
+                Console.WriteLine("User ID is missing. Cannot retrieve subjects.");
+                _isLoading = false;
+                return;
+            }
+
+            var materiasFromApi = await AlunosAPI.GetMateriasByAlunoAsync(UserSession.CurrentUser.IdAluno.Value);
+
+            if (materiasFromApi != null)
+            {
+                TodasMaterias.Clear();
+
+                foreach (var materia in materiasFromApi)
+                {
+                    TodasMaterias.Add(materia);
+                    Console.WriteLine($"Subject retrieved: {materia.IdMateria}");
+                }
+                Console.WriteLine($"Successfully loaded {TodasMaterias.Count} subjects.");
+            }
+            else
+            {
+                Console.WriteLine("No subjects found for the current user.");
             }
         }
-        
-        _isLoanding = false;
+        catch (HttpRequestException httpEx)
+        {
+            Erro = $"Network error: {httpEx.Message}. Please check your internet connection.";
+            Console.WriteLine($"Caught HTTP exception: {httpEx}");
+        }
+        catch (Exception ex)
+        {
+            Erro = $"An unexpected error occurred: {ex.Message}";
+            Console.WriteLine($"Caught general exception: {ex}");
+        }
+        finally
+        {
+            _isLoading = false;
+            Console.WriteLine("_isLoading set to false.");
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }
