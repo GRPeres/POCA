@@ -8,6 +8,7 @@ using POCA.Web.Services;
 using POCA.Web.Services.APIs;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
