@@ -4,6 +4,6 @@ public record ProfessorResponse(
     string NomeProfessor,
     string MateriaProfessor,
     string ContatoProfessor,
-    IEnumerable<int>? IdsMaterias = null,
-    IEnumerable<int>? IdsPessoas = null
+    IEnumerable<int>? MateriasIds = null,
+    IEnumerable<int>? PessoasIds = null
 );
