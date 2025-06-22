@@ -1,0 +1,115 @@
+﻿@page "/materia-sala/{idMateria:int}"
+@using POCA.API.Responses
+@using POCA.Web.Response
+@using MudBlazor
+@inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
+@inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
+@inject UserSessionService UserSession
+
+<PageTitle>Matéria</PageTitle>
+
+<MudPaper Class="p-6 max-w-screen-lg mx-auto">
+    @if (!UserSession.IsLoggedIn)
+    {
+        <MudPaper Elevation="1" Class="pa-4 ma-4 text-center">
+            <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
+        </MudPaper>
+    }
+    else if (materia is null)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <MudStack Row Class="mb-4">
+            <MudText Typo="Typo.h5">@materia.NomeMateria</MudText>
+
+            @if (UserSession.CurrentUser?.IsProfessor == true && !string.IsNullOrWhiteSpace(nomeProfessor))
+            {
+                <MudText Typo="Typo.subtitle2" Class="ml-4 text-secondary">
+                    (Prof. @nomeProfessor)
+                </MudText>
+            }
+        </MudStack>
+
+        <MudExpansionPanels MultiExpansion="true" ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudExpansionPanel Text="Geral">
+                <MudList T="string" Dense="true">
+                    <MudListItem Icon="@Icons.Material.Filled.Notifications">Avisos</MudListItem>
+                </MudList>
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Text="Quizes e Atividades">
+                @if (avaliacoes.Any())
+                {
+                    @foreach (var a in avaliacoes)
+                    {
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Assignment">@a.Titulo</MudListItem>
+                    }
+                }
+                else
+                {
+                    <MudText>Nenhuma atividade encontrada.</MudText>
+                }
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Text="Materiais">
+                @if (materiais.Any())
+                {
+                    @foreach (var m in materiais)
+                    {
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Folder">@m.Titulo</MudListItem>
+                    }
+                }
+                else
+                {
+                    <MudText>Nenhum material encontrado.</MudText>
+                }
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public int idMateria { get; set; }
+
+    private MateriaResponse? materia;
+    private string? nomeProfessor;
+
+    private List<ItemMateria> avaliacoes = new();
+    private List<ItemMateria> materiais = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!UserSession.IsLoggedIn)
+            return;
+
+        materia = await MateriasAPI.GetMateriaAsync(idMateria);
+
+        if (materia is not null && UserSession.CurrentUser?.IsProfessor == true)
+        {
+            var idProf = materia.tbProfessoresIdProfessors?.FirstOrDefault();
+            if (idProf.HasValue)
+            {
+                var professor = await ProfessoresAPI.GetProfessorbyidAsync(idProf.Value);
+                nomeProfessor = professor?.ContatoProfessor;
+            }
+
+            // Mock (substitua depois por dados reais se quiser)
+            avaliacoes = new()
+            {
+                new("Quiz 1 - Visualização de Dados"),
+                new("Atividade 2 - Estatística Descritiva")
+            };
+
+            materiais = new()
+            {
+                new("Slides - Introdução"),
+                new("PDF - Leitura obrigatória")
+            };
+        }
+    }
+
+    public record ItemMateria(string Titulo);
+}
