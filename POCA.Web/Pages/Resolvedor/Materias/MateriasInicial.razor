@@ -202,8 +202,10 @@
                     console.warn('enableHorizontalWheel: Element not found for selector:', selector);
                     return;
                 }
+                console.log('enableHorizontalWheel: Attaching wheel listener to:', selector);
 
                 el.addEventListener('wheel', function(e) {
+                    console.log('enableHorizontalWheel: Wheel event detected. deltaY =', e.deltaY);
                     if (e.deltaY !== 0) {
                         el.scrollLeft += e.deltaY;
                         e.preventDefault();
@@ -214,7 +216,7 @@
             await JSRuntime.InvokeVoidAsync("eval", jsCode);
             await JSRuntime.InvokeVoidAsync("enableHorizontalWheel", ".cards-wrapper");
 
-            hasRenderedCards = false;
+            hasRenderedCards = false;// prevent re-injection on future renders
         }
     }
 }
