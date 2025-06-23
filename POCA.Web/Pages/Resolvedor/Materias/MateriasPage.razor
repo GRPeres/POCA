@@ -2,9 +2,12 @@
 @using POCA.API.Responses
 @using POCA.Web.Response
 @using MudBlazor
+
 @inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
 @inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
+@inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
 @inject UserSessionService UserSession
+@inject NavigationManager NavigationManager
 
 <PageTitle>Matéria</PageTitle>
 
@@ -45,7 +48,14 @@
                 {
                     @foreach (var a in avaliacoes)
                     {
-                        <MudListItem T="string" Icon="@Icons.Material.Filled.Assignment">@a.Titulo</MudListItem>
+                        <MudButton
+                            Variant="Variant.Filled"
+                            Color="Color.Primary"
+                            Class="mb-2"
+                            OnClick="@(() => NavegarParaAtividade(a.IdAtividade))"
+                            StartIcon="@Icons.Material.Filled.Assignment">
+                            @a.NomeAtividade
+                        </MudButton>
                     }
                 }
                 else
@@ -76,8 +86,7 @@
 
     private MateriaResponse? materia;
     private string? nomeProfessor;
-
-    private List<ItemMateria> avaliacoes = new();
+    private List<AtividadeResponse> avaliacoes = new();
     private List<ItemMateria> materiais = new();
 
     protected override async Task OnInitializedAsync()
@@ -87,28 +96,42 @@
 
         materia = await MateriasAPI.GetMateriaAsync(idMateria);
 
-        if (materia is not null && UserSession.CurrentUser?.IsProfessor == true)
+        if (materia is not null)
         {
-            var idProf = materia.tbProfessoresIdProfessors?.FirstOrDefault();
-            if (idProf.HasValue)
+            // Buscar atividades da matéria
+            if (materia.tbAtividadesIdAtividades is not null)
             {
-                var professor = await ProfessoresAPI.GetProfessorbyidAsync(idProf.Value);
-                nomeProfessor = professor?.ContatoProfessor;
+                foreach (var id in materia.tbAtividadesIdAtividades)
+                {
+                    var atividade = await AtividadesAPI.GetAtividadeByIdAsync(id);
+                    if (atividade is not null)
+                        avaliacoes.Add(atividade);
+                }
             }
 
-            // Mock (substitua depois por dados reais se quiser)
-            avaliacoes = new()
+            // Buscar nome do professor (apenas para professores)
+            if (UserSession.CurrentUser?.IsProfessor == true)
             {
-                new("Quiz 1 - Visualização de Dados"),
-                new("Atividade 2 - Estatística Descritiva")
-            };
+                var idProf = materia.tbProfessoresIdProfessors?.FirstOrDefault();
+                if (idProf.HasValue)
+                {
+                    var professor = await ProfessoresAPI.GetProfessorbyidAsync(idProf.Value);
+                    nomeProfessor = professor?.NomeProfessor;
+                }
+            }
 
+            // Mock de materiais (pode substituir por dados reais depois)
             materiais = new()
             {
                 new("Slides - Introdução"),
                 new("PDF - Leitura obrigatória")
             };
         }
+    }
+
+    private void NavegarParaAtividade(int idAtividade)
+    {
+        NavigationManager.NavigateTo($"/atividade/{idAtividade}");
     }
 
     public record ItemMateria(string Titulo);
