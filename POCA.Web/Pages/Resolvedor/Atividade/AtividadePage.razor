@@ -1,0 +1,222 @@
+﻿@page "/atividadepage/{idAtividade:int}"
+@using MudBlazor
+@using POCA.Web
+@inject UserSessionService UserSession
+@inject NavigationManager NavigationManager
+@inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
+@inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
+@inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
+@inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
+
+<h2>Atividade Page</h2>
+
+
+<MudText>@erro</MudText>
+@if (!UserSession.IsLoggedIn)
+{
+    <MudPaper Elevation="1" Class="pa-4 ma-4 text-center">
+        <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
+    </MudPaper>
+}
+else if (isloading)
+{
+    <div class="d-flex justify-center mt-10">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+    </div>
+}
+else
+{
+    if(MostrarResumo)
+    {
+        <MudText>resumo</MudText>
+
+        foreach(var resposta in Resposta)
+        {
+            <MudText>reposta: @(resposta != -1 ? resposta : "Não está respondido")</MudText>
+        }
+
+        <MudButton OnClick="QuestaoVoltar">voltar</MudButton>
+        <MudButton OnClick="QuestaoProximo">Terminar</MudButton>
+    }
+    else if(MostrarRespostas)
+    {
+        <MudText>resposta</MudText>
+        <MudText>Quantidade certa: @QuantidadeCerta</MudText>
+
+        @foreach (var certo in RespostaFinal)
+        {
+            <MudText>Questão: @(certo ? "Correta" : "Errado")</MudText>
+        }
+    }
+    else
+    {
+        <MudText>@atividade.NomeAtividade</MudText>
+        <MudText>@atividade.IdAtividade</MudText>
+
+        <MudText>@questoes[posicao].EnunciadoQuestao</MudText>
+
+        <MudText>Questão @(posicao + 1)</MudText>
+
+        <MudRadioGroup T="int"
+                       @bind-Value="@currentSelection"
+                       SelectedOption="-1"
+                       Class="d-block">
+            <MudRadio T="int" Value="1">@questoes[posicao].RespostaCertaQuestao</MudRadio>
+            <MudRadio T="int" Value="2">@questoes[posicao].RespostaErrada1Questao</MudRadio>
+            <MudRadio T="int" Value="3">@questoes[posicao].RespostaErrada2Questao</MudRadio>
+            <MudRadio T="int" Value="4">@questoes[posicao].RespostaErrada3Questao</MudRadio>
+        </MudRadioGroup>
+
+        <MudText>Opcao @currentSelection</MudText>
+
+        <MudButton OnClick="QuestaoVoltar" Disabled="@(posicao == 0)">voltar</MudButton>
+        <MudButton OnClick="QuestaoProximo">@((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")</MudButton>
+    }
+}
+
+@code
+{
+    [Parameter] public int idAtividade { get; set; }
+
+    public AtividadeResponse? atividade = new(0,"",null,null);
+    public MateriaResponse materia;
+    public List<QuestaoResponse> questoes = new();
+    public List<int> Resposta = new();
+    public List<bool> RespostaFinal = new();
+    public int posicao = 0;
+    public bool isloading = true;
+    public string erro = "";
+    public bool MostrarResumo = false;
+    public bool MostrarRespostas = false;
+    public int currentSelection = -1;
+    public int QuantidadeCerta = 0;
+
+    // Obrigatorio para usar o UserSession
+    protected override async Task OnInitializedAsync()
+    {
+        UserSession.OnChange += HandleUserSessionChanged;
+
+        await CarregarAtividade();
+
+        await InvokeAsync(StateHasChanged); // Ensure re-render
+    }
+
+    public async Task CarregarAtividade()
+    {
+        try
+        {
+            @*
+            var materiaAPI = await MateriasAPI.GetMateriaAsync(idmateria);
+            materia = materiaAPI;
+
+            var AtividadesNaMateria = materiaAPI.tbAtividadesIdAtividades.ToList();
+            for (int i = 0; i < AtividadesNaMateria.Count; i++)
+            {
+                if (AtividadesNaMateria[i] == idAtividade)
+                {
+
+                }
+            }
+            *@
+
+            var atividadeAPI = await AtividadesAPI.GetAtividadeByIdAsync(idAtividade);
+            if (atividadeAPI == null)
+            {
+                return;
+            }
+            atividade = atividadeAPI;
+
+            foreach (var questaoid in atividadeAPI.TbQuestoesIdQuestaos)
+            {
+
+                var questao = await QuestoesAPI.GetQuestaoByIdAsync(questaoid);
+                if (questao != null)
+                    questoes.Add(questao);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar atividade: {ex.Message}");
+        }
+
+        Resposta = Enumerable.Repeat(-1, questoes.Count).ToList();
+        currentSelection = Resposta.Any() ? Resposta[0] : -1; // Initialize currentSelection for the first question
+        RespostaFinal = Enumerable.Repeat(false, questoes.Count).ToList();
+        isloading = false;
+        await InvokeAsync(StateHasChanged); // Ensure re-render
+    }
+
+    public void VerificarResposta()
+    {
+        QuantidadeCerta = 0;
+        for (int i = 0; i < Resposta.Count; i++)
+        {
+            if (i < RespostaFinal.Count)
+            {
+                if (Resposta[i] == 1)
+                {
+                    QuantidadeCerta++;
+                    RespostaFinal[i] = true;
+                }
+                else
+                {
+                    RespostaFinal[i] = false;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Warning: RespostaFinal size mismatch at index {i}. Expected size: {Resposta.Count}, Actual size: {RespostaFinal.Count}");
+            }
+        }
+    }
+
+    public void QuestaoProximo()
+    {
+        if (MostrarResumo)
+        {
+            VerificarResposta();
+            MostrarRespostas = true;
+            MostrarResumo = false;
+        }
+        else
+        {
+            Resposta[posicao] = currentSelection;
+
+            if (posicao < questoes.Count - 1)
+            {
+                posicao++;
+            }
+            else
+            {
+                posicao = 0;
+                MostrarResumo = true;
+            }
+        }
+    }
+
+    public void QuestaoVoltar()
+    {
+        if (MostrarResumo)
+        {
+            MostrarRespostas = false;
+            MostrarResumo = false;
+        }
+        else
+        {
+            Resposta[posicao] = currentSelection;
+            posicao--;
+        }
+    }
+
+    // para o usersession
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
+}
