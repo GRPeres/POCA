@@ -21,11 +21,11 @@
         padding-bottom: 1rem;
         user-select: none;
         scrollbar-width: none;
-        -ms-overflow-style: none; 
+        -ms-overflow-style: none;
     }
 
         .cards-wrapper::-webkit-scrollbar {
-            display: none; 
+            display: none;
         }
 
     .card-container {
@@ -45,7 +45,6 @@
             transform: scale(1.05);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
-
 </style>
 
 <MudLayout>
@@ -69,7 +68,6 @@
             else
             {
                 <div class="cards-wrapper">
-
                     @foreach (var materia in materias.Select((value, index) => new { value, index }))
                     {
                         var isFirst = materia.index == 0;
@@ -77,16 +75,14 @@
                         var style = "";
 
                         if (isFirst)
-                        {
-                            style = "padding-left: 1rem;";  // Or margin-left
-                        }
+                            style = "padding-left: 1rem;";
                         else if (isLast)
-                        {
-                            style = "padding-right: 1rem;"; // Or margin-right
-                        }
+                            style = "padding-right: 1rem;";
 
                         <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard Style="height: 350px;" Elevation="6" Class="hover:shadow-xl transition-all duration-300">
+                            <MudCard Style="height: 350px; background-image: repeating-linear-gradient(45deg, #f3f3f3 0, #f3f3f3 10px, #ffffff 10px, #ffffff 20px);"
+                                     Elevation="6"
+                                     Class="hover:shadow-xl transition-all duration-300">
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
                                     <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
                                     <MudText Typo="Typo.h6" Class="mb-0">@materia.value.NomeMateria</MudText>
@@ -169,7 +165,7 @@
         }
 
         hasRenderedCards = true;
-        await InvokeAsync(StateHasChanged); // Ensure re-render
+        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleUserSessionChanged()
@@ -207,10 +203,7 @@
                     return;
                 }
 
-                console.log('enableHorizontalWheel: Attaching wheel listener to:', selector);
-
                 el.addEventListener('wheel', function(e) {
-                    console.log('enableHorizontalWheel: Wheel event detected. deltaY =', e.deltaY);
                     if (e.deltaY !== 0) {
                         el.scrollLeft += e.deltaY;
                         e.preventDefault();
@@ -221,7 +214,7 @@
             await JSRuntime.InvokeVoidAsync("eval", jsCode);
             await JSRuntime.InvokeVoidAsync("enableHorizontalWheel", ".cards-wrapper");
 
-            hasRenderedCards = false; // prevent re-injection on future renders
+            hasRenderedCards = false;
         }
     }
 }
