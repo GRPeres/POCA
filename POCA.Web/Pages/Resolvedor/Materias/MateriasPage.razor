@@ -1,8 +1,6 @@
 ﻿@page "/materia-sala/{idMateria:int}"
-@using POCA.API.Responses
 @using POCA.Web.Response
 @using MudBlazor
-
 @inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
 @inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
 @inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
@@ -49,11 +47,11 @@
                     @foreach (var a in avaliacoes)
                     {
                         <MudButton
-                            Variant="Variant.Filled"
-                            Color="Color.Primary"
-                            Class="mb-2"
-                            OnClick="@(() => NavegarParaAtividade(a.IdAtividade))"
-                            StartIcon="@Icons.Material.Filled.Assignment">
+                        Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        Class="mb-2"
+                        OnClick="@(() => NavegarParaAtividade(a.IdAtividade))"
+                        StartIcon="@Icons.Material.Filled.Assignment">
                             @a.NomeAtividade
                         </MudButton>
                     }
@@ -91,6 +89,16 @@
 
     protected override async Task OnInitializedAsync()
     {
+        UserSession.OnChange += HandleUserSessionChanged;
+
+        if (UserSession.IsLoggedIn)
+        {
+            await MateriasAtividades();
+        }
+    }
+
+    private async Task MateriasAtividades()
+    {
         if (!UserSession.IsLoggedIn)
             return;
 
@@ -127,6 +135,18 @@
                 new("PDF - Leitura obrigatória")
             };
         }
+    }
+
+    private void HandleUserSessionChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            if (UserSession.IsLoggedIn)
+            {
+                await MateriasAtividades();
+                StateHasChanged();
+            }
+        });
     }
 
     private void NavegarParaAtividade(int idAtividade)
