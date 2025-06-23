@@ -80,7 +80,7 @@
                             style = "padding-right: 1rem;";
 
                         <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard Style="height: 350px; background-image: repeating-linear-gradient(45deg, #f3f3f3 0, #f3f3f3 10px, #ffffff 10px, #ffffff 20px);"
+                            <MudCard Style="@GetCardStyle()"
                                      Elevation="6"
                                      Class="hover:shadow-xl transition-all duration-300">
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
@@ -117,6 +117,9 @@
 
     private ElementReference scrollContainer;
     private System.Timers.Timer? scrollTimer;
+
+    [CascadingParameter]
+    public bool IsDarkMode { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -218,5 +221,14 @@
 
             hasRenderedCards = false;// prevent re-injection on future renders
         }
+    }
+
+    private string GetCardStyle()
+    {
+        var background = IsDarkMode
+            ? "linear-gradient(45deg, #2c2c2c 0, #2c2c2c 10px, #1e1e1e 10px, #1e1e1e 20px)"
+            : "repeating-linear-gradient(45deg, #f3f3f3 0, #f3f3f3 10px, #ffffff 10px, #ffffff 20px)";
+
+        return $"height: 350px; background: {background};";
     }
 }
