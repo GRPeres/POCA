@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using POCA.API.Requests.NewFolder;
 using POCA.API.Response;
 using POCA.API.Services;
 using POCA.Banco;
 using POCA.Banco.Model;
+using System.Text.Json;
 
 namespace POCA.API.Endpoints
 {
@@ -243,6 +245,92 @@ namespace POCA.API.Endpoints
                     questao.TbAtividadesIdAtividades.Remove(atividade);
                     await context.SaveChangesAsync();
                     return Results.NoContent();
+                });
+
+            // Inside AddEndpointsQuestoes()
+            group.MapPost("/ai-generate", async (
+                [FromServices] DbPocaContext context,
+                [FromServices] IConfiguration config,
+                [FromBody] PromptWithMetadataRequest request) =>
+                {
+                    if (string.IsNullOrWhiteSpace(request.Prompt))
+                        return Results.BadRequest("Prompt is required.");
+
+                    var apiKey = config["OpenAI:ApiKey"];
+                    if (string.IsNullOrEmpty(apiKey))
+                        return Results.Problem("AI API key not configured.");
+
+                    using var client = new HttpClient();
+                    client.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+                    var requestBody = new
+                    {
+                        model = "gpt-4o-mini",
+                        messages = new[]
+                        {
+                            new {
+                                role = "system",
+                                content =
+                                    "You are a JSON API that outputs only an array of multiple-choice questions. " +
+                                    "Each question must be an object with these fields: " +
+                                    "EnunciadoQuestao (string), RespostaCertaQuestao (string), RespostaErrada1Questao (string), " +
+                                    "RespostaErrada2Questao (string), RespostaErrada3Questao (string), " +
+                                    "DificuldadeQuestao (string), TemaQuestao (string). " +
+                                    "The field DificuldadeQuestao must be one of exactly these values: 'Fácil', 'Médio', or 'Difícil'. " +
+                                    "The field TemaQuestao must be one of exactly these values: 'Teoria' or 'Programação'. " +
+                                    "Do not include any text, explanation, or markdown—output only JSON starting with '[' and ending with ']'."
+
+                            },
+                            new { role = "user", content = request.Prompt }
+                        },
+                        max_tokens = 800
+                    };
+
+
+
+                    var aiResponse = await client.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
+                    if (!aiResponse.IsSuccessStatusCode)
+                    {
+                        var error = await aiResponse.Content.ReadAsStringAsync();
+                        return Results.Problem($"AI API call failed: {error}");
+                    }
+
+                    var json = await aiResponse.Content.ReadFromJsonAsync<JsonElement>();
+                    var content = json.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+
+                    // Parse the JSON response from AI (ensure prompt requests JSON format)
+                    List<QuestaoRequest> generatedQuestions;
+                    try
+                    {
+                        generatedQuestions = System.Text.Json.JsonSerializer.Deserialize<List<QuestaoRequest>>(content ?? "[]")
+                                              ?? new List<QuestaoRequest>();
+                    }
+                    catch
+                    {
+                        return Results.Problem("Failed to parse AI response into questions.");
+                    }
+
+                    // Apply difficulty/topic from request to each generated question if not set by AI
+                    foreach (var q in generatedQuestions)
+                    {
+                        var questaoEntity = new TbQuesto
+                        {
+                            EnunciadoQuestao = q.EnunciadoQuestao,
+                            RespostacertaQuestao = q.RespostaCertaQuestao,
+                            Respostaerrada1Questao = q.RespostaErrada1Questao,
+                            Respostaerrada2Questao = q.RespostaErrada2Questao,
+                            Respostaerrada3Questao = q.RespostaErrada3Questao,
+                            DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
+                            TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
+                        };
+
+                        context.TbQuestoes.Add(questaoEntity);
+                    }
+
+
+                    await context.SaveChangesAsync();
+
+                    return Results.Ok(generatedQuestions);
                 });
         }
     }
