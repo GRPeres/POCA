@@ -80,5 +80,20 @@ namespace POCA.Web.Services.APIs
             var response = await _httpClient.DeleteAsync($"questoes/{idQuestao}/atividades/{idAtividade}");
             return response.IsSuccessStatusCode;
         }
+
+        /// <summary>
+        /// Calls the backend to generate questions from an AI prompt.
+        /// </summary>
+        public async Task<List<string>> GenerateQuestionsFromPromptAsync(string prompt)
+        {
+            var response = await _httpClient.PostAsJsonAsync("questoes/ai-generate", new { prompt });
+
+            response.EnsureSuccessStatusCode();
+
+            // Assuming backend returns: ["Question 1 text", "Question 2 text", ...]
+            var questions = await response.Content.ReadFromJsonAsync<List<string>>();
+
+            return questions ?? new List<string>();
+        }
     }
 }
