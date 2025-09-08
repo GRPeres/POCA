@@ -8,16 +8,18 @@
 @inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
 @inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
 
-<h2>Atividade Page</h2>
+<MudText Color="Color.Error" Typo="Typo.subtitle2">@erro</MudText>
 
-
-<MudText>@erro</MudText>
 @if (!UserSession.IsLoggedIn)
 {
-    <MudPaper Elevation="1" Class="pa-4 ma-4 text-center">
-        <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
-    </MudPaper>
+    <MudCard Class="ma-4 pa-4 text-center" Elevation="4">
+        <MudCardContent>
+            <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">
+                Fazer Login
+            </MudButton>
+        </MudCardContent>
+    </MudCard>
 }
 else if (isloading)
 {
@@ -27,51 +29,83 @@ else if (isloading)
 }
 else
 {
-    if(MostrarResumo)
+    @* RESUMO *@
+    if (MostrarResumo)
     {
-        <MudText>resumo</MudText>
+        <MudCard Class="ma-4 pa-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Resumo</MudText>
 
-        foreach(var resposta in Resposta)
-        {
-            <MudText>reposta: @(resposta != -1 ? resposta : "Não está respondido")</MudText>
-        }
+                @foreach (var resposta in Resposta)
+                {
+                    <MudText Class="mb-1">  
+                        @(resposta != -1 ? "Resposta Salva" : "Não está respondido")
+                    </MudText>
+                }
 
-        <MudButton OnClick="QuestaoVoltar">voltar</MudButton>
-        <MudButton OnClick="QuestaoProximo">Terminar</MudButton>
+                <div class="d-flex justify-center gap-2 mt-4">
+                    <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">Terminar</MudButton>
+                </div>
+            </MudCardContent>
+        </MudCard>
     }
-    else if(MostrarRespostas)
+    @* RESULTADOS *@
+    else if (MostrarRespostas)
     {
-        <MudText>resposta</MudText>
-        <MudText>Quantidade certa: @QuantidadeCerta</MudText>
+        <MudCard Class="ma-4 pa-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Resultados</MudText>
+                <MudText Class="mb-2">Quantidade certa: <b>@QuantidadeCerta</b></MudText>
 
-        @foreach (var certo in RespostaFinal)
-        {
-            <MudText>Questão: @(certo ? "Correta" : "Errado")</MudText>
-        }
+                @foreach (var certo in RespostaFinal)
+                {
+                    <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
+                }
+            </MudCardContent>
+        </MudCard>
     }
+    @* QUESTÕES *@
     else
     {
-        <MudText>@atividade.NomeAtividade</MudText>
-        <MudText>@atividade.IdAtividade</MudText>
+        <MudCard Class="ma-4 pa-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-2">Questão @(posicao + 1)</MudText>
+                <MudText Class="mb-4" Typo="Typo.h5">@questoes[posicao].EnunciadoQuestao</MudText>
 
-        <MudText>@questoes[posicao].EnunciadoQuestao</MudText>
+                <br />
+                <MudGrid>
+                    <MudRadioGroup T="int"
+                                    @bind-Value="@currentSelection"
+                                    SelectedOption="-1"
+                                    Class="d-block mb-4">
+                        <MudItem xs="12" >
+                            <MudRadio T="int" Value="1" Class="mb-2">@questoes[posicao].RespostaCertaQuestao</MudRadio>
+                        </MudItem>
+                        <MudItem xs="12" >
+                            <MudRadio T="int" Value="2" Class="mb-2">@questoes[posicao].RespostaErrada1Questao</MudRadio>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudRadio T="int" Value="3" Class="mb-2">@questoes[posicao].RespostaErrada2Questao</MudRadio>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudRadio T="int" Value="4" Class="mb-2">@questoes[posicao].RespostaErrada3Questao</MudRadio>
+                        </MudItem>
 
-        <MudText>Questão @(posicao + 1)</MudText>
-
-        <MudRadioGroup T="int"
-                       @bind-Value="@currentSelection"
-                       SelectedOption="-1"
-                       Class="d-block">
-            <MudRadio T="int" Value="1">@questoes[posicao].RespostaCertaQuestao</MudRadio>
-            <MudRadio T="int" Value="2">@questoes[posicao].RespostaErrada1Questao</MudRadio>
-            <MudRadio T="int" Value="3">@questoes[posicao].RespostaErrada2Questao</MudRadio>
-            <MudRadio T="int" Value="4">@questoes[posicao].RespostaErrada3Questao</MudRadio>
-        </MudRadioGroup>
-
-        <MudText>Opcao @currentSelection</MudText>
-
-        <MudButton OnClick="QuestaoVoltar" Disabled="@(posicao == 0)">voltar</MudButton>
-        <MudButton OnClick="QuestaoProximo">@((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")</MudButton>
+                        
+                     </MudRadioGroup>
+                </MudGrid>
+                
+                <div class="d-flex justify-center gap-2">
+                    <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar" Disabled="@(posicao == 0)">
+                        Voltar
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">
+                        @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
+                    </MudButton>
+                </div>
+            </MudCardContent>
+        </MudCard>
     }
 }
 
@@ -106,20 +140,6 @@ else
     {
         try
         {
-            @*
-            var materiaAPI = await MateriasAPI.GetMateriaAsync(idmateria);
-            materia = materiaAPI;
-
-            var AtividadesNaMateria = materiaAPI.tbAtividadesIdAtividades.ToList();
-            for (int i = 0; i < AtividadesNaMateria.Count; i++)
-            {
-                if (AtividadesNaMateria[i] == idAtividade)
-                {
-
-                }
-            }
-            *@
-
             var atividadeAPI = await AtividadesAPI.GetAtividadeByIdAsync(idAtividade);
             if (atividadeAPI == null)
             {
@@ -169,6 +189,15 @@ else
                 Console.WriteLine($"Warning: RespostaFinal size mismatch at index {i}. Expected size: {Resposta.Count}, Actual size: {RespostaFinal.Count}");
             }
         }
+
+        string respostas = "";
+
+        for (int i = 0; i < questoes.Count; i++)
+        {
+            respostas += $"({questoes[i].IdQuestao}, {questoes[i].TemaQuestao.ToString()}, {RespostaFinal[i]})";
+        }
+
+        Console.WriteLine($"ID: {atividade.IdAtividade}, Aluno({UserSession.CurrentUser.IdAluno}) ,Respostas({respostas})");
     }
 
     public void QuestaoProximo()
@@ -186,6 +215,7 @@ else
             if (posicao < questoes.Count - 1)
             {
                 posicao++;
+                currentSelection = -1;
             }
             else
             {
@@ -206,6 +236,9 @@ else
         {
             Resposta[posicao] = currentSelection;
             posicao--;
+            if (Resposta[posicao] != -1) currentSelection = Resposta[posicao];
+            else currentSelection = -1;
+
         }
     }
 
