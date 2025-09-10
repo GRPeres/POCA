@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject UserSessionService UserSession
 
+<CascadingValue Value="_isDarkMode">
 <MudThemeProvider Theme="@CustomTheme.MyTheme" IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -172,6 +173,7 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+</CascadingValue>
 
 @code {
     private bool _isDarkMode = false;

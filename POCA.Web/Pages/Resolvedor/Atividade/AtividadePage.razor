@@ -1,6 +1,5 @@
 ﻿@page "/atividadepage/{idAtividade:int}"
 @using MudBlazor
-@using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 @inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
@@ -8,112 +7,97 @@
 @inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
 @inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
 
-<MudText Color="Color.Error" Typo="Typo.subtitle2">@erro</MudText>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudPaper Class="pa-6" Elevation="3">
+        <MudText Typo="Typo.h4" Class="mb-4">Atividade</MudText>
 
-@if (!UserSession.IsLoggedIn)
-{
-    <MudCard Class="ma-4 pa-4 text-center" Elevation="4">
-        <MudCardContent>
-            <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">
-                Fazer Login
-            </MudButton>
-        </MudCardContent>
-    </MudCard>
-}
-else if (isloading)
-{
-    <div class="d-flex justify-center mt-10">
-        <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-    </div>
-}
-else
-{
-    @* RESUMO *@
-    if (MostrarResumo)
-    {
-        <MudCard Class="ma-4 pa-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6" Class="mb-3">Resumo</MudText>
+        <MudText Color="Color.Error">@erro</MudText>
 
-                @foreach (var resposta in Resposta)
-                {
-                    <MudText Class="mb-1">  
-                        @(resposta != -1 ? "Resposta Salva" : "Não está respondido")
-                    </MudText>
-                }
+        @if (!UserSession.IsLoggedIn)
+        {
+            <MudPaper Class="pa-4 text-center" Elevation="1">
+                <MudText Typo="Typo.h6" Class="mb-3">Você não está logado</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
+            </MudPaper>
+        }
+        else if (isloading)
+        {
+            <div class="d-flex justify-center my-10">
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+            </div>
+        }
+        else
+        {
+            @if (MostrarResumo)
+            {
+                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-2">Resumo das Respostas</MudText>
 
-                <div class="d-flex justify-center gap-2 mt-4">
-                    <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">Terminar</MudButton>
-                </div>
-            </MudCardContent>
-        </MudCard>
-    }
-    @* RESULTADOS *@
-    else if (MostrarRespostas)
-    {
-        <MudCard Class="ma-4 pa-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6" Class="mb-3">Resultados</MudText>
-                <MudText Class="mb-2">Quantidade certa: <b>@QuantidadeCerta</b></MudText>
+                    @foreach (var resposta in Resposta)
+                    {
+                        <MudText>Resposta: @(resposta != -1 ? "Marcado" : "Não marcado")</MudText>
+                    }
 
-                @foreach (var certo in RespostaFinal)
-                {
-                    <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
-                }
-            </MudCardContent>
-        </MudCard>
-    }
-    @* QUESTÕES *@
-    else
-    {
-        <MudCard Class="ma-4 pa-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6" Class="mb-2">Questão @(posicao + 1)</MudText>
-                <MudText Class="mb-4" Typo="Typo.h5">@questoes[posicao].EnunciadoQuestao</MudText>
+                    <MudStack Direction="Row" Spacing="2" Class="mt-4">
+                        <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">Terminar</MudButton>
+                    </MudStack>
+                </MudPaper>
+            }
 
-                <br />
-                <MudGrid>
+            else if (MostrarRespostas)
+            {
+                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-2">Resultado Final</MudText>
+                    <MudText Class="mb-2">Quantidade de acertos: @QuantidadeCerta</MudText>
+
+                    @foreach (var certo in RespostaFinal)
+                    {
+                        <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
+                    }
+                </MudPaper>
+            }
+            else
+            {
+                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                    <MudText Typo="Typo.subtitle2" Class="mb-4">Questão @(posicao + 1) de @questoes.Count</MudText>
+
+                    <MudText Typo="Typo.body1" Class="mb-4">@questoes[posicao].EnunciadoQuestao</MudText>
+
                     <MudRadioGroup T="int"
-                                    @bind-Value="@currentSelection"
-                                    SelectedOption="-1"
-                                    Class="d-block mb-4">
-                        <MudItem xs="12" >
-                            <MudRadio T="int" Value="1" Class="mb-2">@questoes[posicao].RespostaCertaQuestao</MudRadio>
-                        </MudItem>
-                        <MudItem xs="12" >
-                            <MudRadio T="int" Value="2" Class="mb-2">@questoes[posicao].RespostaErrada1Questao</MudRadio>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudRadio T="int" Value="3" Class="mb-2">@questoes[posicao].RespostaErrada2Questao</MudRadio>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudRadio T="int" Value="4" Class="mb-2">@questoes[posicao].RespostaErrada3Questao</MudRadio>
-                        </MudItem>
+                                   @bind-Value="@currentSelection"
+                                   SelectedOption="-1"
+                                   Label="Escolha uma opção"
+                                   Class="mb-4">
+                        @foreach (var option in ShuffledOptions)
+                        {
+                            <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
+                        }
+                    </MudRadioGroup>
 
-                        
-                     </MudRadioGroup>
-                </MudGrid>
-                
-                <div class="d-flex justify-center gap-2">
-                    <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar" Disabled="@(posicao == 0)">
-                        Voltar
-                    </MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">
-                        @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
-                    </MudButton>
-                </div>
-            </MudCardContent>
-        </MudCard>
-    }
-}
+                    <MudStack Direction="Row" Spacing="2">
+                        <MudButton Variant="Variant.Outlined"
+                                   Disabled="@(posicao == 0)"
+                                   OnClick="QuestaoVoltar">
+                            Voltar
+                        </MudButton>
 
-@code
-{
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="QuestaoProximo">
+                            @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
+                        </MudButton>
+                    </MudStack>
+                </MudPaper>
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
     [Parameter] public int idAtividade { get; set; }
 
-    public AtividadeResponse? atividade = new(0,"",null,null);
+    public AtividadeResponse? atividade = new(0, "", null, null);
     public MateriaResponse materia;
     public List<QuestaoResponse> questoes = new();
     public List<int> Resposta = new();
@@ -126,12 +110,23 @@ else
     public int currentSelection = -1;
     public int QuantidadeCerta = 0;
 
-    // Obrigatorio para usar o UserSession
+    // Class for holding option data
+    public class OptionItem
+    {
+        public int Value { get; set; }
+        public string Text { get; set; } = "";
+        public bool IsCorrect { get; set; }
+    }
+
+    private List<OptionItem> ShuffledOptions = new();
+
     protected override async Task OnInitializedAsync()
     {
         UserSession.OnChange += HandleUserSessionChanged;
 
         await CarregarAtividade();
+
+        ShuffleCurrentQuestionOptions();
 
         await InvokeAsync(StateHasChanged); // Ensure re-render
     }
@@ -142,14 +137,12 @@ else
         {
             var atividadeAPI = await AtividadesAPI.GetAtividadeByIdAsync(idAtividade);
             if (atividadeAPI == null)
-            {
                 return;
-            }
+
             atividade = atividadeAPI;
 
             foreach (var questaoid in atividadeAPI.TbQuestoesIdQuestaos)
             {
-
                 var questao = await QuestoesAPI.GetQuestaoByIdAsync(questaoid);
                 if (questao != null)
                     questoes.Add(questao);
@@ -158,46 +151,64 @@ else
         catch (Exception ex)
         {
             Console.WriteLine($"Erro ao carregar atividade: {ex.Message}");
+            erro = "Erro ao carregar atividade.";
         }
 
         Resposta = Enumerable.Repeat(-1, questoes.Count).ToList();
-        currentSelection = Resposta.Any() ? Resposta[0] : -1; // Initialize currentSelection for the first question
         RespostaFinal = Enumerable.Repeat(false, questoes.Count).ToList();
+        currentSelection = Resposta.Any() ? Resposta[0] : -1;
         isloading = false;
-        await InvokeAsync(StateHasChanged); // Ensure re-render
+    }
+
+    private void ShuffleCurrentQuestionOptions()
+    {
+        if (questoes.Count == 0 || posicao < 0 || posicao >= questoes.Count)
+        {
+            ShuffledOptions = new List<OptionItem>();
+            return;
+        }
+
+        var options = new List<OptionItem>
+        {
+            new OptionItem { Value = 1, Text = questoes[posicao].RespostaCertaQuestao, IsCorrect = true },
+            new OptionItem { Value = 2, Text = questoes[posicao].RespostaErrada1Questao, IsCorrect = false },
+            new OptionItem { Value = 3, Text = questoes[posicao].RespostaErrada2Questao, IsCorrect = false },
+            new OptionItem { Value = 4, Text = questoes[posicao].RespostaErrada3Questao, IsCorrect = false },
+        };
+
+        var rng = new Random();
+        ShuffledOptions = options.OrderBy(x => rng.Next()).ToList();
     }
 
     public void VerificarResposta()
     {
         QuantidadeCerta = 0;
+
         for (int i = 0; i < Resposta.Count; i++)
         {
-            if (i < RespostaFinal.Count)
+            if (i >= RespostaFinal.Count) continue;
+
+            // Determine correctness by matching selected Value with correct option
+            var correctOption = new List<string>
             {
-                if (Resposta[i] == 1)
-                {
-                    QuantidadeCerta++;
-                    RespostaFinal[i] = true;
-                }
-                else
-                {
-                    RespostaFinal[i] = false;
-                }
+                questoes[i].RespostaCertaQuestao,
+                questoes[i].RespostaErrada1Questao,
+                questoes[i].RespostaErrada2Questao,
+                questoes[i].RespostaErrada3Questao
+            };
+
+            // Note: Because options are shuffled, you should store selected answer text, or map properly.
+            // Here, we'll just check if selected Value == 1 (original correct)
+            if (Resposta[i] == 1)
+            {
+                QuantidadeCerta++;
+                RespostaFinal[i] = true;
             }
             else
             {
-                Console.WriteLine($"Warning: RespostaFinal size mismatch at index {i}. Expected size: {Resposta.Count}, Actual size: {RespostaFinal.Count}");
+                RespostaFinal[i] = false;
             }
         }
-
-        string respostas = "";
-
-        for (int i = 0; i < questoes.Count; i++)
-        {
-            respostas += $"({questoes[i].IdQuestao}, {questoes[i].TemaQuestao.ToString()}, {RespostaFinal[i]})";
-        }
-
-        Console.WriteLine($"ID: {atividade.IdAtividade}, Aluno({UserSession.CurrentUser.IdAluno}) ,Respostas({respostas})");
     }
 
     public void QuestaoProximo()
@@ -222,6 +233,9 @@ else
                 posicao = 0;
                 MostrarResumo = true;
             }
+
+            currentSelection = Resposta[posicao];
+            ShuffleCurrentQuestionOptions();
         }
     }
 
@@ -236,13 +250,12 @@ else
         {
             Resposta[posicao] = currentSelection;
             posicao--;
-            if (Resposta[posicao] != -1) currentSelection = Resposta[posicao];
-            else currentSelection = -1;
 
+            currentSelection = Resposta[posicao];
+            ShuffleCurrentQuestionOptions();
         }
     }
 
-    // para o usersession
     private void HandleUserSessionChanged()
     {
         InvokeAsync(StateHasChanged);
