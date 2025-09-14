@@ -22,9 +22,9 @@
         }
         else if (isloading)
         {
-            <div class="d-flex justify-center my-10">
+            <MudStack AlignItems="AlignItems.Center" JustifyContent="Center" Class="my-10">
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-            </div>
+            </MudStack>
         }
         else
         {
@@ -33,10 +33,14 @@
                 <MudPaper Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resumo das Respostas</MudText>
 
+                    <MudList T="int" Dense="true">
                     @foreach (var resposta in Resposta)
                     {
-                        <MudText>Resposta: @(resposta != -1 ? "Marcado" : "Não marcado")</MudText>
+                        <MudListItem>
+                            <MudText>Resposta: @(resposta != -1 ? "Marcado" : "Não marcado")</MudText>
+                        </MudListItem>
                     }
+                    </MudList>
 
                     <MudStack Direction="Row" Spacing="2" Class="mt-4">
                         <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
@@ -51,10 +55,14 @@
                     <MudText Typo="Typo.h6" Class="mb-2">Resultado Final</MudText>
                     <MudText Class="mb-2">Quantidade de acertos: @QuantidadeCerta</MudText>
 
+                    <MudList T="int" Dense="true">
                     @foreach (var certo in RespostaFinal)
                     {
-                        <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
+                        <MudListItem>
+                                <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
+                        </MudListItem>
                     }
+                    </MudList>
                 </MudPaper>
             }
             else
@@ -64,16 +72,22 @@
 
                     <MudText Typo="Typo.body1" Class="mb-4">@questoes[posicao].EnunciadoQuestao</MudText>
 
-                    <MudRadioGroup T="int"
-                                   @bind-Value="@currentSelection"
-                                   SelectedOption="-1"
-                                   Label="Escolha uma opção"
-                                   Class="mb-4">
-                        @foreach (var option in ShuffledOptions)
-                        {
-                            <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
-                        }
-                    </MudRadioGroup>
+                    <MudGrid xs="12" md="1">
+                        <MudRadioGroup T="int"
+                                       @bind-Value="@currentSelection"
+                                       SelectedOption="-1"
+                                       Label="Escolha uma opção"
+                                       Class="d-flex flex-column gap-2 mb-4"
+                                       Row="false">
+
+                            @foreach (var option in ShuffledOptions)
+                            {
+                                <MudItem>
+                                        <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
+                                </MudItem>
+                            }
+                        </MudRadioGroup>
+                    </MudGrid>
 
                     <MudStack Direction="Row" Spacing="2">
                         <MudButton Variant="Variant.Outlined"
