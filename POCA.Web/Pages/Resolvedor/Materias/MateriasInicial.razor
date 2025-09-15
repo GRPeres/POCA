@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using MudBlazor
+@using POCA.API.Response
 @using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
@@ -68,33 +69,26 @@
             else
             {
                 <div class="cards-wrapper">
-                    @foreach (var materia in materias.Select((value, index) => new { value, index }))
+                    @foreach (var materia in materiasProgresso)
                     {
-                        var isFirst = materia.index == 0;
-                        var isLast = materia.index == materias.Count - 1;
-                        var style = "";
-
-                        if (isFirst)
-                            style = "padding-left: 1rem;";
-                        else if (isLast)
-                            style = "padding-right: 1rem;";
-
-                        <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard Style="@GetCardStyle()"
-                                     Elevation="6"
-                                     Class="hover:shadow-xl transition-all duration-300">
+                        <MudItem xs="12" sm="6" md="4" lg="3">
+                            <MudCard Style="@GetCardStyle()" Elevation="6" Class="hover:shadow-xl transition-all duration-300">
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
                                     <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
-                                    <MudText Typo="Typo.h6" Class="mb-0">@materia.value.NomeMateria</MudText>
+                                    <MudText Typo="Typo.h6" Class="mb-0">@materia.NomeMateria</MudText>
                                 </MudCardActions>
 
-                               @*  <MudCardContent Class="px-4">
-                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                        Uma breve descrição da matéria pode ir aqui ou até um resumo.
+                                <MudCardContent Class="px-4 pb-4">
+                                    <MudProgressLinear Value="@materia.Progresso"
+                                                       Color="Color.Success"
+                                                       Rounded="true"
+                                                       Class="my-2" />
+                                    <MudText Typo="Typo.body2">
+                                        @($"{materia.AtividadesRespondidas}/{materia.TotalAtividades} atividades concluídas")
                                     </MudText>
-                                </MudCardContent> *@
+                                </MudCardContent>
                             </MudCard>
-                        </div>
+                        </MudItem>
                     }
                 </div>
             }
@@ -110,6 +104,7 @@
 </MudLayout>
 
 @code {
+    private List<MateriaProgressoResponse> materiasProgresso = new();
     private List<MateriaResponse> materias = new();
     private bool isLoaded = false;
     private bool isLoading = true;

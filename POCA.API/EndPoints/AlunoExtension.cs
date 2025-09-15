@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Requests.Aluno;
+using POCA.API.Response;
 using POCA.API.Responses;
 using POCA.Banco.Model;
 
@@ -188,6 +189,28 @@ namespace POCA.API.EndPoints
                     await context.SaveChangesAsync();
                     return Results.NoContent();
                 });
+            // GET progresso do aluno em cada matéria
+            group.MapGet("/{idAluno}/materias/progresso",
+                async ([FromServices] DbPocaContext context, int idAluno) =>
+                {
+                    var result = await context.TbMaterias
+                        .Where(m => m.TbAlunosIdAlunos.Any(a => a.IdAluno == idAluno))
+                        .Select(m => new MateriaProgressoResponse
+                        {
+                            IdMateria = m.IdMateria,
+                            NomeMateria = m.NomeMateria,
+                            TotalAtividades = m.TbAtividadesIdAtividades.Count(),
+                            AtividadesRespondidas = m.TbAtividadesIdAtividades
+                                .Count(a => a.TbRespostasIdRespostas.Any(r => r.IdAluno == idAluno)),
+                            Progresso = (double)m.TbAtividadesIdAtividades
+                                .Count(a => a.TbRespostasIdRespostas.Any(r => r.IdAluno == idAluno))
+                                / (m.TbAtividadesIdAtividades.Count() == 0 ? 1 : m.TbAtividadesIdAtividades.Count()) * 100
+                        })
+                        .ToListAsync();
+
+                    return Results.Ok(result);
+                });
+
         }
     }
 }

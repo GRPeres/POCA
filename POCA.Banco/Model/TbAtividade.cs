@@ -12,4 +12,6 @@ public partial class TbAtividade
     public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
 
     public virtual ICollection<TbQuesto> TbQuestoesIdQuestaos { get; set; } = new List<TbQuesto>();
+
+    public ICollection<TbResposta> TbRespostasIdRespostas { get; set; } = new List<TbResposta>();
 }

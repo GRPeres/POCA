@@ -27,6 +27,8 @@ public partial class DbPocaContext : DbContext
 
     public virtual DbSet<TbQuesto> TbQuestoes { get; set; }
 
+    public virtual DbSet<TbResposta> TbRespostas { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseMySQL("server=localhost;port=3306;user=root;password=root;database=db_poca");
@@ -125,6 +127,37 @@ public partial class DbPocaContext : DbContext
                 .HasMaxLength(45)
                 .HasColumnName("nome_materia");
         });
+
+        modelBuilder.Entity<TbResposta>(entity =>
+        {
+            entity.HasKey(e => e.IdResposta).HasName("PRIMARY");
+
+            entity.ToTable("tb_respostas");
+
+            entity.HasIndex(e => e.IdResposta, "id_resposta_UNIQUE").IsUnique();
+
+            entity.Property(e => e.IdResposta).HasColumnName("id_resposta");
+            entity.Property(e => e.RespostaAluno)
+                  .HasMaxLength(500)
+                  .HasColumnName("resposta_aluno");
+            entity.Property(e => e.Correta)
+                  .HasColumnName("correta");
+            entity.Property(e => e.DataResposta)
+                  .HasColumnName("data_resposta");
+
+            entity.HasOne(d => d.Aluno)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdAluno)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_alunos");
+
+            entity.HasOne(d => d.Atividade)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdAtividade)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_atividades");
+        });
+
 
         modelBuilder.Entity<TbPessoa>(entity =>
         {

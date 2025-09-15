@@ -15,6 +15,8 @@ public partial class TbAluno
 
     public string ContatoAluno { get; set; } = null!;
 
+    public ICollection<TbResposta> TbRespostasIdRespostas { get; set; } = new List<TbResposta>();
+
     public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
 
     public virtual ICollection<TbPessoa> TbPessoasIdPessoas { get; set; } = new List<TbPessoa>();
