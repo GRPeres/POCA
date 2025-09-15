@@ -6,7 +6,8 @@ namespace POCA.API.Requests.Aluno;
 public record AlunoEditRequest(
         [Required] int IdAluno,
         string NomeAluno,
-        int IdadeAluno,
+        string NascimentoAluno,
+        string EmailAluno,
         int ProgressoAluno,
         string ContatoAluno
-    ) : AlunoRequest(NomeAluno, IdadeAluno, ProgressoAluno, ContatoAluno);
+    ) : AlunoRequest(NomeAluno, NascimentoAluno, ProgressoAluno, ContatoAluno);

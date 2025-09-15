@@ -2,8 +2,9 @@
 {
     public record AlunoCreateRequest(
         string NomeAluno,
-        int IdadeAluno,
+        string NascimentoAluno,
+        string EmailAluno,
         int ProgressoAluno,
         string ContatoAluno
-    ) : AlunoRequest(NomeAluno, IdadeAluno, ProgressoAluno, ContatoAluno);
+    ) : AlunoRequest(NomeAluno, NascimentoAluno, ProgressoAluno, ContatoAluno);
 }

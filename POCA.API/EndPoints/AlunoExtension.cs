@@ -21,7 +21,7 @@ namespace POCA.API.EndPoints
                     .Select(a => new AlunoResponse(
                         a.IdAluno,
                         a.NomeAluno,
-                        a.IdadeAluno,
+                        a.NascimentoAluno,
                         a.ProgressoAluno,
                         a.ContatoAluno,
                         a.TbMateriasIdMateria.Select(m => m.IdMateria),
@@ -46,7 +46,7 @@ namespace POCA.API.EndPoints
                 var response = new AlunoResponse(
                     aluno.IdAluno,
                     aluno.NomeAluno,
-                    aluno.IdadeAluno,
+                    aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
                     aluno.TbMateriasIdMateria.Select(m => m.IdMateria),
@@ -63,7 +63,7 @@ namespace POCA.API.EndPoints
                 var aluno = new TbAluno
                 {
                     NomeAluno = request.NomeAluno,
-                    IdadeAluno = request.IdadeAluno,
+                    NascimentoAluno = request.NascimentoAluno,
                     ProgressoAluno = request.ProgressoAluno,
                     ContatoAluno = request.ContatoAluno
                 };
@@ -74,7 +74,7 @@ namespace POCA.API.EndPoints
                 var response = new AlunoResponse(
                     aluno.IdAluno,
                     aluno.NomeAluno,
-                    aluno.IdadeAluno,
+                    aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
                     null,
@@ -97,7 +97,7 @@ namespace POCA.API.EndPoints
                     return Results.NotFound();
 
                 aluno.NomeAluno = request.NomeAluno;
-                aluno.IdadeAluno = request.IdadeAluno;
+                aluno.NascimentoAluno = request.NascimentoAluno;
                 aluno.ProgressoAluno = request.ProgressoAluno;
                 aluno.ContatoAluno = request.ContatoAluno;
 
