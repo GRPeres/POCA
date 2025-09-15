@@ -17,5 +17,7 @@ public partial class TbAluno
 
     public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
 
+    public ICollection<TbResposta> TbRespostasIdRespostas { get; set;} = new List<TbResposta>();
+
     public virtual ICollection<TbPessoa> TbPessoasIdPessoas { get; set; } = new List<TbPessoa>();
 }
