@@ -4,9 +4,9 @@
         int IdAluno,
         string NomeAluno,
         string NascimentoAluno,
-        string EmailAluno,
         int ProgressoAluno,
         string ContatoAluno,
+        string EmailAluno,
         IEnumerable<int>? MateriasIds,
         IEnumerable<int>? PessoasIds
     );

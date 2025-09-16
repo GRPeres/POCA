@@ -23,8 +23,9 @@ namespace POCA.API.EndPoints
                         a.IdAluno,
                         a.NomeAluno,
                         a.NascimentoAluno,
-                        a.ProgressoAluno,
                         a.ContatoAluno,
+                        a.ProgressoAluno,
+                        a.EmailAluno,
                         a.TbMateriasIdMateria.Select(m => m.IdMateria),
                         a.TbPessoasIdPessoas.Select(p => p.IdPessoa)
                     ))
@@ -50,6 +51,7 @@ namespace POCA.API.EndPoints
                     aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
+                    aluno.EmailAluno,
                     aluno.TbMateriasIdMateria.Select(m => m.IdMateria),
                     aluno.TbPessoasIdPessoas.Select(p => p.IdPessoa)
                 );

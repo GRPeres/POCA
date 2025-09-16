@@ -49,7 +49,7 @@ public partial class DbPocaContext : DbContext
             entity.Property(e => e.ContatoAluno)
                 .HasMaxLength(45)
                 .HasColumnName("contato_aluno");
-            entity.Property(e => e.IdadeAluno).HasColumnName("idade_aluno");
+            entity.Property(e => e.NascimentoAluno).HasColumnName("nascimento_aluno");
             entity.Property(e => e.NomeAluno)
                 .HasMaxLength(45)
                 .HasColumnName("nome_aluno");
