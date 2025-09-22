@@ -23,8 +23,8 @@ namespace POCA.API.EndPoints
                         a.IdAluno,
                         a.NomeAluno,
                         a.NascimentoAluno,
-                        a.ContatoAluno,
                         a.ProgressoAluno,
+                        a.ContatoAluno,
                         a.EmailAluno,
                         a.TbMateriasIdMateria.Select(m => m.IdMateria),
                         a.TbPessoasIdPessoas.Select(p => p.IdPessoa)
@@ -68,7 +68,8 @@ namespace POCA.API.EndPoints
                     NomeAluno = request.NomeAluno,
                     NascimentoAluno = request.NascimentoAluno,
                     ProgressoAluno = request.ProgressoAluno,
-                    ContatoAluno = request.ContatoAluno
+                    ContatoAluno = request.ContatoAluno,
+                    EmailAluno = request.EmailAluno
                 };
 
                 context.TbAlunos.Add(aluno);
@@ -80,6 +81,7 @@ namespace POCA.API.EndPoints
                     aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
+                    aluno.EmailAluno,
                     null,
                     null
                 );
@@ -103,6 +105,7 @@ namespace POCA.API.EndPoints
                 aluno.NascimentoAluno = request.NascimentoAluno;
                 aluno.ProgressoAluno = request.ProgressoAluno;
                 aluno.ContatoAluno = request.ContatoAluno;
+                aluno.EmailAluno = request.EmailAluno;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();

@@ -3,7 +3,7 @@
     public record AlunoResponse(
         int IdAluno,
         string NomeAluno,
-        string NascimentoAluno,
+        DateTime NascimentoAluno,
         int ProgressoAluno,
         string ContatoAluno,
         string EmailAluno,

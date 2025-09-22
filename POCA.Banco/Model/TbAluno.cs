@@ -9,7 +9,7 @@ public partial class TbAluno
 
     public string NomeAluno { get; set; } = null!;
 
-    public string NascimentoAluno { get; set; } = null!;
+    public DateTime NascimentoAluno { get; set; }
 
     public int ProgressoAluno { get; set; }
 
