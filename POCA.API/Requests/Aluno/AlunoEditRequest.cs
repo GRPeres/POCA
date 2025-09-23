@@ -7,7 +7,7 @@ public record AlunoEditRequest(
         [Required] int IdAluno,
         string NomeAluno,
         DateTime NascimentoAluno,
-        string EmailAluno,
         int ProgressoAluno,
-        string ContatoAluno
-    ) : AlunoRequest(NomeAluno, NascimentoAluno, EmailAluno, ProgressoAluno, ContatoAluno);
+        string ContatoAluno,
+        string EmailAluno
+    ) : AlunoRequest(NomeAluno, NascimentoAluno, ProgressoAluno, ContatoAluno, EmailAluno);
