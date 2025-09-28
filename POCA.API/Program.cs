@@ -16,6 +16,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<AtividadeService>();
+builder.Services.AddHttpClient<GENAIService>();
+
 
 // Prevents circular reference issues in JSON responses
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>

@@ -95,5 +95,19 @@ namespace POCA.Web.Services.APIs
 
             return questions ?? new List<string>();
         }
+
+        /// <summary>
+        /// Calls the backend to generate new questions based on existing database questions.
+        /// </summary>
+        public async Task<List<QuestaoResponse>> GenerateBasedOnExistingAsync()
+        {
+            var response = await _httpClient.PostAsync("questoes/ai-generate-based-on-existing", null);
+
+            response.EnsureSuccessStatusCode();
+
+            var generated = await response.Content.ReadFromJsonAsync<List<QuestaoResponse>>();
+
+            return generated ?? new List<QuestaoResponse>();
+        }
     }
 }

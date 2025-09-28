@@ -247,91 +247,103 @@ namespace POCA.API.Endpoints
                     return Results.NoContent();
                 });
 
-            // Inside AddEndpointsQuestoes()
             group.MapPost("/ai-generate", async (
                 [FromServices] DbPocaContext context,
-                [FromServices] IConfiguration config,
+                [FromServices] GENAIService aiService,
                 [FromBody] PromptWithMetadataRequest request) =>
+            {
+                if (string.IsNullOrWhiteSpace(request.Prompt))
+                    return Results.BadRequest("Prompt is required.");
+
+                var systemInstruction =
+                    "You are a JSON API that outputs only an array of multiple-choice questions. " +
+                    "Each question must be an object with these fields: " +
+                    "EnunciadoQuestao (string), RespostaCertaQuestao (string), RespostaErrada1Questao (string), " +
+                    "RespostaErrada2Questao (string), RespostaErrada3Questao (string), " +
+                    "DificuldadeQuestao (string), TemaQuestao (string). " +
+                    "The field DificuldadeQuestao must be one of exactly these values: 'Fácil', 'Médio', or 'Difícil'. " +
+                    "The field TemaQuestao must be one of exactly these values: 'Teoria' or 'Programação'. " +
+                    "Do not include any text, explanation, or markdown—output only JSON starting with '[' and ending with ']'.";
+
+                List<QuestaoRequest> generatedQuestions;
+                try
                 {
-                    if (string.IsNullOrWhiteSpace(request.Prompt))
-                        return Results.BadRequest("Prompt is required.");
+                    generatedQuestions = await aiService.GenerateQuestionsAsync(request.Prompt, systemInstruction);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
 
-                    var apiKey = config["OpenAI:ApiKey"];
-                    if (string.IsNullOrEmpty(apiKey))
-                        return Results.Problem("AI API key not configured.");
-
-                    using var client = new HttpClient();
-                    client.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-                    var requestBody = new
+                foreach (var q in generatedQuestions)
+                {
+                    context.TbQuestoes.Add(new TbQuesto
                     {
-                        model = "gpt-4o-mini",
-                        messages = new[]
-                        {
-                            new {
-                                role = "system",
-                                content =
-                                    "You are a JSON API that outputs only an array of multiple-choice questions. " +
-                                    "Each question must be an object with these fields: " +
-                                    "EnunciadoQuestao (string), RespostaCertaQuestao (string), RespostaErrada1Questao (string), " +
-                                    "RespostaErrada2Questao (string), RespostaErrada3Questao (string), " +
-                                    "DificuldadeQuestao (string), TemaQuestao (string). " +
-                                    "The field DificuldadeQuestao must be one of exactly these values: 'Fácil', 'Médio', or 'Difícil'. " +
-                                    "The field TemaQuestao must be one of exactly these values: 'Teoria' or 'Programação'. " +
-                                    "Do not include any text, explanation, or markdown—output only JSON starting with '[' and ending with ']'."
+                        EnunciadoQuestao = q.EnunciadoQuestao,
+                        RespostacertaQuestao = q.RespostaCertaQuestao,
+                        Respostaerrada1Questao = q.RespostaErrada1Questao,
+                        Respostaerrada2Questao = q.RespostaErrada2Questao,
+                        Respostaerrada3Questao = q.RespostaErrada3Questao,
+                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
+                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
+                    });
+                }
 
-                            },
-                            new { role = "user", content = request.Prompt }
-                        },
-                        max_tokens = 800
-                    };
+                await context.SaveChangesAsync();
+                return Results.Ok(generatedQuestions);
+            });
 
+            group.MapPost("/ai-generate-based-on-existing", async (
+                    [FromServices] DbPocaContext context,
+                    [FromServices] GENAIService aiService) =>
+                {
+                var existingQuestions = context.TbQuestoes.Take(10).ToList(); // e.g., first 10 for input
 
+                var prompt = System.Text.Json.JsonSerializer.Serialize(existingQuestions.Select(q => new {
+                    q.EnunciadoQuestao,
+                    q.RespostacertaQuestao,
+                    q.Respostaerrada1Questao,
+                    q.Respostaerrada2Questao,
+                    q.Respostaerrada3Questao,
+                    q.DificuldadeQuestao,
+                    q.TemaQuestao
+                }));
 
-                    var aiResponse = await client.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
-                    if (!aiResponse.IsSuccessStatusCode)
+                var systemInstruction =
+                    "You are a JSON API that creates new multiple-choice questions inspired by provided examples. " +
+                    "Use the style and difficulty of the given input, but do not repeat them. " +
+                    "Output only an array of JSON objects with fields: " +
+                    "EnunciadoQuestao, RespostaCertaQuestao, RespostaErrada1Questao, RespostaErrada2Questao, RespostaErrada3Questao, " +
+                    "DificuldadeQuestao (one of 'Fácil', 'Médio', 'Difícil'), TemaQuestao (one of 'Teoria', 'Programação'). " +
+                    "Do not output any extra text, only JSON.";
+
+                List<QuestaoRequest> generatedQuestions;
+                try
+                {
+                    generatedQuestions = await aiService.GenerateQuestionsAsync(prompt, systemInstruction);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+
+                foreach (var q in generatedQuestions)
+                {
+                    context.TbQuestoes.Add(new TbQuesto
                     {
-                        var error = await aiResponse.Content.ReadAsStringAsync();
-                        return Results.Problem($"AI API call failed: {error}");
-                    }
+                        EnunciadoQuestao = q.EnunciadoQuestao,
+                        RespostacertaQuestao = q.RespostaCertaQuestao,
+                        Respostaerrada1Questao = q.RespostaErrada1Questao,
+                        Respostaerrada2Questao = q.RespostaErrada2Questao,
+                        Respostaerrada3Questao = q.RespostaErrada3Questao,
+                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
+                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
+                    });
+                }
 
-                    var json = await aiResponse.Content.ReadFromJsonAsync<JsonElement>();
-                    var content = json.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
-
-                    // Parse the JSON response from AI (ensure prompt requests JSON format)
-                    List<QuestaoRequest> generatedQuestions;
-                    try
-                    {
-                        generatedQuestions = System.Text.Json.JsonSerializer.Deserialize<List<QuestaoRequest>>(content ?? "[]")
-                                              ?? new List<QuestaoRequest>();
-                    }
-                    catch
-                    {
-                        return Results.Problem("Failed to parse AI response into questions.");
-                    }
-
-                    // Apply difficulty/topic from request to each generated question if not set by AI
-                    foreach (var q in generatedQuestions)
-                    {
-                        var questaoEntity = new TbQuesto
-                        {
-                            EnunciadoQuestao = q.EnunciadoQuestao,
-                            RespostacertaQuestao = q.RespostaCertaQuestao,
-                            Respostaerrada1Questao = q.RespostaErrada1Questao,
-                            Respostaerrada2Questao = q.RespostaErrada2Questao,
-                            Respostaerrada3Questao = q.RespostaErrada3Questao,
-                            DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
-                            TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
-                        };
-
-                        context.TbQuestoes.Add(questaoEntity);
-                    }
-
-
-                    await context.SaveChangesAsync();
-
-                    return Results.Ok(generatedQuestions);
-                });
+                await context.SaveChangesAsync();
+                return Results.Ok(generatedQuestions);
+            });
         }
     }
 }

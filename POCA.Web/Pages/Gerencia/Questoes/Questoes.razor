@@ -8,13 +8,20 @@
     <!-- Page Header with Action Button -->
     <div class="d-flex align-center justify-space-between mb-6">
         <MudText Typo="Typo.h4" Class="mb-0">Lista de Questões</MudText>
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   Href="/adicionar-questao"
-                   Size="Size.Small">
-            Nova Questão
-        </MudButton>
+
+        <!-- Dropdown for Nova Questão -->
+        <MudMenu Color="Color.Primary"
+                 Variant="Variant.Filled"
+                 StartIcon="@Icons.Material.Filled.Add"
+                 Size="Size.Small"
+                 Label="Nova Questão">
+            <MudMenuItem OnClick="@(() => Navigation.NavigateTo("/adicionar-questao"))">
+                Criar Manualmente
+            </MudMenuItem>
+            <MudMenuItem OnClick="OpenGenerateDialog">
+                Gerar com AI
+            </MudMenuItem>
+        </MudMenu>
     </div>
 
     <!-- Search and Filter Bar -->
@@ -35,9 +42,9 @@
                        AnchorOrigin="Origin.BottomRight"
                        Class="mr-4"
                        Style="min-width: 150px;">
-                <MudSelectItem Value="@( "Fácil" )">Fácil</MudSelectItem>
-                <MudSelectItem Value="@( "Médio" )">Médio</MudSelectItem>
-                <MudSelectItem Value="@( "Difícil" )">Difícil</MudSelectItem>
+                <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
+                <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
+                <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
             </MudSelect>
 
             <MudSelect @bind-Value="_selectedTopic"
@@ -128,7 +135,7 @@
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
+                <MudTablePager PageSizeOptions="@(new[] { 10, 25, 50 })" />
             </PagerContent>
         </MudTable>
     </MudPaper>
@@ -149,6 +156,27 @@
     </DialogActions>
 </MudDialog>
 
+<!-- Generate with AI Dialog -->
+<MudDialog @ref="generateDialog" MaxWidth="MaxWidth.Small">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Gerar Novas Questões</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>
+            Este recurso vai gerar novas questões com base nas existentes no banco de dados.
+        </MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+            Deseja continuar?
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => generateDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="GenerateQuestions">
+            Gerar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<QuestaoResponse> _questoes = new();
     private bool _isLoading = true;
@@ -157,6 +185,7 @@
     private string _selectedTopic = "";
     private List<string> _uniqueTopics = new();
     private MudDialog deleteDialog;
+    private MudDialog generateDialog;
     private int _questionToDeleteId;
 
     protected override async Task OnInitializedAsync()
@@ -229,13 +258,43 @@
         {
             await QuestoesAPI.DeleteQuestaoAsync(_questionToDeleteId);
             Snackbar.Add("Questão excluída com sucesso!", Severity.Success);
-            await LoadQuestions(); // Refresh the list after deletion
+            await LoadQuestions();
             await deleteDialog.CloseAsync();
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
+        }
+    }
+
+    private void OpenGenerateDialog()
+    {
+        generateDialog.ShowAsync();
+    }
+
+    private async Task GenerateQuestions()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var generated = await QuestoesAPI.GenerateBasedOnExistingAsync();
+
+            Snackbar.Add($"{generated.Count} novas questões geradas com sucesso!", Severity.Success);
+            await LoadQuestions();
+            await generateDialog.CloseAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao gerar questões: {ex.Message}", Severity.Error);
+            await generateDialog.CloseAsync();
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
         }
     }
 }
