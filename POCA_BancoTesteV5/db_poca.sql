@@ -257,10 +257,12 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_respostas` (
   `final_resposta` VARCHAR(100) NOT NULL,
   `tb_atividades_id_atividade` INT NOT NULL,
   `tb_alunos_id_aluno` INT NOT NULL,
-  PRIMARY KEY (`id_resposta`, `tb_atividades_id_atividade`, `tb_alunos_id_aluno`),
+  `tb_questoes_id_questao` INT NOT NULL,
+  PRIMARY KEY (`id_resposta`, `tb_atividades_id_atividade`, `tb_alunos_id_aluno`, `tb_questoes_id_questao`),
   UNIQUE INDEX `id_resposta_UNIQUE` (`id_resposta` ASC) VISIBLE,
-  INDEX `fk_tb_respostas_tb_atividades1_idx` (`tb_atividades_id_atividade` ASC) VISIBLE,
+  INDEX `fk_tb_respostas_tb_atividades1_idx` (`tb_atividades_id_atividade` ASC) INVISIBLE,
   INDEX `fk_tb_respostas_tb_alunos1_idx` (`tb_alunos_id_aluno` ASC) VISIBLE,
+  INDEX `fk_tb_respostas_tb_questoes1_idx` (`tb_questoes_id_questao` ASC) VISIBLE,
   CONSTRAINT `fk_tb_respostas_tb_atividades1`
     FOREIGN KEY (`tb_atividades_id_atividade`)
     REFERENCES `db_poca`.`tb_atividades` (`id_atividade`)
@@ -269,6 +271,11 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_respostas` (
   CONSTRAINT `fk_tb_respostas_tb_alunos1`
     FOREIGN KEY (`tb_alunos_id_aluno`)
     REFERENCES `db_poca`.`tb_alunos` (`id_aluno`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_tb_respostas_tb_questoes1`
+    FOREIGN KEY (`tb_questoes_id_questao`)
+    REFERENCES `db_poca`.`tb_questoes` (`id_questao`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
