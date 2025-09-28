@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using POCA.Banco.Migrations;
 
 namespace POCA.Banco.Model
 {
@@ -10,15 +11,16 @@ namespace POCA.Banco.Model
     {
         public int IdResposta { get; set; }
 
-        public int IdAluno { get; set; }
-        public TbAluno Aluno { get; set; }
+        public string FinalResposta { get; set; } = string.Empty;
 
         public int IdAtividade { get; set; }
         public TbAtividade Atividade { get; set; }
 
-        public string RespostaAluno { get; set; } = string.Empty;
-        public bool Correta { get; set; }   // opcional: true/false
-        public DateTime DataResposta { get; set; } = DateTime.Now;
+        public int IdAluno { get; set; }
+        public TbAluno Aluno { get; set; }
+
+        public int IdQuestao { get; set; }
+        public TbQuesto Questao { get; set; }
     }
 
 }
