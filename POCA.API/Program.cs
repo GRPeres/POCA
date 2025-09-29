@@ -37,6 +37,7 @@ app.AddEndpointsProfessores();
 app.AddEndpointsMaterias();
 app.AddEndpointsPessoas();
 app.AddEndpointsAtividades();
+app.AddEndpointsRespostas();
 app.UseSwagger();
 app.UseSwaggerUI();
 

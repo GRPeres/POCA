@@ -31,7 +31,7 @@ public partial class DbPocaContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySQL("server=localhost;port=3306;user=root;password=root;database=db_poca");
+        => optionsBuilder.UseMySQL("server=localhost;port=3306;user=root;password=passywassy;database=db_poca");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +53,9 @@ public partial class DbPocaContext : DbContext
             entity.Property(e => e.NomeAluno)
                 .HasMaxLength(45)
                 .HasColumnName("nome_aluno");
+            entity.Property(e => e.EmailAluno)
+                .HasMaxLength(100)
+                .HasColumnName("email_aluno");
             entity.Property(e => e.ProgressoAluno).HasColumnName("progresso_aluno");
 
             entity.HasMany(d => d.TbMateriasIdMateria).WithMany(p => p.TbAlunosIdAlunos)
@@ -136,14 +139,21 @@ public partial class DbPocaContext : DbContext
 
             entity.HasIndex(e => e.IdResposta, "id_resposta_UNIQUE").IsUnique();
 
-            entity.Property(e => e.IdResposta).HasColumnName("id_resposta");
-            entity.Property(e => e.RespostaAluno)
+            entity.Property(e => e.IdResposta)
+                  .HasColumnName("id_resposta");
+
+            entity.Property(e => e.FinalResposta)
                   .HasMaxLength(500)
-                  .HasColumnName("resposta_aluno");
-            entity.Property(e => e.Correta)
-                  .HasColumnName("correta");
-            entity.Property(e => e.DataResposta)
-                  .HasColumnName("data_resposta");
+                  .HasColumnName("final_resposta");
+
+            entity.Property(e => e.IdAluno)
+                  .HasColumnName("tb_alunos_id_aluno");
+
+            entity.Property(e => e.IdAtividade)
+                  .HasColumnName("tb_atividades_id_atividade");
+
+            entity.Property(e => e.IdQuestao)
+                  .HasColumnName("tb_questoes_id_questao");
 
             entity.HasOne(d => d.Aluno)
                   .WithMany(p => p.TbRespostasIdRespostas)
@@ -156,6 +166,12 @@ public partial class DbPocaContext : DbContext
                   .HasForeignKey(d => d.IdAtividade)
                   .OnDelete(DeleteBehavior.ClientSetNull)
                   .HasConstraintName("fk_tb_respostas_tb_atividades");
+
+            entity.HasOne(d => d.Questao)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdQuestao)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_questoes");
         });
 
 
