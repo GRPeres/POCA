@@ -255,6 +255,10 @@ namespace POCA.API.Endpoints
                 if (string.IsNullOrWhiteSpace(request.Prompt))
                     return Results.BadRequest("Prompt is required.");
 
+                var cleanedPrompt = request.Prompt.Trim();
+                if (cleanedPrompt.Length > 2000)
+                    cleanedPrompt = cleanedPrompt.Substring(0, 2000);
+
                 var systemInstruction =
                     "You are a JSON API that outputs only an array of multiple-choice questions. " +
                     "Each question must be an object with these fields: " +
@@ -268,38 +272,79 @@ namespace POCA.API.Endpoints
                 List<QuestaoRequest> generatedQuestions;
                 try
                 {
-                    generatedQuestions = await aiService.GenerateQuestionsAsync(request.Prompt, systemInstruction);
+                    generatedQuestions = await aiService.GenerateQuestionsAsync(cleanedPrompt, systemInstruction);
+
+                    if (generatedQuestions == null || generatedQuestions.Count == 0)
+                        return Results.BadRequest("AI did not return valid questions.");
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    return Results.Problem($"AI generation failed: {ex.Message}");
                 }
 
+                var validQuestions = new List<QuestaoRequest>();
                 foreach (var q in generatedQuestions)
                 {
+                    if (string.IsNullOrWhiteSpace(q.EnunciadoQuestao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaCertaQuestao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada1Questao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada2Questao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada3Questao))
+                    {
+                        continue;
+                    }
+
+                    validQuestions.Add(q);
+
                     context.TbQuestoes.Add(new TbQuesto
                     {
-                        EnunciadoQuestao = q.EnunciadoQuestao,
-                        RespostacertaQuestao = q.RespostaCertaQuestao,
-                        Respostaerrada1Questao = q.RespostaErrada1Questao,
-                        Respostaerrada2Questao = q.RespostaErrada2Questao,
-                        Respostaerrada3Questao = q.RespostaErrada3Questao,
-                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
-                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
+                        EnunciadoQuestao = q.EnunciadoQuestao.Trim(),
+                        RespostacertaQuestao = q.RespostaCertaQuestao.Trim(),
+                        Respostaerrada1Questao = q.RespostaErrada1Questao.Trim(),
+                        Respostaerrada2Questao = q.RespostaErrada2Questao.Trim(),
+                        Respostaerrada3Questao = q.RespostaErrada3Questao.Trim(),
+                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "Fácil" : q.DificuldadeQuestao,
+                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "Teoria" : q.TemaQuestao
                     });
                 }
 
-                await context.SaveChangesAsync();
-                return Results.Ok(generatedQuestions);
+                if (validQuestions.Count == 0)
+                    return Results.BadRequest("No valid questions could be generated.");
+
+                try
+                {
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem($"Database save failed: {ex.Message}");
+                }
+
+                return Results.Ok(validQuestions);
             });
 
             group.MapPost("/ai-generate-based-on-existing", async (
-                    [FromServices] DbPocaContext context,
-                    [FromServices] GENAIService aiService) =>
+                [FromServices] DbPocaContext context,
+                [FromServices] GENAIService aiService,
+                [FromBody] BaseQuestionsRequest? request) =>
+            {
+                // ✅ Fetch base questions
+                List<TbQuesto> baseQuestions;
+                if (request?.QuestionIds != null && request.QuestionIds.Any())
                 {
-                var existingQuestions = context.TbQuestoes.Take(10).ToList(); // e.g., first 10 for input
+                    baseQuestions = context.TbQuestoes
+                        .Where(q => request.QuestionIds.Contains(q.IdQuestao))
+                        .ToList();
+                }
+                else
+                {
+                    baseQuestions = context.TbQuestoes.Take(10).ToList();
+                }
 
-                var prompt = System.Text.Json.JsonSerializer.Serialize(existingQuestions.Select(q => new {
+                if (!baseQuestions.Any())
+                    return Results.BadRequest("No base questions found to generate from.");
+
+                var prompt = System.Text.Json.JsonSerializer.Serialize(baseQuestions.Select(q => new {
                     q.EnunciadoQuestao,
                     q.RespostacertaQuestao,
                     q.Respostaerrada1Questao,
@@ -321,28 +366,51 @@ namespace POCA.API.Endpoints
                 try
                 {
                     generatedQuestions = await aiService.GenerateQuestionsAsync(prompt, systemInstruction);
+                    if (generatedQuestions == null || !generatedQuestions.Any())
+                        return Results.BadRequest("AI did not generate any valid questions.");
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    return Results.Problem($"AI generation failed: {ex.Message}");
                 }
 
+                var validQuestions = new List<QuestaoRequest>();
                 foreach (var q in generatedQuestions)
                 {
+                    if (string.IsNullOrWhiteSpace(q.EnunciadoQuestao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaCertaQuestao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada1Questao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada2Questao) ||
+                        string.IsNullOrWhiteSpace(q.RespostaErrada3Questao))
+                        continue;
+
+                    validQuestions.Add(q);
+
                     context.TbQuestoes.Add(new TbQuesto
                     {
-                        EnunciadoQuestao = q.EnunciadoQuestao,
-                        RespostacertaQuestao = q.RespostaCertaQuestao,
-                        Respostaerrada1Questao = q.RespostaErrada1Questao,
-                        Respostaerrada2Questao = q.RespostaErrada2Questao,
-                        Respostaerrada3Questao = q.RespostaErrada3Questao,
-                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "NOT PROVIDED" : q.DificuldadeQuestao,
-                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "NOT PROVIDED" : q.TemaQuestao
+                        EnunciadoQuestao = q.EnunciadoQuestao.Trim(),
+                        RespostacertaQuestao = q.RespostaCertaQuestao.Trim(),
+                        Respostaerrada1Questao = q.RespostaErrada1Questao.Trim(),
+                        Respostaerrada2Questao = q.RespostaErrada2Questao.Trim(),
+                        Respostaerrada3Questao = q.RespostaErrada3Questao.Trim(),
+                        DificuldadeQuestao = string.IsNullOrWhiteSpace(q.DificuldadeQuestao) ? "Fácil" : q.DificuldadeQuestao,
+                        TemaQuestao = string.IsNullOrWhiteSpace(q.TemaQuestao) ? "Teoria" : q.TemaQuestao
                     });
                 }
 
-                await context.SaveChangesAsync();
-                return Results.Ok(generatedQuestions);
+                if (!validQuestions.Any())
+                    return Results.BadRequest("No valid questions could be inserted into the database.");
+
+                try
+                {
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem($"Database save failed: {ex.Message}");
+                }
+
+                return Results.Ok(validQuestions);
             });
         }
     }

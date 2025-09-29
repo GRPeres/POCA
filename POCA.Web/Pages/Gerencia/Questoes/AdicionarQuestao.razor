@@ -188,6 +188,9 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Erro ao salvar questão: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
             _isSubmitting = false;
         }
     }
@@ -196,7 +199,6 @@
     {
         try
         {
-            // This should call your backend API endpoint that uses the AI key securely
             _generatedQuestions = await QuestoesService.GenerateQuestionsFromPromptAsync(_aiPrompt);
             Snackbar.Add("Questões geradas com sucesso!", Severity.Success);
         }

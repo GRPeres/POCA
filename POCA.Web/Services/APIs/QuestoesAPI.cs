@@ -90,7 +90,6 @@ namespace POCA.Web.Services.APIs
 
             response.EnsureSuccessStatusCode();
 
-            // Assuming backend returns: ["Question 1 text", "Question 2 text", ...]
             var questions = await response.Content.ReadFromJsonAsync<List<string>>();
 
             return questions ?? new List<string>();
@@ -99,9 +98,11 @@ namespace POCA.Web.Services.APIs
         /// <summary>
         /// Calls the backend to generate new questions based on existing database questions.
         /// </summary>
-        public async Task<List<QuestaoResponse>> GenerateBasedOnExistingAsync()
+        public async Task<List<QuestaoResponse>> GenerateBasedOnExistingAsync(List<int> baseQuestionIds)
         {
-            var response = await _httpClient.PostAsync("questoes/ai-generate-based-on-existing", null);
+            var requestBody = new { QuestionIds = baseQuestionIds ?? new List<int>() };
+
+            var response = await _httpClient.PostAsJsonAsync("questoes/ai-generate-based-on-existing", requestBody);
 
             response.EnsureSuccessStatusCode();
 
@@ -109,5 +110,6 @@ namespace POCA.Web.Services.APIs
 
             return generated ?? new List<QuestaoResponse>();
         }
+
     }
 }
