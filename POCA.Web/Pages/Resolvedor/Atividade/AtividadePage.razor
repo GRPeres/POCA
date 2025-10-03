@@ -15,10 +15,10 @@
 
         @if (!UserSession.IsLoggedIn)
         {
-            <MudPaper Class="pa-4 text-center" Elevation="1">
+            <MudStack Class="pa-4 text-center" Elevation="1">
                 <MudText Typo="Typo.h6" Class="mb-3">Você não está logado</MudText>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
-            </MudPaper>
+            </MudStack>
         }
         else if (isloading)
         {
@@ -30,7 +30,7 @@
         {
             @if (MostrarResumo)
             {
-                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resumo das Respostas</MudText>
 
                     @foreach (var resposta in Resposta)
@@ -42,12 +42,12 @@
                         <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">Terminar</MudButton>
                     </MudStack>
-                </MudPaper>
+                </MudStack>
             }
 
             else if (MostrarRespostas)
             {
-                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resultado Final</MudText>
                     <MudText Class="mb-2">Quantidade de acertos: @QuantidadeCerta</MudText>
 
@@ -55,7 +55,7 @@
                     {
                         <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
                     }
-                </MudPaper>
+                </MudStack>
             }
             else
             {
