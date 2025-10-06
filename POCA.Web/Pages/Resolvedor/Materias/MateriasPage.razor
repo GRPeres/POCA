@@ -1,9 +1,10 @@
-﻿@page "/materia-sala/{idMateria:int}"
+@page "/materia-sala/{idMateria:int}"
 @using POCA.Web.Response
 @using MudBlazor
 @inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
 @inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
 @inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
+@inject POCA.Web.Services.APIs.RespostasAPI RespostasAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 
@@ -38,6 +39,25 @@
             <MudExpansionPanel Text="Geral">
                 <MudList T="string" Dense="true">
                     <MudListItem Icon="@Icons.Material.Filled.Notifications">Avisos</MudListItem>
+
+                    @if (UserSession.CurrentUser?.IdAluno != null)
+                    {
+                        <MudListItem>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Secondary"
+                                       OnClick="@CalcularMedia"
+                                       StartIcon="@Icons.Material.Filled.Calculate">
+                                Calcular Média
+                            </MudButton>
+                        </MudListItem>
+
+                        @if (media is not null)
+                        {
+                            <MudListItem>
+                                <MudText Typo="Typo.body1">Média: @media.Value.ToString("F2")</MudText>
+                            </MudListItem>
+                        }
+                    }
                 </MudList>
             </MudExpansionPanel>
 
@@ -46,12 +66,11 @@
                 {
                     @foreach (var a in avaliacoes)
                     {
-                        <MudButton
-                        Variant="Variant.Filled"
-                        Color="Color.Primary"
-                        Class="mb-2"
-                        OnClick="@(() => NavegarParaAtividade(a.IdAtividade))"
-                        StartIcon="@Icons.Material.Filled.Assignment">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="mb-2"
+                                   OnClick="@(() => NavegarParaAtividade(a.IdAtividade))"
+                                   StartIcon="@Icons.Material.Filled.Assignment">
                             @a.NomeAtividade
                         </MudButton>
                     }
@@ -86,6 +105,7 @@
     private string? nomeProfessor;
     private List<AtividadeResponse> avaliacoes = new();
     private List<ItemMateria> materiais = new();
+    private double? media; // Média calculada
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,6 +172,15 @@
     private void NavegarParaAtividade(int idAtividade)
     {
         NavigationManager.NavigateTo($"/atividadepage/{idAtividade}");
+    }
+
+    private async Task CalcularMedia()
+    {
+        if (UserSession.CurrentUser?.IdAluno != null)
+        {
+            media = await RespostasAPI.GetMediaPorMateriaAsync(UserSession.CurrentUser.IdAluno.Value, idMateria);
+            StateHasChanged();
+        }
     }
 
     public record ItemMateria(string Titulo);

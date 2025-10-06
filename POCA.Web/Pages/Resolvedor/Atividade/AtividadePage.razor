@@ -15,10 +15,10 @@
 
         @if (!UserSession.IsLoggedIn)
         {
-            <MudPaper Class="pa-4 text-center" Elevation="1">
+            <MudStack Class="pa-4 text-center" Elevation="1">
                 <MudText Typo="Typo.h6" Class="mb-3">Você não está logado</MudText>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
-            </MudPaper>
+            </MudStack>
         }
         else if (isloading)
         {
@@ -30,7 +30,7 @@
         {
             @if (MostrarResumo)
             {
-                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resumo das Respostas</MudText>
 
                     @foreach (var resposta in Resposta)
@@ -42,12 +42,12 @@
                         <MudButton Variant="Variant.Outlined" OnClick="QuestaoVoltar">Voltar</MudButton>
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="QuestaoProximo">Terminar</MudButton>
                     </MudStack>
-                </MudPaper>
+                </MudStack>
             }
 
             else if (MostrarRespostas)
             {
-                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resultado Final</MudText>
                     <MudText Class="mb-2">Quantidade de acertos: @QuantidadeCerta</MudText>
 
@@ -55,12 +55,12 @@
                     {
                         <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
                     }
-                </MudPaper>
+                </MudStack>
             }
             else
             {
-                <MudPaper Class="pa-4 mb-4" Elevation="2">
-                    <MudText Typo="Typo.subtitle2" Class="mb-4">Questão @(posicao + 1) de @questoes.Count</MudText>
+                <MudStack Class="pa-4 ma-2">
+                    <MudText Typo="Typo.subtitle1" Class="mb-4">Questão @(posicao + 1)</MudText>
 
                     <MudText Typo="Typo.body1" Class="mb-4">@questoes[posicao].EnunciadoQuestao</MudText>
 
@@ -69,13 +69,16 @@
                                    SelectedOption="-1"
                                    Label="Escolha uma opção"
                                    Class="mb-4">
-                        @foreach (var option in ShuffledOptions)
-                        {
-                            <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
-                        }
+                        <MudItem xs="12">
+                            @foreach (var option in ShuffledOptions)
+                            {
+                                <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
+                            }
+                        </MudItem>
+                        
                     </MudRadioGroup>
 
-                    <MudStack Direction="Row" Spacing="2">
+                    <MudStack class="justify-space-between mx-8" Row="true">
                         <MudButton Variant="Variant.Outlined"
                                    Disabled="@(posicao == 0)"
                                    OnClick="QuestaoVoltar">
@@ -88,7 +91,7 @@
                             @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
                         </MudButton>
                     </MudStack>
-                </MudPaper>
+                </MudStack>
             }
         }
     </MudPaper>
@@ -248,9 +251,11 @@
         else
         {
             Resposta[posicao] = currentSelection;
+
             posicao--;
 
             currentSelection = Resposta[posicao];
+
             ShuffleCurrentQuestionOptions();
         }
     }
