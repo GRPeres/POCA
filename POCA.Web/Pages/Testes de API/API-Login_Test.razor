@@ -34,6 +34,7 @@
     private readonly int testAlunoId = 1; // Test ID to use
     private readonly string testLogin = "testuser";
     private readonly string testPassword = "testpass123";
+    private readonly DateTime testIdade = new DateTime(2025, 10, 06);
 
     private string HashPassword(string password)
     {
@@ -64,9 +65,10 @@
             // First create aluno
             var alunoRequest = new AlunoCreateRequest(
                 NomeAluno: "Test User",
-                IdadeAluno: 25,
+                dtNascimento: testIdade,
                 ProgressoAluno: 0,
-                ContatoAluno: "test@example.com"
+                EmailAluno: "test@example.com",
+                ContatoAluno: "99999999999"
             );
 
             var createdAluno = await AlunosAPI.AddAlunosAsync(alunoRequest);

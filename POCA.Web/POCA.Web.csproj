@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <None Include="Pages\User\Login.razor" />
-    <None Include="Pages\User\PaginaCadastro.razor" />
+    <None Include="Pages\User\Cadastro.razor" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,8 +2,9 @@
 {
     public record AlunoCreateRequest(
      string NomeAluno,
-     int IdadeAluno,
      int ProgressoAluno,
-     string ContatoAluno
+     string EmailAluno,
+     string ContatoAluno,
+     DateTime dtNascimento
  );
 }
