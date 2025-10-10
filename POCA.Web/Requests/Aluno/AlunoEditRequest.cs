@@ -2,8 +2,8 @@
 public record AlunoEditRequest(
     int IdAluno,
     string NomeAluno,
-    int IdadeAluno,
+    DateTime NascimentoAluno,
     int ProgressoAluno,
-    string ContatoAluno,
-     DateTime dtNascimento
+    string EmailAluno,
+    string ContatoAluno
 );

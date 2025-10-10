@@ -26,6 +26,8 @@
             </MudAlert>
         }
 
+        <MudText>@apiResponse</MudText>
+
         <MudTextField @bind-Value="Credenciais.LoginUsuario"
                         Label="Login"
                         Variant="Variant.Outlined"
@@ -54,35 +56,14 @@
                         AdornmentIcon="@Icons.Material.Filled.Email"
                         Class="mb-3" />
 
-        <MudTextField @bind-Value="Credenciais.SenhaUsuario"
-                        Label="Senha"
-                        Variant="Variant.Outlined"
-                        InputType="(_showPassword ? InputType.Text : InputType.Password)"
-                        Adornment="Adornment.End"
-                        AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                        OnAdornmentClick="TogglePasswordVisibility"
-                        Required
-                        RequiredError="Coloque sua senha"
-                        Class="mb-3" />
-
-        @if (SenhaErrada)
-        {
-            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
-                As senhas não são iguais
-            </MudAlert>
-        }
-
-        <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
-                        Label="Confirme sua Senha"
-                        Variant="Variant.Outlined"
-                        InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
-                        Adornment="Adornment.End"
-                        AdornmentIcon="@(_showPasswordConfirmation ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                        OnAdornmentClick="TogglePasswordConfirmationVisibility"
-                        Required
-                        RequiredError="Confirme a senha"
-                        Class="mb-3" />
-
+    <MudTextField @bind-Value="Credenciais.ContatoUsuario"
+    Label="Contato"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Telephone"
+                      RequiredError="Coloque seu Numero de celular"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Phone"
+                      Class="mb-3" />
 
         <MudDatePicker Label="Data de Nascimento"
                        Editable="true"
@@ -92,6 +73,39 @@
                        Placeholder="DD/MM/YYYY"
                        Required
                        Variant="Variant.Outlined" />
+
+
+        <MudText>@dtNascimento2</MudText>
+        <MudText>@Credenciais.dtNascimento</MudText>
+
+        <MudTextField @bind-Value="Credenciais.SenhaUsuario"
+                      Label="Senha"
+                      Variant="Variant.Outlined"
+                      InputType="(_showPassword ? InputType.Text : InputType.Password)"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      OnAdornmentClick="TogglePasswordVisibility"
+                      Required
+                      RequiredError="Coloque sua senha"
+                      Class="mb-3" />
+        
+        @if (SenhaErrada)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                As senhas não são iguais
+            </MudAlert>
+        }
+
+        <MudTextField @bind-Value="Credenciais.confirmarSenhaUsuario"
+                      Label="Confirme sua Senha"
+                      Variant="Variant.Outlined"
+                      InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@(_showPasswordConfirmation? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      OnAdornmentClick="TogglePasswordConfirmationVisibility"
+                      Required
+                      RequiredError="Confirme a senha"
+                      Class="mb-3" />
 
         <MudStack class="justify-space-between mx-2" Row="true">
             <MudButton Variant="Variant.Filled"
@@ -205,7 +219,7 @@
             // First create aluno
             var alunoRequest = new AlunoCreateRequest(
                 NomeAluno: Credenciais.nomeUsuario,
-                dtNascimento: Credenciais.dtNascimento,
+                NascimentoAluno: Credenciais.dtNascimento,
                 ProgressoAluno: 0,
                 EmailAluno: Credenciais.EmailUsuario,
                 ContatoAluno: Credenciais.ContatoUsuario

@@ -25,7 +25,7 @@
                 <MudDivider />
                 <MudText><b>Nome:</b> @Aluno.NomeAluno</MudText>
                 <MudText><b>Contato:</b> @Aluno.ContatoAluno</MudText>
-                <MudText><b>Idade:</b> @Aluno.IdadeAluno</MudText>
+                <MudText><b>Idade:</b> @Aluno.NascimentoAluno</MudText>
             }
         </MudStack>
     }
@@ -46,7 +46,7 @@
 
     public bool paginicial = false;
     public ProfessorResponse Professor { get; set; } = new ProfessorResponse(0, "", "", "");
-    public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", 0, 0, "", null, null);
+    public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", DateTime.MinValue, 0, "", "", null, null);
 
     protected override async Task OnInitializedAsync()
     {

@@ -2,8 +2,9 @@
 public record AlunoResponse(
     int IdAluno,
     string NomeAluno,
-    int IdadeAluno,
+    DateTime NascimentoAluno,
     int ProgressoAluno,
+    string EmailAluno,
     string ContatoAluno,
     IEnumerable<int>? MateriasIds,
     IEnumerable<int>? PessoasIds
