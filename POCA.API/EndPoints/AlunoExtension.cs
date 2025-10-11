@@ -240,7 +240,7 @@ namespace POCA.API.EndPoints
         // 3️⃣ Busca todas as respostas do aluno nesta matéria
         var respostas = materia.TbAtividadesIdAtividades
             .SelectMany(at => at.TbRespostasIdRespostas)
-            .Where(r => r.TbAlunosIdAluno == idAluno)
+            .Where(r => r.IdAluno == idAluno)
             .ToList();
         if (!respostas.Any())
             return Results.Ok(new { Media = 0.0, Acertos = 0, Total = 0 });
@@ -252,7 +252,7 @@ namespace POCA.API.EndPoints
         foreach (var resposta in respostas)
         {
             var questao = await context.TbQuestoes
-                .FirstOrDefaultAsync(q => q.IdQuestao == resposta.TbQuestoesIdQuestoes);
+                .FirstOrDefaultAsync(q => q.IdQuestao == resposta.IdQuestao);
 
             if (questao is not null && resposta.FinalResposta == questao.RespostacertaQuestao)
                 acertos++;
