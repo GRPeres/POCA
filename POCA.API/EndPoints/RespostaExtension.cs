@@ -155,7 +155,7 @@ namespace POCA.API.EndPoints
                     var response = new AtividadeResponse(
                         resposta.Atividade.IdAtividade,
                         resposta.Atividade.NomeAtividade,
-                        resposta.Atividade.TbQuestoesIdQuestaos?.Select(q => q.IdQuestao),
+                        resposta.Atividade.TbQuestoesIdQuestoes?.Select(q => q.IdQuestao),
                         null
                     );
 

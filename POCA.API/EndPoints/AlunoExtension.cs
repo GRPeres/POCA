@@ -216,6 +216,60 @@ namespace POCA.API.EndPoints
                     return Results.Ok(result);
                 });
 
+            group.MapGet("/{idAluno}/materias/{idMateria}/media",
+    async ([FromServices] DbPocaContext context, int idAluno, int idMateria) =>
+    {
+        // 1️⃣ Busca o aluno e suas relações necessárias
+        var aluno = await context.TbAlunos
+            .Include(a => a.TbMateriasIdMateria)
+                .ThenInclude(m => m.TbAtividadesIdAtividades)
+                    .ThenInclude(q => q.TbQuestoesIdQuestoes)
+            .Include(a => a.TbMateriasIdMateria)
+                .ThenInclude(m => m.TbAtividadesIdAtividades)
+                    .ThenInclude(at => at.TbRespostasIdRespostas)
+            .FirstOrDefaultAsync(a => a.IdAluno == idAluno);
+
+        if (aluno is null)
+            return Results.NotFound("Aluno não encontrado.");
+
+        // 2️⃣ Localiza a matéria
+        var materia = aluno.TbMateriasIdMateria.FirstOrDefault(m => m.IdMateria == idMateria);
+        if (materia is null)
+            return Results.NotFound("Matéria não encontrada ou não associada ao aluno.");
+
+        // 3️⃣ Busca todas as respostas do aluno nesta matéria
+        var respostas = materia.TbAtividadesIdAtividades
+            .SelectMany(at => at.TbRespostasIdRespostas)
+            .Where(r => r.TbAlunosIdAluno == idAluno)
+            .ToList();
+        if (!respostas.Any())
+            return Results.Ok(new { Media = 0.0, Acertos = 0, Total = 0 });
+
+        // 4️⃣ Calcula o total de questões e acertos
+        int totalQuestoes = respostas.Count;
+        int acertos = 0;
+
+        foreach (var resposta in respostas)
+        {
+            var questao = await context.TbQuestoes
+                .FirstOrDefaultAsync(q => q.IdQuestao == resposta.TbQuestoesIdQuestoes);
+
+            if (questao is not null && resposta.FinalResposta == questao.RespostacertaQuestao)
+                acertos++;
+        }
+
+        // 5️⃣ Calcula a média (nota de 0 a 10)
+        double media = (double)acertos / totalQuestoes * 10.0;
+
+        // 6️⃣ Retorna os dados
+        return Results.Ok(new
+        {
+            Media = Math.Round(media, 2),
+            Acertos = acertos,
+            Total = totalQuestoes
+        });
+    });
+
         }
     }
 }

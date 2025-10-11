@@ -6,6 +6,6 @@ namespace POCA.API.Requests.Atividade
     public record AtividadeCreateRequest(
         [Required] int IdAtividade,
         [Required] string NomeAtividade,
-        int? TbQuestoesIdQuestaos
+        int? TbQuestoesIdQuestoes
     ) : AtividadeRequest(IdAtividade, NomeAtividade);
 }

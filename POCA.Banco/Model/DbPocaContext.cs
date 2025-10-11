@@ -313,7 +313,7 @@ public partial class DbPocaContext : DbContext
                 .HasColumnType("enum('Teoria','Programação')")
                 .HasColumnName("tema_questao");
 
-            entity.HasMany(d => d.TbAtividadesIdAtividades).WithMany(p => p.TbQuestoesIdQuestaos)
+            entity.HasMany(d => d.TbAtividadesIdAtividades).WithMany(p => p.TbQuestoesIdQuestoes)
                 .UsingEntity<Dictionary<string, object>>(
                     "TbQuestoesHasTbAtividade",
                     r => r.HasOne<TbAtividade>().WithMany()
@@ -321,16 +321,16 @@ public partial class DbPocaContext : DbContext
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("fk_tb_questoes_has_tb_atividades_tb_atividades1"),
                     l => l.HasOne<TbQuesto>().WithMany()
-                        .HasForeignKey("TbQuestoesIdQuestao")
+                        .HasForeignKey("TbQuestoesIdQuestoes")
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("fk_tb_questoes_has_tb_atividades_tb_questoes1"),
                     j =>
                     {
-                        j.HasKey("TbQuestoesIdQuestao", "TbAtividadesIdAtividade").HasName("PRIMARY");
+                        j.HasKey("TbQuestoesIdQuestoes", "TbAtividadesIdAtividade").HasName("PRIMARY");
                         j.ToTable("tb_questoes_has_tb_atividades");
                         j.HasIndex(new[] { "TbAtividadesIdAtividade" }, "fk_tb_questoes_has_tb_atividades_tb_atividades1_idx");
-                        j.HasIndex(new[] { "TbQuestoesIdQuestao" }, "fk_tb_questoes_has_tb_atividades_tb_questoes1_idx");
-                        j.IndexerProperty<int>("TbQuestoesIdQuestao").HasColumnName("tb_questoes_id_questao");
+                        j.HasIndex(new[] { "TbQuestoesIdQuestoes" }, "fk_tb_questoes_has_tb_atividades_tb_questoes1_idx");
+                        j.IndexerProperty<int>("TbQuestoesIdQuestoes").HasColumnName("tb_questoes_id_questao");
                         j.IndexerProperty<int>("TbAtividadesIdAtividade").HasColumnName("tb_atividades_id_atividade");
                     });
         });

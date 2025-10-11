@@ -155,7 +155,7 @@
 
             atividade = atividadeAPI;
 
-            foreach (var questaoid in atividadeAPI.TbQuestoesIdQuestaos)
+            foreach (var questaoid in atividadeAPI.TbQuestoesIdQuestoes)
             {
                 var questao = await QuestoesAPI.GetQuestaoByIdAsync(questaoid);
                 if (questao != null)

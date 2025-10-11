@@ -23,7 +23,7 @@ namespace POCA.API.EndPoints
                         a.IdAtividade,
                         a.NomeAtividade,
                         a.TbMateriasIdMateria.Select(m => m.IdMateria),
-                        a.TbQuestoesIdQuestaos.Select(p => p.IdQuestao)
+                        a.TbQuestoesIdQuestoes.Select(p => p.IdQuestao)
                     ))
                     .ToListAsync();
 
@@ -35,7 +35,7 @@ namespace POCA.API.EndPoints
             {
                 var atividade = await context.TbAtividades
                     .Include(a => a.TbMateriasIdMateria)
-                    .Include(a => a.TbQuestoesIdQuestaos)
+                    .Include(a => a.TbQuestoesIdQuestoes)
                     .FirstOrDefaultAsync(a => a.IdAtividade == id);
 
                 if (atividade is null)
@@ -45,7 +45,7 @@ namespace POCA.API.EndPoints
                         atividade.IdAtividade,
                         atividade.NomeAtividade,
                         atividade.TbMateriasIdMateria.Select(m => m.IdMateria),
-                        atividade.TbQuestoesIdQuestaos.Select(p => p.IdQuestao)
+                        atividade.TbQuestoesIdQuestoes.Select(p => p.IdQuestao)
                     );
 
                 return Results.Ok(response);
@@ -97,7 +97,7 @@ namespace POCA.API.EndPoints
                 // Include related materias and questions when loading the activity
                 var atividade = await context.TbAtividades
                     .Include(a => a.TbMateriasIdMateria)
-                    .Include(a => a.TbQuestoesIdQuestaos)
+                    .Include(a => a.TbQuestoesIdQuestoes)
                     .FirstOrDefaultAsync(a => a.IdAtividade == id);
 
                 if (atividade is null) return Results.NotFound();
@@ -111,9 +111,9 @@ namespace POCA.API.EndPoints
                     }
 
                     // Remove all question associations
-                    foreach (var questao in atividade.TbQuestoesIdQuestaos.ToList())
+                    foreach (var questao in atividade.TbQuestoesIdQuestoes.ToList())
                     {
-                        atividade.TbQuestoesIdQuestaos.Remove(questao);
+                        atividade.TbQuestoesIdQuestoes.Remove(questao);
                     }
 
                     // Now delete the activity
@@ -135,7 +135,7 @@ namespace POCA.API.EndPoints
                 async ([FromServices] DbPocaContext context, int idAtividade, int idQuestao) =>
                 {
                     var atividade = await context.TbAtividades
-                        .Include(a => a.TbQuestoesIdQuestaos)
+                        .Include(a => a.TbQuestoesIdQuestoes)
                         .FirstOrDefaultAsync(a => a.IdAtividade == idAtividade);
 
                     if (atividade is null)
@@ -145,9 +145,9 @@ namespace POCA.API.EndPoints
                     if (questao is null)
                         return Results.NotFound("Questao not found");
 
-                    if (!atividade.TbQuestoesIdQuestaos.Any(m => m.IdQuestao == idQuestao))
+                    if (!atividade.TbQuestoesIdQuestoes.Any(m => m.IdQuestao == idQuestao))
                     {
-                        atividade.TbQuestoesIdQuestaos.Add(questao);
+                        atividade.TbQuestoesIdQuestoes.Add(questao);
                         await context.SaveChangesAsync();
                     }
 
@@ -158,19 +158,19 @@ namespace POCA.API.EndPoints
                 async ([FromServices] DbPocaContext context, int idAtividade, int idQuestao) =>
                 {
                     var atividade = await context.TbAtividades
-                        .Include(a => a.TbQuestoesIdQuestaos)
+                        .Include(a => a.TbQuestoesIdQuestoes)
                         .FirstOrDefaultAsync(a => a.IdAtividade == idAtividade);
 
                     if (atividade is null)
                         return Results.NotFound("Aluno not found");
 
-                    var questao = atividade.TbQuestoesIdQuestaos
+                    var questao = atividade.TbQuestoesIdQuestoes
                         .FirstOrDefault(m => m.IdQuestao == idQuestao);
 
                     if (questao is null)
                         return Results.NotFound("Materia not associated with aluno");
 
-                    atividade.TbQuestoesIdQuestaos.Remove(questao);
+                    atividade.TbQuestoesIdQuestoes.Remove(questao);
                     await context.SaveChangesAsync();
                     return Results.NoContent();
                 });

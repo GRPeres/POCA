@@ -6,6 +6,6 @@ namespace POCA.API.Responses
         int IdAtividade,
         string NomeAtividade,
         IEnumerable<int>? TbMateriasIdMateria,
-        IEnumerable<int>? TbQuestoesIdQuestaos
+        IEnumerable<int>? TbQuestoesIdQuestoes
     );
 }

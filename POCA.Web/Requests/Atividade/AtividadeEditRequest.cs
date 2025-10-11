@@ -7,5 +7,5 @@ namespace POCA.API.Requests.Atividade;
 public record AtividadeEditRequest(
         int IdAtividade,
         string NomeAtividade,
-        int? TbQuestoesIdQuestaos
+        int? TbQuestoesIdQuestoes
     );
