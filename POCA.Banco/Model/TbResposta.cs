@@ -22,9 +22,9 @@ namespace POCA.Banco.Model
         public int IdQuestao { get; set; }
         public TbQuesto Questao { get; set; }
 
-        public int TbAlunosIdAluno { get; set; }
+        //public int TbAlunosIdAluno { get; set; }
 
-        public int TbQuestoesIdQuestoes { get; set; }
+        //public int TbQuestoesIdQuestoes { get; set; }
 
         //public virtual ICollection<TbAluno> TbAlunosIdAluno { get; set; } = new List<TbAluno>();
     }
