@@ -1,9 +1,6 @@
-﻿namespace POCA.Web.Requests.Resposta
-{
-    public record RespostaCreateRequest(
-        string FinalResposta,
-        int IdAtividade,
-        int IdAluno,
-        int IdQuestao
-    );
-}
+﻿public record RespostaCreateRequest(
+    string FinalResposta,
+    int IdAtividade,
+    int IdAluno,
+    int IdQuestao
+);
