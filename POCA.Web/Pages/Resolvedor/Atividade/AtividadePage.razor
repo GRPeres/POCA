@@ -1,11 +1,13 @@
 ﻿@page "/atividadepage/{idAtividade:int}"
 @using MudBlazor
+@using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 @inject POCA.Web.Services.APIs.AtividadesAPI AtividadesAPI
 @inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
 @inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
 @inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
+@inject POCA.Web.Services.APIs.RespostaAPI RespostaAPI
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
     <MudPaper Class="pa-6" Elevation="3">
@@ -112,7 +114,6 @@
     [Parameter] public int idAtividade { get; set; }
 
     public AtividadeResponse? atividade = new(0, "", null, null);
-    public MateriaResponse materia;
     public List<QuestaoResponse> questoes = new();
     public List<int> Resposta = new();
     public List<bool> RespostaFinal = new();
@@ -136,6 +137,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         UserSession.OnChange += HandleUserSessionChanged;
 
         await CarregarAtividade();
@@ -225,10 +227,22 @@
         }
     }
 
+    public async void EnviarPraAPI()
+    {
+        for (int i = 0; i < questoes.Count; i++)
+        {
+            int? idPessoa = (UserSession.CurrentUser.IsProfessor ? UserSession.CurrentUser.IdProfessor : UserSession.CurrentUser.IdAluno);
+            RespostaCreateRequest respostaAPI = new RespostaCreateRequest(Resposta.ToString(), atividade.IdAtividade, idPessoa ?? 0, questoes[i].IdQuestao);
+
+            await RespostaAPI.AddRespostaAsync(respostaAPI);
+        }
+    }
+
     public void QuestaoProximo()
     {
         if (MostrarResumo)
         {
+            EnviarPraAPI();
             VerificarResposta();
             MostrarRespostas = true;
             MostrarResumo = false;
@@ -247,6 +261,7 @@
                 posicao = 0;
                 MostrarResumo = true;
             }
+
 
             currentSelection = Resposta[posicao];
             ShuffleCurrentQuestionOptions();
