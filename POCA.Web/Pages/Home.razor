@@ -1,154 +1,56 @@
-﻿@page "/teste-home"
-@inject UserSessionService UserSession
-@inject NavigationManager NavigationManager
-@inject Services.APIs.AlunosAPI AlunosAPI;
+﻿@page "/test-home"
+@using MudBlazor
+@using POCA.Web
 
-<PageTitle>Home</PageTitle>
+<MudContainer Class="pa-4">
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-6">
+        Bem-vindo ao Portal de Atividades
+    </MudText>
 
-<MudText>@Erro</MudText>
-
-@if (UserSession.IsLoggedIn)
-{
-    @if (UserSession.CurrentUser.IsProfessor)
-    {
-        <MudText>Você já está logado como professor</MudText>
-    }
-    else
-    {
-        <MudNavMenu>
-            <MudText>Quadro de Avisos</MudText>
-            <MudButton OnClick="AvisoVoltar">Voltar</MudButton>
-            <MudButton OnClick="AvisoProximo">Proximo</MudButton>
-        </MudNavMenu>
-
-        <MudText>@Avisos[posicao]</MudText>
-
-
-        if (!_isLoading)
+    <MudGrid Gutter="3" Justify="Justify.Center">
+        @foreach (var item in PortalItems)
         {
-            @foreach (var materia in TodasMaterias)
-            {
-                <MudText>@materia</MudText>
-            }
-        }else
-        {
-            <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Class="pa-3 hover-elevate cursor-pointer" Style="height: 200px;"
+                         @onclick="() => Navegar(item.Link)">
+                    <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
+                        <MudIcon Icon="@item.Icon" Size="Size.Large" Color="Color.Primary" />
+                        <MudText Typo="Typo.h6" Class="mt-2">@item.Titulo</MudText>
+                        <MudText Typo="Typo.body2" Class="mt-1 text-secondary">@item.Descricao</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
         }
-    }
-}
-else
-{
-    <MudText>Você já não está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/login">Logar</MudButton>
-}
+    </MudGrid>
+</MudContainer>
 
 @code
 {
-    public List<string> Avisos = new() { "Aviso 1", "Aviso 2", "Aviso 3", "Aviso 4" };
-    public string Erro = "";
-    public int posicao;
-    public int Progresso;
-    public bool _isLoading = true;
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
-    public List<MateriaResponse> TodasMaterias = new();
+    public List<PortalItem> PortalItems { get; set; } = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        UserSession.OnChange += HandleUserSessionChanged;
-
-        if (UserSession.IsLoggedIn)
+        PortalItems = new List<PortalItem>
         {
-            await GetMaterias();
-        }
+            new() { Titulo = "Atividades", Descricao = "Acesse suas atividades e desafios", Icon = Icons.Material.Filled.School, Link = "/atividades" },
+            new() { Titulo = "Perfil", Descricao = "Gerencie suas informações pessoais", Icon = Icons.Material.Filled.Person, Link = "/perfil" },
+            new() { Titulo = "Ranking", Descricao = "Veja o desempenho dos alunos", Icon = Icons.Material.Filled.Leaderboard, Link = "/ranking" },
+            new() { Titulo = "Configurações", Descricao = "Personalize sua experiência", Icon = Icons.Material.Filled.Settings, Link = "/configuracoes" }
+        };
     }
 
-    private void HandleUserSessionChanged()
+    protected void Navegar(string link)
     {
-        InvokeAsync(StateHasChanged);
-    }   
-
-    public void Dispose()
-    {
-        UserSession.OnChange -= HandleUserSessionChanged;
+        NavigationManager.NavigateTo(link);
     }
 
-    // Começo
-    public void AvisoProximo()
+    public class PortalItem
     {
-        if (posicao < Avisos.Count - 1)
-        {
-            posicao++;
-        }else
-        {
-            posicao = 0;
-        }
-    }
-
-    public void AvisoVoltar()
-    {
-        if (posicao > 0)
-        {
-            posicao--;
-        }
-        else
-        {
-            posicao = Avisos.Count - 1;
-        }
-    }
-
-    public async Task GetMaterias()
-    {
-        try
-        {
-            if (UserSession.CurrentUser == null)
-            {
-                Console.WriteLine("Current user is null. Cannot retrieve subjects.");
-                return;
-            }
-
-            _isLoading = true;
-            Console.WriteLine("Loading subjects...");
-
-            if (!UserSession.CurrentUser.IdAluno.HasValue)
-            {
-                Console.WriteLine("User ID is missing. Cannot retrieve subjects.");
-                _isLoading = false;
-                return;
-            }
-
-            var materiasFromApi = await AlunosAPI.GetMateriasByAlunoAsync(UserSession.CurrentUser.IdAluno.Value);
-
-            if (materiasFromApi != null)
-            {
-                TodasMaterias.Clear();
-
-                foreach (var materia in materiasFromApi)
-                {
-                    TodasMaterias.Add(materia);
-                    Console.WriteLine($"Subject retrieved: {materia.IdMateria}");
-                }
-                Console.WriteLine($"Successfully loaded {TodasMaterias.Count} subjects.");
-            }
-            else
-            {
-                Console.WriteLine("No subjects found for the current user.");
-            }
-        }
-        catch (HttpRequestException httpEx)
-        {
-            Erro = $"Network error: {httpEx.Message}. Please check your internet connection.";
-            Console.WriteLine($"Caught HTTP exception: {httpEx}");
-        }
-        catch (Exception ex)
-        {
-            Erro = $"An unexpected error occurred: {ex.Message}";
-            Console.WriteLine($"Caught general exception: {ex}");
-        }
-        finally
-        {
-            _isLoading = false;
-            Console.WriteLine("_isLoading set to false.");
-            await InvokeAsync(StateHasChanged);
-        }
+        public string Titulo { get; set; } = string.Empty;
+        public string Descricao { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string Link { get; set; } = string.Empty;
     }
 }
