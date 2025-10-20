@@ -1,154 +1,292 @@
-﻿@page "/teste-home"
+﻿@page "/"
+@using MudBlazor
+@using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
-@inject Services.APIs.AlunosAPI AlunosAPI;
+@inject POCA.Web.Services.APIs.AlunosAPI AlunosAPI
+@inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
+@inject POCA.Web.Services.APIs.MateriasAPI MateriasAPI
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Home</PageTitle>
-
-<MudText>@Erro</MudText>
-
-@if (UserSession.IsLoggedIn)
-{
-    @if (UserSession.CurrentUser.IsProfessor)
-    {
-        <MudText>Você já está logado como professor</MudText>
+<style>
+    /* Parte do card de cima */
+    .hover-elevate {
+        transition: all 0.3s ease;
     }
-    else
-    {
-        <MudNavMenu>
-            <MudText>Quadro de Avisos</MudText>
-            <MudButton OnClick="AvisoVoltar">Voltar</MudButton>
-            <MudButton OnClick="AvisoProximo">Proximo</MudButton>
-        </MudNavMenu>
 
-        <MudText>@Avisos[posicao]</MudText>
+    .hover-elevate:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
 
+    .cursor-pointer {
+        cursor: pointer;
+    }
 
-        if (!_isLoading)
-        {
-            @foreach (var materia in TodasMaterias)
-            {
-                <MudText>@materia</MudText>
-            }
-        }else
-        {
-            <MudProgressCircular Indeterminate="true" size="Size.Small" Color="Color.Inherit"></MudProgressCircular>
+    /* Parte de materias */
+    .cards-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        padding-bottom: 1rem;
+        user-select: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+        .cards-wrapper::-webkit-scrollbar {
+            display: none;
         }
+
+    .card-container {
+        flex-shrink: 0;
+        scroll-snap-align: center;
+        width: 250px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
     }
-}
-else
-{
-    <MudText>Você já não está logado</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/login">Logar</MudButton>
-}
+
+        .card-container:hover {
+            z-index: 10;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+</style>
+
+<MudLayout>
+    <MudMainContent Class="pt-2 pb-0 px-6 gap-10">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center mt-10">
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+            </div>
+        }
+        else if (UserSession.IsLoggedIn)
+        {
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-6">
+                Bem-vindo ao Portal de Atividades
+            </MudText>
+
+            <MudGrid Gutter="3" Justify="Justify.Center">
+                @foreach (var item in PortalItems)
+                {
+                    <MudItem xs="12" sm="6" md="4" lg="3">
+                        <MudCard Class="pa-3 hover-elevate cursor-pointer" Style="height: 200px;"
+                                 @onclick="() => Navegar(item.Link)">
+                            <MudCardContent Class="d-flex flex-column align-center justify-center text-center">
+                                <MudIcon Icon="@item.Icon" Size="Size.Large" Color="Color.Primary" />
+                                <MudText Typo="Typo.h6" Class="mt-2">@item.Titulo</MudText>
+                                <MudText Typo="Typo.body2" Class="mt-1 text-secondary">@item.Descricao</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <MudText Typo="Typo.h4" Class="my-6 font-weight-bold">
+                📚 @(UserSession.CurrentUser.IsProfessor ? "Matérias que você leciona" : "Minhas Matérias")
+            </MudText>
+
+            @if (materias == null || materias.Count == 0)
+            {
+                <MudText>Nenhuma matéria encontrada.</MudText>
+            }
+            else
+            {
+                <div class="cards-wrapper">
+                    @foreach (var materia in materias.Select((value, index) => new { value, index }))
+                    {
+                        var isFirst = materia.index == 0;
+                        var isLast = materia.index == materias.Count - 1;
+                        var style = "";
+
+                        if (isFirst)
+                            style = "padding-left: 1rem;";
+                        else if (isLast)
+                            style = "padding-right: 1rem;";
+
+                        <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
+                            <MudCard 
+                                     Elevation="6"
+                                     Class="hover:shadow-xl transition-all duration-300">
+                                <MudCardActions Class="d-flex align-center gap-2 p-4">
+                                    <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
+                                    <MudText Typo="Typo.h6" Class="mb-0">@materia.value.NomeMateria</MudText>
+                                </MudCardActions>
+
+                                @*  <MudCardContent Class="px-4">
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        Uma breve descrição da matéria pode ir aqui ou até um resumo.
+                                    </MudText>
+                                </MudCardContent> *@
+                            </MudCard>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <MudPaper Elevation="1" Class="pa-4 ma-4 text-center">
+                <MudText Typo="Typo.h6" Class="mb-4">Você não está logado</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
+            </MudPaper>
+        }
+    </MudMainContent>
+</MudLayout>
 
 @code
 {
-    public List<string> Avisos = new() { "Aviso 1", "Aviso 2", "Aviso 3", "Aviso 4" };
-    public string Erro = "";
-    public int posicao;
-    public int Progresso;
-    public bool _isLoading = true;
+    private List<MateriaResponse> materias = new();
+    private bool isLoaded = false;
+    private bool isLoading = true;
+    private bool hasRenderedCards = false;
 
-    public List<MateriaResponse> TodasMaterias = new();
+    private ElementReference scrollContainer;
+    private System.Timers.Timer? scrollTimer;
+
+    public List<PortalItem> PortalItems { get; set; } = new();
+
+    [CascadingParameter]
+    public bool IsDarkMode { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         UserSession.OnChange += HandleUserSessionChanged;
 
-        if (UserSession.IsLoggedIn)
+        if (UserSession.IsLoggedIn && !isLoaded)
         {
-            await GetMaterias();
+            isLoaded = true;
+            await CarregarMaterias();
         }
+
+        PortalItems = new List<PortalItem>
+        {
+            new() { Titulo = "Atividades", Descricao = "Acesse suas atividades", Icon = Icons.Material.Filled.School, Link = "/materias-aluno" },
+            new() { Titulo = "Perfil", Descricao = "Gerencie suas informações pessoais", Icon = Icons.Material.Filled.Person, Link = "/perfil" },
+            new() { Titulo = "Ranking", Descricao = "Veja o desempenho dos alunos", Icon = Icons.Material.Filled.Leaderboard, Link = "/ranking" },
+        };        
+
+        isLoading = false;
+    }
+
+    protected void Navegar(string link)
+    {
+        NavigationManager.NavigateTo(link);
+    }
+
+    public class PortalItem
+    {
+        public string Titulo { get; set; } = string.Empty;
+        public string Descricao { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string Link { get; set; } = string.Empty;
+    }
+
+    private async Task CarregarMaterias()
+    {
+        try
+        {
+            if (UserSession.CurrentUser == null)
+                return;
+
+            if (UserSession.CurrentUser.IdProfessor.HasValue)
+            {
+                var professor = await ProfessoresAPI.GetProfessorbyidAsync(UserSession.CurrentUser.IdProfessor.Value);
+                foreach (var materiaId in professor.MateriasIds)
+                {
+                    var materia = await MateriasAPI.GetMateriaAsync(materiaId);
+                    if (materia != null)
+                        materias.Add(materia);
+                }
+            }
+            else if (UserSession.CurrentUser.IdAluno.HasValue)
+            {
+                var aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
+                foreach (var materiaId in aluno.MateriasIds)
+                {
+                    var materia = await MateriasAPI.GetMateriaAsync(materiaId);
+                    if (materia != null)
+                        materias.Add(materia);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar matérias: {ex.Message}");
+        }
+
+        hasRenderedCards = true;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleUserSessionChanged()
     {
-        InvokeAsync(StateHasChanged);
-    }   
+        InvokeAsync(async () =>
+        {
+            if (UserSession.IsLoggedIn && !isLoaded)
+            {
+                isLoaded = true;
+                await CarregarMaterias();
+                StateHasChanged();
+            }
+        });
+    }
+
+    private void NavigateToMateria(int materiaId)
+    {
+        NavigationManager.NavigateTo($"/materia-sala/{materiaId}");
+    }
 
     public void Dispose()
     {
         UserSession.OnChange -= HandleUserSessionChanged;
     }
 
-    // Começo
-    public void AvisoProximo()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (posicao < Avisos.Count - 1)
+        if (hasRenderedCards)
         {
-            posicao++;
-        }else
-        {
-            posicao = 0;
-        }
-    }
-
-    public void AvisoVoltar()
-    {
-        if (posicao > 0)
-        {
-            posicao--;
-        }
-        else
-        {
-            posicao = Avisos.Count - 1;
-        }
-    }
-
-    public async Task GetMaterias()
-    {
-        try
-        {
-            if (UserSession.CurrentUser == null)
-            {
-                Console.WriteLine("Current user is null. Cannot retrieve subjects.");
-                return;
-            }
-
-            _isLoading = true;
-            Console.WriteLine("Loading subjects...");
-
-            if (!UserSession.CurrentUser.IdAluno.HasValue)
-            {
-                Console.WriteLine("User ID is missing. Cannot retrieve subjects.");
-                _isLoading = false;
-                return;
-            }
-
-            var materiasFromApi = await AlunosAPI.GetMateriasByAlunoAsync(UserSession.CurrentUser.IdAluno.Value);
-
-            if (materiasFromApi != null)
-            {
-                TodasMaterias.Clear();
-
-                foreach (var materia in materiasFromApi)
-                {
-                    TodasMaterias.Add(materia);
-                    Console.WriteLine($"Subject retrieved: {materia.IdMateria}");
+            var jsCode = @"
+            window.enableHorizontalWheel = function(selector) {
+                const el = document.querySelector(selector);
+                if (!el) {
+                    console.warn('enableHorizontalWheel: Element not found for selector:', selector);
+                    return;
                 }
-                Console.WriteLine($"Successfully loaded {TodasMaterias.Count} subjects.");
-            }
-            else
-            {
-                Console.WriteLine("No subjects found for the current user.");
-            }
+                console.log('enableHorizontalWheel: Attaching wheel listener to:', selector);
+
+                el.addEventListener('wheel', function(e) {
+                    console.log('enableHorizontalWheel: Wheel event detected. deltaY =', e.deltaY);
+                    if (e.deltaY !== 0) {
+                        el.scrollLeft += e.deltaY;
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            };";
+
+            await JSRuntime.InvokeVoidAsync("eval", jsCode);
+            await JSRuntime.InvokeVoidAsync("enableHorizontalWheel", ".cards-wrapper");
+
+            hasRenderedCards = false;// prevent re-injection on future renders
         }
-        catch (HttpRequestException httpEx)
-        {
-            Erro = $"Network error: {httpEx.Message}. Please check your internet connection.";
-            Console.WriteLine($"Caught HTTP exception: {httpEx}");
-        }
-        catch (Exception ex)
-        {
-            Erro = $"An unexpected error occurred: {ex.Message}";
-            Console.WriteLine($"Caught general exception: {ex}");
-        }
-        finally
-        {
-            _isLoading = false;
-            Console.WriteLine("_isLoading set to false.");
-            await InvokeAsync(StateHasChanged);
-        }
+    }
+
+    private string GetCardStyle()
+    {
+        var background = IsDarkMode
+            ? "linear-gradient(45deg, #2c2c2c 0, #2c2c2c 10px, #1e1e1e 10px, #1e1e1e 20px)"
+            : "repeating-linear-gradient(45deg, #f3f3f3 0, #f3f3f3 10px, #ffffff 10px, #ffffff 20px)";
+
+        return $"height: 350px; background: {background};";
     }
 }

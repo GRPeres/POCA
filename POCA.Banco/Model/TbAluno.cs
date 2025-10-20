@@ -13,7 +13,7 @@ public partial class TbAluno
 
     public int ProgressoAluno { get; set; }
 
-    public string ContatoAluno { get; set; } = null!;
+    public string? ContatoAluno { get; set; } = null;
 
     public string EmailAluno { get; set; } = null!;
 
