@@ -76,7 +76,7 @@
 
                     <MudGrid xs="12" md="1">
                         <MudRadioGroup T="int"
-                                       @bind-Value="@currentSelection"
+                                       @bind-Value="currentSelection"
                                        SelectedOption="-1"
                                        Label="Escolha uma opção"
                                        Class="d-flex flex-column gap-2 mb-4"
@@ -116,6 +116,7 @@
     public AtividadeResponse? atividade = new(0, "", null, null);
     public List<QuestaoResponse> questoes = new();
     public List<int> Resposta = new();
+    public List<String> RespostaString = new();
     public List<bool> RespostaFinal = new();
     public int posicao = 0;
     public bool isloading = true;
@@ -171,6 +172,7 @@
         }
 
         Resposta = Enumerable.Repeat(-1, questoes.Count).ToList();
+        RespostaString = Enumerable.Repeat("", questoes.Count).ToList();
         RespostaFinal = Enumerable.Repeat(false, questoes.Count).ToList();
         currentSelection = Resposta.Any() ? Resposta[0] : -1;
         isloading = false;
@@ -232,7 +234,12 @@
         for (int i = 0; i < questoes.Count; i++)
         {
             int? idPessoa = (UserSession.CurrentUser.IsProfessor ? UserSession.CurrentUser.IdProfessor : UserSession.CurrentUser.IdAluno);
-            RespostaCreateRequest respostaAPI = new RespostaCreateRequest(Resposta.ToString(), atividade.IdAtividade, idPessoa ?? 0, questoes[i].IdQuestao);
+            RespostaCreateRequest respostaAPI = new RespostaCreateRequest(
+                RespostaString[i], 
+                atividade.IdAtividade, 
+                idPessoa ?? 0, 
+                questoes[i].IdQuestao
+            );
 
             await RespostaAPI.AddRespostaAsync(respostaAPI);
         }
@@ -250,6 +257,7 @@
         else
         {
             Resposta[posicao] = currentSelection;
+            RespostaString[posicao] = ShuffledOptions[posicao].Text.ToString();
 
             if (posicao < questoes.Count - 1)
             {
@@ -278,6 +286,7 @@
         else
         {
             Resposta[posicao] = currentSelection;
+            RespostaString[posicao] = ShuffledOptions[posicao].Text.ToString();
             posicao--;
 
             currentSelection = Resposta[posicao];
