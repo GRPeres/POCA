@@ -1,4 +1,6 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@inject UserTrackingService Tracker
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <MudThemeProvider Theme="@CustomTheme.MyTheme" />
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
@@ -11,3 +13,10 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Tracker.InitializeMouseTrackingAsync();
+    }
+}
