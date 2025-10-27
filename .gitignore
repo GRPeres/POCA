@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /POCA.Banco/appsettings.json
 /POCA.API/appsettings.json
 /POCA.API/Services/appsettigs.json
+/POCA.Web/wwwroot/appsettings.json
