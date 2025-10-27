@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using MudBlazor
+@using POCA.API.Response
 @using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
@@ -105,34 +106,33 @@
                 <div class="cards-wrapper">
                     @foreach (var materia in materias.Select((value, index) => new { value, index }))
                     {
-                        var isFirst = materia.index == 0;
-                        var isLast = materia.index == materias.Count - 1;
-                        var style = "";
-
-                        if (isFirst)
-                            style = "padding-left: 1rem;";
-                        else if (isLast)
-                            style = "padding-right: 1rem;";
+                        var progresso = materiasProgresso.FirstOrDefault(p => p.IdMateria == materia.value.IdMateria);
+                        var style = materia.index == 0 ? "padding-left: 1rem;"
+                        : materia.index == materias.Count - 1 ? "padding-right: 1rem;" : "";
 
                         <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard 
-                                     Elevation="6"
-                                     Class="hover:shadow-xl transition-all duration-300">
+                            <MudCard Elevation="6" Class="hover:shadow-xl transition-all duration-300">
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
                                     <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
-                                    <MudText Typo="Typo.h6" Class="mb-0">@materia.value.NomeMateria</MudText>
-                                </MudCardActions>
-
-                                @*  <MudCardContent Class="px-4">
-                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                        Uma breve descrição da matéria pode ir aqui ou até um resumo.
+                                    <MudText Typo="Typo.h6" Class="mb-0">
+                                        @materia.value.NomeMateria
                                     </MudText>
-                                </MudCardContent> *@
+
+                                    @if (UserSession.CurrentUser?.IdAluno != null && progresso != null)
+                                    {
+                                        <MudProgressLinear Value="@(progresso.Progresso)"
+                                                           Color="Color.Success"
+                                                           Rounded="true"
+                                                           Style="height:6px; flex:1; margin-left:10px;" />
+                                        <MudText Typo="Typo.caption" Class="ml-2">@($"{progresso.Progresso:F0}%")</MudText>
+                                    }
+                                </MudCardActions>
                             </MudCard>
                         </div>
                     }
                 </div>
             }
+
         }
         else
         {
@@ -190,43 +190,6 @@
         public string Descricao { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty;
         public string Link { get; set; } = string.Empty;
-    }
-
-    private async Task CarregarMaterias()
-    {
-        try
-        {
-            if (UserSession.CurrentUser == null)
-                return;
-
-            if (UserSession.CurrentUser.IdProfessor.HasValue)
-            {
-                var professor = await ProfessoresAPI.GetProfessorbyidAsync(UserSession.CurrentUser.IdProfessor.Value);
-                foreach (var materiaId in professor.MateriasIds)
-                {
-                    var materia = await MateriasAPI.GetMateriaAsync(materiaId);
-                    if (materia != null)
-                        materias.Add(materia);
-                }
-            }
-            else if (UserSession.CurrentUser.IdAluno.HasValue)
-            {
-                var aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
-                foreach (var materiaId in aluno.MateriasIds)
-                {
-                    var materia = await MateriasAPI.GetMateriaAsync(materiaId);
-                    if (materia != null)
-                        materias.Add(materia);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao carregar matérias: {ex.Message}");
-        }
-
-        hasRenderedCards = true;
-        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleUserSessionChanged()
@@ -289,4 +252,48 @@
 
         return $"height: 350px; background: {background};";
     }
+    private List<MateriaProgressoResponse> materiasProgresso = new();
+
+private async Task CarregarMaterias()
+{
+    try
+    {
+        if (UserSession.CurrentUser == null)
+            return;
+
+        materias.Clear();
+
+        if (UserSession.CurrentUser.IdProfessor.HasValue)
+        {
+            var professor = await ProfessoresAPI.GetProfessorbyidAsync(UserSession.CurrentUser.IdProfessor.Value);
+            foreach (var materiaId in professor.MateriasIds)
+            {
+                var materia = await MateriasAPI.GetMateriaAsync(materiaId);
+                if (materia != null)
+                    materias.Add(materia);
+            }
+        }
+        else if (UserSession.CurrentUser.IdAluno.HasValue)
+        {
+            var aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
+            foreach (var materiaId in aluno.MateriasIds)
+            {
+                var materia = await MateriasAPI.GetMateriaAsync(materiaId);
+                if (materia != null)
+                    materias.Add(materia);
+            }
+
+            // 🔹 Carregar progresso das matérias do aluno
+            materiasProgresso = (await MateriasAPI.GetProgressoMateriasAsync(UserSession.CurrentUser.IdAluno.Value))?.ToList() ?? new();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erro ao carregar matérias: {ex.Message}");
+    }
+
+    hasRenderedCards = true;
+    await InvokeAsync(StateHasChanged);
+}
+
 }
