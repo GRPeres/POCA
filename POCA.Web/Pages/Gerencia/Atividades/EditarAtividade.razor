@@ -243,9 +243,9 @@
                 _atividadeModel.NomeAtividade = atividade.NomeAtividade;
                 
                 // Initialize selected questions
-                if (atividade.TbQuestoesIdQuestaos != null)
+                if (atividade.TbQuestoesIdQuestoes != null)
                 {
-                    foreach (var questionId in atividade.TbQuestoesIdQuestaos)
+                    foreach (var questionId in atividade.TbQuestoesIdQuestoes)
                     {
                         IsSelected[questionId] = true;
                     }
@@ -342,13 +342,13 @@
             var updateRequest = new AtividadeEditRequest(
                 IdAtividade: id,
                 NomeAtividade: _atividadeModel.NomeAtividade,
-                TbQuestoesIdQuestaos: null
+                TbQuestoesIdQuestoes: null
             );
             await AtividadesAPI.UpdateAtividadeAsync(updateRequest);
 
             // Get current associations
             var currentActivity = await AtividadesAPI.GetAtividadeByIdAsync(id);
-            var currentQuestionIds = currentActivity?.TbQuestoesIdQuestaos ?? new List<int>();
+            var currentQuestionIds = currentActivity?.TbQuestoesIdQuestoes ?? new List<int>();
 
             // Get selected question IDs
             var selectedQuestionIds = IsSelected

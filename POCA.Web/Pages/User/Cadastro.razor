@@ -26,45 +26,69 @@
             </MudAlert>
         }
 
+        <MudText>@apiResponse</MudText>
+
         <MudTextField @bind-Value="Credenciais.LoginUsuario"
-                      Label="Login"
-                      Variant="Variant.Outlined"
-                      Required
-                      RequiredError="Coloque um nome de usuário"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.AccountCircle"
-                      Class="mb-3" />
+                        Label="Login"
+                        Variant="Variant.Outlined"
+                        Required
+                        RequiredError="Coloque um nome de usuário"
+                        Adornment="Adornment.Start"
+                        AdornmentIcon="@Icons.Material.Filled.AccountCircle"
+                        Class="mb-3" />
 
         <MudTextField @bind-Value="Credenciais.nomeUsuario"
-                      Label="Nome"
+                        Label="Nome"
+                        Variant="Variant.Outlined"
+                        Required
+                        RequiredError="Coloque seu nome"
+                        Adornment="Adornment.Start"
+                        AdornmentIcon="@Icons.Material.Filled.Person"
+                        Class="mb-3" />
+
+        <MudTextField @bind-Value="Credenciais.EmailUsuario"
+                        Label="Email"
+                        Variant="Variant.Outlined"
+                        InputType="InputType.Email"
+                        Required
+                        RequiredError="Coloque seu email"
+                        Adornment="Adornment.Start"
+                        AdornmentIcon="@Icons.Material.Filled.Email"
+                        Class="mb-3" />
+
+    <MudTextField @bind-Value="Credenciais.ContatoUsuario"
+    Label="Contato"
                       Variant="Variant.Outlined"
-                      Required
-                      RequiredError="Coloque seu nome"
+                      InputType="InputType.Telephone"
+                      RequiredError="Coloque seu Numero de celular"
                       Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Person"
+                      AdornmentIcon="@Icons.Material.Filled.Phone"
                       Class="mb-3" />
 
-        <MudTextField @bind-Value="Credenciais.ContatoUsuario"
-                      Label="Email"
-                      Variant="Variant.Outlined"
-                      InputType="InputType.Email"
-                      Required
-                      RequiredError="Coloque seu email"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Email"
-                      Class="mb-3" />
+        <MudDatePicker Label="Data de Nascimento"
+                       Editable="true"
+                       @bind-Date="dtNascimento2"
+                       Mask="@(new DateMask("dd/MM/yyyy"))" 
+                       DateFormat="dd/MM/yyyy" 
+                       Placeholder="DD/MM/YYYY"
+                       Required
+                       Variant="Variant.Outlined" />
+
+
+        <MudText>@dtNascimento2</MudText>
+        <MudText>@Credenciais.dtNascimento</MudText>
 
         <MudTextField @bind-Value="Credenciais.SenhaUsuario"
                       Label="Senha"
                       Variant="Variant.Outlined"
                       InputType="(_showPassword ? InputType.Text : InputType.Password)"
                       Adornment="Adornment.End"
-                      AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       OnAdornmentClick="TogglePasswordVisibility"
                       Required
                       RequiredError="Coloque sua senha"
                       Class="mb-3" />
-
+        
         @if (SenhaErrada)
         {
             <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
@@ -77,45 +101,27 @@
                       Variant="Variant.Outlined"
                       InputType="(_showPasswordConfirmation ? InputType.Text : InputType.Password)"
                       Adornment="Adornment.End"
-                      AdornmentIcon="@(_showPasswordConfirmation ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      AdornmentIcon="@(_showPasswordConfirmation? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       OnAdornmentClick="TogglePasswordConfirmationVisibility"
                       Required
                       RequiredError="Confirme a senha"
                       Class="mb-3" />
 
-        <MudTextField @bind-Value="Credenciais.IdadeUsuario"
-                      Label="Idade"
-                      Variant="Variant.Outlined"
-                      InputType="InputType.Number"
-                      Required
-                      RequiredError="Coloque sua idade"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.CalendarToday"
-                      Class="mb-4" />
-
-        <MudStack Direction="Column" Spacing="2">
+        <MudStack class="justify-space-between mx-2" Row="true">
             <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="EfetuarCadastro"
-                       Disabled="@(!IsFormValid)"
-                       FullWidth="true">
+                        Color="Color.Primary"
+                        OnClick="EfetuarCadastro"
+                        Disabled="@(!IsFormValid)" >
                 Criar Conta
             </MudButton>
 
             <MudButton Variant="Variant.Outlined"
-                       Color="Color.Secondary"
-                       Href="/login"
-                       FullWidth="true">
+                        Color="Color.Secondary"
+                        Href="/login" >
                 Já tenho uma conta
             </MudButton>
         </MudStack>
 
-        @if (teste)
-        {
-            <MudAlert Severity="Severity.Success" Dense="true" Class="mt-3">
-                Cadastro realizado com sucesso!
-            </MudAlert>
-        }
     }
     else
     {
@@ -132,18 +138,16 @@
 @code
 {
     public string apiResponse = "";
-    private bool teste = false;
     private bool SenhaErrada = false;
     private bool deuErro = false;
     private bool _showPassword = false;
     private bool _showPasswordConfirmation = false;
-
+    private DateTime? dtNascimento2;
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.nomeUsuario) &&
+                            !string.IsNullOrWhiteSpace(Credenciais.EmailUsuario) &&
                             !string.IsNullOrWhiteSpace(Credenciais.SenhaUsuario) &&
-                            !string.IsNullOrWhiteSpace(Credenciais.confirmarSenhaUsuario) &&
-                            !int.IsNegative(Credenciais.IdadeUsuario) &&
-                            Credenciais.IdadeUsuario >= 1;
+                            !string.IsNullOrWhiteSpace(Credenciais.confirmarSenhaUsuario);
 
     private CadastroModel Credenciais = new();
 
@@ -179,10 +183,11 @@
     {
         public string LoginUsuario { get; set; } = string.Empty;
         public string nomeUsuario { get; set; } = string.Empty;
+        public string EmailUsuario { get; set; } = string.Empty;
         public string ContatoUsuario { get; set; } = string.Empty;
         public string SenhaUsuario { get; set; } = string.Empty;
         public string confirmarSenhaUsuario { get; set; } = string.Empty;
-        public int IdadeUsuario { get; set; } = 0;
+        public DateTime dtNascimento { get; set; }
         public bool isProfessorUsuario { get; set; } = false;
     }
 
@@ -190,10 +195,9 @@
     {
         if (Credenciais.SenhaUsuario == Credenciais.confirmarSenhaUsuario)
         {
-            await TestCreateAluno();
-            teste = true;
+            await CreateAluno();
 
-            await  EfetuarLogin();
+            await EfetuarLogin();
         }
         else
         {
@@ -201,15 +205,23 @@
         }
     }
 
-    private async Task TestCreateAluno()
+    private async Task CreateAluno()
     {
         try
         {
+            // Conserta o DateTime
+            Credenciais.dtNascimento = dtNascimento2 ?? DateTime.MinValue;
+            if (Credenciais.dtNascimento == DateTime.MinValue)
+            {
+                apiResponse = "Failed to create aluno, pela data";
+                return;
+            }
             // First create aluno
             var alunoRequest = new AlunoCreateRequest(
                 NomeAluno: Credenciais.nomeUsuario,
-                IdadeAluno: Credenciais.IdadeUsuario,
+                NascimentoAluno: Credenciais.dtNascimento,
                 ProgressoAluno: 0,
+                EmailAluno: Credenciais.EmailUsuario,
                 ContatoAluno: Credenciais.ContatoUsuario
             );
 

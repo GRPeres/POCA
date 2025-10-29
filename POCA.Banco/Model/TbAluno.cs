@@ -9,13 +9,17 @@ public partial class TbAluno
 
     public string NomeAluno { get; set; } = null!;
 
-    public int IdadeAluno { get; set; }
+    public DateTime NascimentoAluno { get; set; }
 
     public int ProgressoAluno { get; set; }
 
-    public string ContatoAluno { get; set; } = null!;
+    public string? ContatoAluno { get; set; } = null;
+
+    public string EmailAluno { get; set; } = null!;
 
     public virtual ICollection<TbMateria> TbMateriasIdMateria { get; set; } = new List<TbMateria>();
+
+    public ICollection<TbResposta> TbRespostasIdRespostas { get; set;} = new List<TbResposta>();
 
     public virtual ICollection<TbPessoa> TbPessoasIdPessoas { get; set; } = new List<TbPessoa>();
 }

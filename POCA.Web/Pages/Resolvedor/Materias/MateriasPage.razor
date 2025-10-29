@@ -7,6 +7,7 @@
 @inject POCA.Web.Services.APIs.RespostasAPI RespostasAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <PageTitle>Matéria</PageTitle>
 
@@ -34,6 +35,23 @@
                 </MudText>
             }
         </MudStack>
+
+        @if (mediaAluno.HasValue && (mediaAluno.Value < 5 || mediaAluno.Value == 0))
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4">
+                Sua média está baixa ( @mediaAluno ). Vamos fazer um reforço?
+                <MudButton Color="Color.Error" Variant="Variant.Outlined" Class="ml-4" OnClick="RecarregarPagina">
+                    Fazer Reforço
+                </MudButton>
+            </MudAlert>
+        }
+
+        @if (!mediaAluno.HasValue)
+        {
+            <MudText>Carregando a média...</MudText>  <!-- Para monitorar o processo de carregamento -->
+        }
+
+
 
         <MudExpansionPanels MultiExpansion="true" ExpandIcon="@Icons.Material.Filled.ExpandMore">
             <MudExpansionPanel Text="Geral">
@@ -105,7 +123,7 @@
     private string? nomeProfessor;
     private List<AtividadeResponse> avaliacoes = new();
     private List<ItemMateria> materiais = new();
-    private double? media; // Média calculada
+    private double? mediaAluno;
 
     protected override async Task OnInitializedAsync()
     {
@@ -114,7 +132,13 @@
         if (UserSession.IsLoggedIn)
         {
             await MateriasAtividades();
+            await BuscarMediaAluno();
         }
+    }
+
+    private void RecarregarPagina()
+    {
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task MateriasAtividades()
@@ -148,13 +172,54 @@
                 }
             }
 
-            // Mock de materiais (pode substituir por dados reais depois)
+            // Mock de materiais
             materiais = new()
             {
                 new("Slides - Introdução"),
                 new("PDF - Leitura obrigatória")
             };
         }
+    }
+
+    // ✅ Função que chama o endpoint de média
+    private async Task BuscarMediaAluno()
+    {
+        var idAluno = UserSession.CurrentUser?.IdAluno;
+        if (idAluno is null) return;
+
+        try
+        {
+            // URL base do seu backend (verifique a porta que a API está rodando)
+            var apiBase = "http://localhost:5000";  // Use http:// em vez de https://
+
+            // Chama o endpoint completo para buscar a média
+            var result = await Http.GetFromJsonAsync<MediaResponse>(
+                $"{apiBase}/alunos/{idAluno}/materias/{idMateria}/media");
+
+            if (result != null)
+            {
+                mediaAluno = result.Media;
+                Console.WriteLine($"✅ Média do aluno: {mediaAluno}");
+            }
+            else
+            {
+                mediaAluno = 0;
+                Console.WriteLine("⚠️ Nenhuma média retornada.");
+            }
+        }
+        catch (Exception ex)
+        {
+            mediaAluno = null;
+            Console.WriteLine($"❌ Erro ao buscar média: {ex.Message}");
+        }
+    }
+
+
+
+
+    private void IrParaReforco()
+    {
+        NavigationManager.NavigateTo($"/reforco/{idMateria}");
     }
 
     private void HandleUserSessionChanged()
@@ -164,6 +229,7 @@
             if (UserSession.IsLoggedIn)
             {
                 await MateriasAtividades();
+                await BuscarMediaAluno();
                 StateHasChanged();
             }
         });
@@ -184,4 +250,7 @@
     }
 
     public record ItemMateria(string Titulo);
+
+    // ✅ Record auxiliar para deserializar a resposta do endpoint
+    public record MediaResponse(double Media, int Acertos, int Total);
 }

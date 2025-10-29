@@ -1,5 +1,6 @@
-﻿@page "/"
+﻿@page "/materias-aluno"
 @using MudBlazor
+@using POCA.API.Response
 @using POCA.Web
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
@@ -61,38 +62,44 @@
                 📚 @(UserSession.CurrentUser.IsProfessor ? "Matérias que você leciona" : "Minhas Matérias")
             </MudText>
 
-            @if (materias == null || materias.Count == 0)
+            @if (materiasProgresso == null || materiasProgresso.Count == 0)
             {
                 <MudText>Nenhuma matéria encontrada.</MudText>
             }
             else
             {
                 <div class="cards-wrapper">
-                    @foreach (var materia in materias.Select((value, index) => new { value, index }))
+                    @foreach (var materia in materiasProgresso.Select((value, index) => new { value, index }))
                     {
                         var isFirst = materia.index == 0;
-                        var isLast = materia.index == materias.Count - 1;
-                        var style = "";
-
-                        if (isFirst)
-                            style = "padding-left: 1rem;";
-                        else if (isLast)
-                            style = "padding-right: 1rem;";
+                        var isLast = materia.index == materiasProgresso.Count - 1;
+                        var style = isFirst ? "padding-left: 1rem;" : isLast ? "padding-right: 1rem;" : "";
 
                         <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard Style="@GetCardStyle()"
-                                     Elevation="6"
-                                     Class="hover:shadow-xl transition-all duration-300">
+                            <MudCard Style="@GetCardStyle()" Elevation="6" Class="hover:shadow-xl transition-all duration-300">
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
                                     <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
                                     <MudText Typo="Typo.h6" Class="mb-0">@materia.value.NomeMateria</MudText>
                                 </MudCardActions>
 
-                               @*  <MudCardContent Class="px-4">
-                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                        Uma breve descrição da matéria pode ir aqui ou até um resumo.
-                                    </MudText>
-                                </MudCardContent> *@
+                                <MudCardContent Class="px-4 pb-4">
+                                    @if (UserSession.CurrentUser.IdAluno.HasValue)
+                                    {
+                                        <MudProgressLinear Value="@materia.value.Progresso"
+                                                           Color="Color.Success"
+                                                           Rounded="true"
+                                                           Class="my-2" />
+                                        <MudText Typo="Typo.body2">
+                                            @($"{materia.value.AtividadesRespondidas}/{materia.value.TotalAtividades} atividades concluídas")
+                                        </MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            Progresso disponível apenas para alunos.
+                                        </MudText>
+                                    }
+                                </MudCardContent>
                             </MudCard>
                         </div>
                     }
@@ -110,16 +117,12 @@
 </MudLayout>
 
 @code {
-    private List<MateriaResponse> materias = new();
+    private List<MateriaProgressoResponse> materiasProgresso = new();
     private bool isLoaded = false;
     private bool isLoading = true;
     private bool hasRenderedCards = false;
 
-    private ElementReference scrollContainer;
-    private System.Timers.Timer? scrollTimer;
-
-    [CascadingParameter]
-    public bool IsDarkMode { get; set; }
+    [CascadingParameter] public bool IsDarkMode { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,24 +144,30 @@
             if (UserSession.CurrentUser == null)
                 return;
 
-            if (UserSession.CurrentUser.IdProfessor.HasValue)
+            if (UserSession.CurrentUser.IdAluno.HasValue && UserSession.CurrentUser.IdAluno.HasValue)
             {
+                materiasProgresso = (await MateriasAPI
+                    .GetProgressoMateriasAsync(UserSession.CurrentUser.IdAluno.Value))?
+                    .ToList() ?? new();
+            }
+            else if (UserSession.CurrentUser.IdProfessor.HasValue)
+            {
+                // Mantém o comportamento anterior para professores
                 var professor = await ProfessoresAPI.GetProfessorbyidAsync(UserSession.CurrentUser.IdProfessor.Value);
                 foreach (var materiaId in professor.MateriasIds)
                 {
                     var materia = await MateriasAPI.GetMateriaAsync(materiaId);
                     if (materia != null)
-                        materias.Add(materia);
-                }
-            }
-            else if (UserSession.CurrentUser.IdAluno.HasValue)
-            {
-                var aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
-                foreach (var materiaId in aluno.MateriasIds)
-                {
-                    var materia = await MateriasAPI.GetMateriaAsync(materiaId);
-                    if (materia != null)
-                        materias.Add(materia);
+                    {
+                        materiasProgresso.Add(new MateriaProgressoResponse
+                            {
+                                IdMateria = materia.IdMateria,
+                                NomeMateria = materia.NomeMateria,
+                                TotalAtividades = 0,
+                                AtividadesRespondidas = 0,
+                                Progresso = 0
+                            });
+                    }
                 }
             }
         }
@@ -201,25 +210,18 @@
             var jsCode = @"
             window.enableHorizontalWheel = function(selector) {
                 const el = document.querySelector(selector);
-                if (!el) {
-                    console.warn('enableHorizontalWheel: Element not found for selector:', selector);
-                    return;
-                }
-                console.log('enableHorizontalWheel: Attaching wheel listener to:', selector);
-
+                if (!el) return;
                 el.addEventListener('wheel', function(e) {
-                    console.log('enableHorizontalWheel: Wheel event detected. deltaY =', e.deltaY);
                     if (e.deltaY !== 0) {
                         el.scrollLeft += e.deltaY;
                         e.preventDefault();
                     }
                 }, { passive: false });
             };";
-
             await JSRuntime.InvokeVoidAsync("eval", jsCode);
             await JSRuntime.InvokeVoidAsync("enableHorizontalWheel", ".cards-wrapper");
 
-            hasRenderedCards = false;// prevent re-injection on future renders
+            hasRenderedCards = false;
         }
     }
 
@@ -228,7 +230,6 @@
         var background = IsDarkMode
             ? "linear-gradient(45deg, #2c2c2c 0, #2c2c2c 10px, #1e1e1e 10px, #1e1e1e 20px)"
             : "repeating-linear-gradient(45deg, #f3f3f3 0, #f3f3f3 10px, #ffffff 10px, #ffffff 20px)";
-
         return $"height: 350px; background: {background};";
     }
 }

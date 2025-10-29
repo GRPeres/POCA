@@ -18,6 +18,8 @@ builder.Services.AddScoped<ProfessoresAPI>();
 builder.Services.AddScoped<QuestoesAPI>();
 builder.Services.AddScoped<PessoasAPI>();
 builder.Services.AddScoped<AtividadesAPI>();
+builder.Services.AddScoped<RespostaAPI>();
+
 builder.Services.AddScoped<UserTrackingService>();
 
 builder.Services.AddSingleton<AtividadeState>();

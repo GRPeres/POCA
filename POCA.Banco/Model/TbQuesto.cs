@@ -22,4 +22,5 @@ public partial class TbQuesto
     public string TemaQuestao { get; set; } = null!;
 
     public virtual ICollection<TbAtividade> TbAtividadesIdAtividades { get; set; } = new List<TbAtividade>();
+    public ICollection<TbResposta> TbRespostasIdRespostas { get; set; } = new List<TbResposta>();
 }

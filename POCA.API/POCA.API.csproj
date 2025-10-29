@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\POCA.Banco\POCA.Banco.csproj" />
+	<None Update="..\POCA.Banco\bin\Release\net8.0\POCA.Banco.dll">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="9.0.5" />

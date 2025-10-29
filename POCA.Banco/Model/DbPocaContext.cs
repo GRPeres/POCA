@@ -27,6 +27,7 @@ public partial class DbPocaContext : DbContext
 
     public virtual DbSet<TbQuesto> TbQuestoes { get; set; }
 
+    public virtual DbSet<TbResposta> TbRespostas { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TbAluno>(entity =>
@@ -43,10 +44,13 @@ public partial class DbPocaContext : DbContext
             entity.Property(e => e.ContatoAluno)
                 .HasMaxLength(45)
                 .HasColumnName("contato_aluno");
-            entity.Property(e => e.IdadeAluno).HasColumnName("idade_aluno");
+            entity.Property(e => e.NascimentoAluno).HasColumnName("nascimento_aluno");
             entity.Property(e => e.NomeAluno)
                 .HasMaxLength(45)
                 .HasColumnName("nome_aluno");
+            entity.Property(e => e.EmailAluno)
+                .HasMaxLength(100)
+                .HasColumnName("email_aluno");
             entity.Property(e => e.ProgressoAluno).HasColumnName("progresso_aluno");
 
             entity.HasMany(d => d.TbMateriasIdMateria).WithMany(p => p.TbAlunosIdAlunos)
@@ -121,6 +125,50 @@ public partial class DbPocaContext : DbContext
                 .HasMaxLength(45)
                 .HasColumnName("nome_materia");
         });
+
+        modelBuilder.Entity<TbResposta>(entity =>
+        {
+            entity.HasKey(e => e.IdResposta).HasName("PRIMARY");
+
+            entity.ToTable("tb_respostas");
+
+            entity.HasIndex(e => e.IdResposta, "id_resposta_UNIQUE").IsUnique();
+
+            entity.Property(e => e.IdResposta)
+                  .HasColumnName("id_resposta");
+
+            entity.Property(e => e.FinalResposta)
+                  .HasMaxLength(500)
+                  .HasColumnName("final_resposta");
+
+            entity.Property(e => e.IdAluno)
+                  .HasColumnName("tb_alunos_id_aluno");
+
+            entity.Property(e => e.IdAtividade)
+                  .HasColumnName("tb_atividades_id_atividade");
+
+            entity.Property(e => e.IdQuestao)
+                  .HasColumnName("tb_questoes_id_questao");
+
+            entity.HasOne(d => d.Aluno)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdAluno)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_alunos");
+
+            entity.HasOne(d => d.Atividade)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdAtividade)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_atividades");
+
+            entity.HasOne(d => d.Questao)
+                  .WithMany(p => p.TbRespostasIdRespostas)
+                  .HasForeignKey(d => d.IdQuestao)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("fk_tb_respostas_tb_questoes");
+        });
+
 
         modelBuilder.Entity<TbPessoa>(entity =>
         {
@@ -260,7 +308,7 @@ public partial class DbPocaContext : DbContext
                 .HasColumnType("enum('Teoria','Programação')")
                 .HasColumnName("tema_questao");
 
-            entity.HasMany(d => d.TbAtividadesIdAtividades).WithMany(p => p.TbQuestoesIdQuestaos)
+            entity.HasMany(d => d.TbAtividadesIdAtividades).WithMany(p => p.TbQuestoesIdQuestoes)
                 .UsingEntity<Dictionary<string, object>>(
                     "TbQuestoesHasTbAtividade",
                     r => r.HasOne<TbAtividade>().WithMany()
@@ -268,16 +316,16 @@ public partial class DbPocaContext : DbContext
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("fk_tb_questoes_has_tb_atividades_tb_atividades1"),
                     l => l.HasOne<TbQuesto>().WithMany()
-                        .HasForeignKey("TbQuestoesIdQuestao")
+                        .HasForeignKey("TbQuestoesIdQuestoes")
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("fk_tb_questoes_has_tb_atividades_tb_questoes1"),
                     j =>
                     {
-                        j.HasKey("TbQuestoesIdQuestao", "TbAtividadesIdAtividade").HasName("PRIMARY");
+                        j.HasKey("TbQuestoesIdQuestoes", "TbAtividadesIdAtividade").HasName("PRIMARY");
                         j.ToTable("tb_questoes_has_tb_atividades");
                         j.HasIndex(new[] { "TbAtividadesIdAtividade" }, "fk_tb_questoes_has_tb_atividades_tb_atividades1_idx");
-                        j.HasIndex(new[] { "TbQuestoesIdQuestao" }, "fk_tb_questoes_has_tb_atividades_tb_questoes1_idx");
-                        j.IndexerProperty<int>("TbQuestoesIdQuestao").HasColumnName("tb_questoes_id_questao");
+                        j.HasIndex(new[] { "TbQuestoesIdQuestoes" }, "fk_tb_questoes_has_tb_atividades_tb_questoes1_idx");
+                        j.IndexerProperty<int>("TbQuestoesIdQuestoes").HasColumnName("tb_questoes_id_questao");
                         j.IndexerProperty<int>("TbAtividadesIdAtividade").HasColumnName("tb_atividades_id_atividade");
                     });
         });

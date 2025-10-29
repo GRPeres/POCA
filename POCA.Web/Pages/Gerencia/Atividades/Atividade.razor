@@ -127,10 +127,10 @@
             atividade = await AtividadesAPI.GetAtividadeByIdAsync(id);
             
             // Load associated questions if they exist
-            if (atividade?.TbQuestoesIdQuestaos?.Count() > 0)
+            if (atividade?.TbQuestoesIdQuestoes?.Count() > 0)
             {
                 var questions = new List<QuestaoResponse>();
-                foreach (var questionId in atividade.TbQuestoesIdQuestaos)
+                foreach (var questionId in atividade.TbQuestoesIdQuestoes)
                 {
                     var question = await QuestoesAPI.GetQuestaoByIdAsync(questionId);
                     if (question != null)
@@ -161,9 +161,9 @@
         try
         {
             // First remove all question associations
-            if (atividade?.TbQuestoesIdQuestaos?.Count() > 0)
+            if (atividade?.TbQuestoesIdQuestoes?.Count() > 0)
             {
-                foreach (var questaoId in atividade.TbQuestoesIdQuestaos)
+                foreach (var questaoId in atividade.TbQuestoesIdQuestoes)
                 {
                     try
                     {

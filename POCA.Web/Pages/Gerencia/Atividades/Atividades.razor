@@ -74,10 +74,10 @@
                     @atividade.NomeAtividade
                 </MudTd>
                 <MudTd>
-                    @if (atividade.TbQuestoesIdQuestaos?.Count() > 0)
+                    @if (atividade.TbQuestoesIdQuestoes?.Count() > 0)
                     {
                         <div class="d-flex flex-wrap gap-1">
-                            @foreach (var questaoId in atividade.TbQuestoesIdQuestaos)
+                            @foreach (var questaoId in atividade.TbQuestoesIdQuestoes)
                             {
                                 <MudButton Variant="Variant.Outlined"
                                            Color="Color.Primary"

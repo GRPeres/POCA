@@ -1,0 +1,191 @@
+﻿@page "/test-Resposta"
+@using System.Text
+@using POCA.Web.Services.APIs
+@inject RespostaAPI RespostaAPI
+
+<h3>API_Resposta</h3>
+
+<div class="mb-3">
+    <button @onclick="TestGetAllResposta" class="btn btn-success me-2">Test GET All Resposta</button>
+    <button @onclick="TestCreateRespostas" class="btn btn-success me-2">Test Create Resposta</button>
+    <button @onclick="TestGetRespostasid" class="btn btn-success me-2">Test GET Resposta by id</button>
+    <button @onclick="TestUpdateResposta" class="btn btn-success me-2">Test Update Resposta</button>
+    <button @onclick="TestDeleteResposta" class="btn btn-success me-2">Test Delete Resposta</button>
+    <button @onclick="GetAlunoFromResposta" class="btn btn-success me-2">Get Aluno</button>
+    <button @onclick="GetAtividadeFromResposta" class="btn btn-success me-2">Get Atividade</button>
+    <button @onclick="GetQuestaoFromResposta" class="btn btn-success me-2">Get Questao</button>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        API Response
+    </div>
+    <div class="card-body">
+        <pre>@apiResponse</pre>
+    </div>
+</div>
+
+@code {
+    private string apiResponse = "Click buttons to test API endpoints";
+    private int id = 9;
+
+    private async Task TestGetAllResposta()
+    {
+        try
+        {
+            var Respostas = await RespostaAPI.GetRespostasAsync();
+            if (Respostas == null)
+            {
+                apiResponse = "Erro ao pegar a todas as resposta";
+            }
+            apiResponse = FormatJsonResponse(Respostas);
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestCreateRespostas()
+    {
+        try
+        {
+            var respostaRequest = new RespostaCreateRequest(
+                FinalResposta: "Teste",
+                IdAtividade: 1,
+                IdAluno: 1,
+                IdQuestao: 3
+            );
+
+            var createdResposta = await RespostaAPI.AddRespostaAsync(respostaRequest);
+
+            if (createdResposta == null)
+            {
+                apiResponse = "Failed to create resposta";
+                return;
+            }
+
+            apiResponse = $"Created resposta accounts:\n" +
+                         $"resposta: {FormatJsonResponse(createdResposta)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestGetRespostasid()
+    {
+        try
+        {
+            var Respostaid = await RespostaAPI.GetRespostabyidAsync(id);
+
+            if (Respostaid == null)
+            {
+                apiResponse = "Failed to get resposta, null";
+                return;
+            }
+
+            apiResponse = $"Created resposta accounts:\n" +
+                         $"resposta: {FormatJsonResponse(Respostaid)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestUpdateResposta()
+    {
+        try
+        {
+            var resposta = new RespostaEditRequest(
+                IdResposta: id,
+                FinalResposta: "Mudou",
+                IdAtividade: 1,
+                IdAluno: 1,
+                IdQuestao: 3
+            );
+            await RespostaAPI.UpdateRespostaAsync(resposta);
+
+            apiResponse = $"Updated sucessefuly";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task TestDeleteResposta()
+    {
+        try
+        {
+            await RespostaAPI.DeleteRespostaAsync(id);
+
+            apiResponse = "Deleted sucessefuly";
+        }
+        catch(Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task GetAlunoFromResposta()
+    {
+        try
+        {
+            var response = await RespostaAPI.GetAlunoFromResposta(id);
+            if (response == null)
+            {
+                apiResponse = "Erro ao pegar a todas as resposta";
+            }
+            apiResponse = $"{FormatJsonResponse(response)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}"; ;
+        }
+    }
+
+    private async Task GetAtividadeFromResposta()
+    {
+        try
+        {
+            var response = await RespostaAPI.GetAtividadeFromResposta(id);
+            if (response == null)
+            {
+                apiResponse = "Erro ao pegar a todas as resposta";
+            }
+            apiResponse = $"{FormatJsonResponse(response)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}"; ;
+        }
+    }
+
+    private async Task GetQuestaoFromResposta()
+    {
+        try
+        {
+            var response = await RespostaAPI.GetQuestaoFromResposta(id);
+            if (response == null)
+            {
+                apiResponse = "Erro ao pegar a todas as resposta";
+            }
+            apiResponse = $"{FormatJsonResponse(response)}";
+        }
+        catch (Exception ex)
+        {
+            apiResponse = $"Error: {ex.Message}"; ;
+        }
+    }
+
+    private string FormatJsonResponse(object obj)
+    {
+        return JsonSerializer.Serialize(obj, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+    }
+}

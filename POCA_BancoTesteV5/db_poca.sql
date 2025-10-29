@@ -20,12 +20,15 @@ USE `db_poca` ;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_alunos`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_alunos` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_alunos` (
   `id_aluno` INT NOT NULL AUTO_INCREMENT,
   `nome_aluno` VARCHAR(45) NOT NULL,
-  `idade_aluno` int NOT NULL,
+  `nascimento_aluno` DATE NOT NULL,
   `progresso_aluno` INT NOT NULL,
-  `contato_aluno` VARCHAR(45) NOT NULL,
+  `contato_aluno` VARCHAR(45) NULL,
+  `email_aluno` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_aluno`),
   UNIQUE INDEX `nome_aluno_UNIQUE` (`nome_aluno` ASC) VISIBLE,
   UNIQUE INDEX `id_aluno_UNIQUE` (`id_aluno` ASC) VISIBLE)
@@ -36,6 +39,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_materias`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_materias` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_materias` (
   `id_materia` INT NOT NULL AUTO_INCREMENT,
   `nome_materia` VARCHAR(45) NULL DEFAULT NULL,
@@ -48,6 +53,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_alunos_has_tb_materias`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_alunos_has_tb_materias` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_alunos_has_tb_materias` (
   `tb_alunos_id_aluno` INT NOT NULL,
   `tb_materias_id_materia` INT NOT NULL,
@@ -67,6 +74,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_atividades`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_atividades` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_atividades` (
   `id_atividade` INT NOT NULL AUTO_INCREMENT,
   `nome_atividade` VARCHAR(45) NOT NULL,
@@ -80,6 +89,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_atividades_has_tb_materias`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_atividades_has_tb_materias` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_atividades_has_tb_materias` (
   `tb_atividades_id_atividade` INT NOT NULL,
   `tb_materias_id_materia` INT NOT NULL,
@@ -99,6 +110,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_pessoas`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_pessoas` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_pessoas` (
   `id_pessoa` INT NOT NULL AUTO_INCREMENT,
   `login_pessoa` VARCHAR(45) NOT NULL,
@@ -114,6 +127,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_pessoas_has_tb_alunos`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_pessoas_has_tb_alunos` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_pessoas_has_tb_alunos` (
   `tb_pessoas_id_pessoa` INT NOT NULL,
   `tb_alunos_id_aluno` INT NOT NULL,
@@ -133,6 +148,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_professores`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_professores` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_professores` (
   `id_professor` INT NOT NULL AUTO_INCREMENT,
   `nome_professor` VARCHAR(45) NOT NULL,
@@ -149,6 +166,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_professores_has_tb_materias`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_professores_has_tb_materias` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_professores_has_tb_materias` (
   `tb_professores_id_professor` INT NOT NULL,
   `tb_materias_id_materia` INT NOT NULL,
@@ -168,6 +187,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_professores_has_tb_pessoas`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_professores_has_tb_pessoas` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_professores_has_tb_pessoas` (
   `tb_professores_id_professor` INT NOT NULL,
   `tb_pessoas_id_pessoa` INT NOT NULL,
@@ -187,6 +208,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_questoes`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_questoes` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_questoes` (
   `id_questao` INT NOT NULL AUTO_INCREMENT,
   `enunciado_questao` VARCHAR(200) NOT NULL,
@@ -199,12 +222,15 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_questoes` (
   PRIMARY KEY (`id_questao`),
   UNIQUE INDEX `id_questao_UNIQUE` (`id_questao` ASC) VISIBLE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 3
 DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
 -- Table `db_poca`.`tb_questoes_has_tb_atividades`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_questoes_has_tb_atividades` ;
+
 CREATE TABLE IF NOT EXISTS `db_poca`.`tb_questoes_has_tb_atividades` (
   `tb_questoes_id_questao` INT NOT NULL,
   `tb_atividades_id_atividade` INT NOT NULL,
@@ -219,6 +245,40 @@ CREATE TABLE IF NOT EXISTS `db_poca`.`tb_questoes_has_tb_atividades` (
     REFERENCES `db_poca`.`tb_questoes` (`id_questao`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `db_poca`.`tb_respostas`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_poca`.`tb_respostas` ;
+
+CREATE TABLE IF NOT EXISTS `db_poca`.`tb_respostas` (
+  `id_resposta` INT NOT NULL AUTO_INCREMENT,
+  `final_resposta` VARCHAR(100) NOT NULL,
+  `tb_atividades_id_atividade` INT NOT NULL,
+  `tb_alunos_id_aluno` INT NOT NULL,
+  `tb_questoes_id_questao` INT NOT NULL,
+  PRIMARY KEY (`id_resposta`, `tb_atividades_id_atividade`, `tb_alunos_id_aluno`, `tb_questoes_id_questao`),
+  UNIQUE INDEX `id_resposta_UNIQUE` (`id_resposta` ASC) VISIBLE,
+  INDEX `fk_tb_respostas_tb_atividades1_idx` (`tb_atividades_id_atividade` ASC) INVISIBLE,
+  INDEX `fk_tb_respostas_tb_alunos1_idx` (`tb_alunos_id_aluno` ASC) VISIBLE,
+  INDEX `fk_tb_respostas_tb_questoes1_idx` (`tb_questoes_id_questao` ASC) VISIBLE,
+  CONSTRAINT `fk_tb_respostas_tb_atividades1`
+    FOREIGN KEY (`tb_atividades_id_atividade`)
+    REFERENCES `db_poca`.`tb_atividades` (`id_atividade`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_tb_respostas_tb_alunos1`
+    FOREIGN KEY (`tb_alunos_id_aluno`)
+    REFERENCES `db_poca`.`tb_alunos` (`id_aluno`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_tb_respostas_tb_questoes1`
+    FOREIGN KEY (`tb_questoes_id_questao`)
+    REFERENCES `db_poca`.`tb_questoes` (`id_questao`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

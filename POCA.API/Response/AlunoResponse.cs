@@ -3,9 +3,10 @@
     public record AlunoResponse(
         int IdAluno,
         string NomeAluno,
-        int IdadeAluno,
+        DateTime NascimentoAluno,
         int ProgressoAluno,
         string ContatoAluno,
+        string EmailAluno,
         IEnumerable<int>? MateriasIds,
         IEnumerable<int>? PessoasIds
     );

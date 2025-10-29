@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using Org.BouncyCastle.Asn1.Ocsp;
+using POCA.API.Response;
 using POCA.Web.Requests;
 
 namespace POCA.Web.Services.APIs
@@ -56,6 +57,13 @@ namespace POCA.Web.Services.APIs
                 return null;
             }
         }
+
+        public async Task<ICollection<MateriaProgressoResponse>?> GetProgressoMateriasAsync(int idAluno)
+        {
+            return await _httpClient.GetFromJsonAsync<ICollection<MateriaProgressoResponse>>(
+                $"alunos/{idAluno}/materias/progresso");
+        }
+
 
         public async Task<bool> UpdateMateriaAsync(MateriaEditRequest request)
         {

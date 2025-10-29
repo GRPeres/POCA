@@ -42,7 +42,7 @@ CREATE TABLE `tb_alunos` (
 
 LOCK TABLES `tb_alunos` WRITE;
 /*!40000 ALTER TABLE `tb_alunos` DISABLE KEYS */;
-INSERT INTO `tb_alunos` VALUES (1,'Alice Silva','15',40,'alice@email.com'),(2,'Carla Souza','25',60,'carla@email.com'),(3,'Ellen Moura','36',75,'ellen@email.com'),(4,'Felipe Costa','84',30,'felipe@email.com'),(5,'Gabriela Martins','10',50,'gabriela@email.com'),(6,'Heitor Oliveira','54',80,'heitor@email.com');
+INSERT INTO `tb_alunos` (`id_aluno`, `nome_aluno`, `nascimento_aluno`, `progresso_aluno`, `contato_aluno`, `email_aluno`) VALUES(1,'Alice Silva','2010-01-01',40,NULL,'alice@email.com'),(2,'Carla Souza','2000-01-01',60,NULL,'carla@email.com'),(3,'Ellen Moura','1989-01-01',75,NULL,'ellen@email.com'),(4,'Felipe Costa','1941-01-01',30,NULL,'felipe@email.com'),(5,'Gabriela Martins','2013-01-01',50,NULL,'gabriela@email.com'),(6,'Heitor Oliveira','1969-01-01',80,NULL,'heitor@email.com');
 /*!40000 ALTER TABLE `tb_alunos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -371,3 +371,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-05-31 14:51:41
+

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using POCA.API.Requests.Aluno;
+using POCA.API.Response;
 using POCA.API.Responses;
 using POCA.Banco.Model;
 
@@ -21,9 +22,10 @@ namespace POCA.API.EndPoints
                     .Select(a => new AlunoResponse(
                         a.IdAluno,
                         a.NomeAluno,
-                        a.IdadeAluno,
+                        a.NascimentoAluno,
                         a.ProgressoAluno,
                         a.ContatoAluno,
+                        a.EmailAluno,
                         a.TbMateriasIdMateria.Select(m => m.IdMateria),
                         a.TbPessoasIdPessoas.Select(p => p.IdPessoa)
                     ))
@@ -46,9 +48,10 @@ namespace POCA.API.EndPoints
                 var response = new AlunoResponse(
                     aluno.IdAluno,
                     aluno.NomeAluno,
-                    aluno.IdadeAluno,
+                    aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
+                    aluno.EmailAluno,
                     aluno.TbMateriasIdMateria.Select(m => m.IdMateria),
                     aluno.TbPessoasIdPessoas.Select(p => p.IdPessoa)
                 );
@@ -63,9 +66,10 @@ namespace POCA.API.EndPoints
                 var aluno = new TbAluno
                 {
                     NomeAluno = request.NomeAluno,
-                    IdadeAluno = request.IdadeAluno,
+                    NascimentoAluno = request.NascimentoAluno,
                     ProgressoAluno = request.ProgressoAluno,
-                    ContatoAluno = request.ContatoAluno
+                    ContatoAluno = request.ContatoAluno,
+                    EmailAluno = request.EmailAluno
                 };
 
                 context.TbAlunos.Add(aluno);
@@ -74,9 +78,10 @@ namespace POCA.API.EndPoints
                 var response = new AlunoResponse(
                     aluno.IdAluno,
                     aluno.NomeAluno,
-                    aluno.IdadeAluno,
+                    aluno.NascimentoAluno,
                     aluno.ProgressoAluno,
                     aluno.ContatoAluno,
+                    aluno.EmailAluno,
                     null,
                     null
                 );
@@ -97,9 +102,10 @@ namespace POCA.API.EndPoints
                     return Results.NotFound();
 
                 aluno.NomeAluno = request.NomeAluno;
-                aluno.IdadeAluno = request.IdadeAluno;
+                aluno.NascimentoAluno = request.NascimentoAluno;
                 aluno.ProgressoAluno = request.ProgressoAluno;
                 aluno.ContatoAluno = request.ContatoAluno;
+                aluno.EmailAluno = request.EmailAluno;
 
                 await context.SaveChangesAsync();
                 return Results.NoContent();
@@ -188,6 +194,82 @@ namespace POCA.API.EndPoints
                     await context.SaveChangesAsync();
                     return Results.NoContent();
                 });
+            // GET progresso do aluno em cada matéria
+            group.MapGet("/{idAluno}/materias/progresso",
+                async ([FromServices] DbPocaContext context, int idAluno) =>
+                {
+                    var result = await context.TbMaterias
+                        .Where(m => m.TbAlunosIdAlunos.Any(a => a.IdAluno == idAluno))
+                        .Select(m => new MateriaProgressoResponse
+                        {
+                            IdMateria = m.IdMateria,
+                            NomeMateria = m.NomeMateria,
+                            TotalAtividades = m.TbAtividadesIdAtividades.Count(),
+                            AtividadesRespondidas = m.TbAtividadesIdAtividades
+                                .Count(a => a.TbRespostasIdRespostas.Any(r => r.IdAluno == idAluno)),
+                            Progresso = (double)m.TbAtividadesIdAtividades
+                                .Count(a => a.TbRespostasIdRespostas.Any(r => r.IdAluno == idAluno))
+                                / (m.TbAtividadesIdAtividades.Count() == 0 ? 1 : m.TbAtividadesIdAtividades.Count()) * 100
+                        })
+                        .ToListAsync();
+
+                    return Results.Ok(result);
+                });
+
+            group.MapGet("/{idAluno}/materias/{idMateria}/media",
+    async ([FromServices] DbPocaContext context, int idAluno, int idMateria) =>
+    {
+        // 1️⃣ Busca o aluno e suas relações necessárias
+        var aluno = await context.TbAlunos
+            .Include(a => a.TbMateriasIdMateria)
+                .ThenInclude(m => m.TbAtividadesIdAtividades)
+                    .ThenInclude(q => q.TbQuestoesIdQuestoes)
+            .Include(a => a.TbMateriasIdMateria)
+                .ThenInclude(m => m.TbAtividadesIdAtividades)
+                    .ThenInclude(at => at.TbRespostasIdRespostas)
+            .FirstOrDefaultAsync(a => a.IdAluno == idAluno);
+
+        if (aluno is null)
+            return Results.NotFound("Aluno não encontrado.");
+
+        // 2️⃣ Localiza a matéria
+        var materia = aluno.TbMateriasIdMateria.FirstOrDefault(m => m.IdMateria == idMateria);
+        if (materia is null)
+            return Results.NotFound("Matéria não encontrada ou não associada ao aluno.");
+
+        // 3️⃣ Busca todas as respostas do aluno nesta matéria
+        var respostas = materia.TbAtividadesIdAtividades
+            .SelectMany(at => at.TbRespostasIdRespostas)
+            .Where(r => r.IdAluno == idAluno)
+            .ToList();
+        if (!respostas.Any())
+            return Results.Ok(new { Media = 0.0, Acertos = 0, Total = 0 });
+
+        // 4️⃣ Calcula o total de questões e acertos
+        int totalQuestoes = respostas.Count;
+        int acertos = 0;
+
+        foreach (var resposta in respostas)
+        {
+            var questao = await context.TbQuestoes
+                .FirstOrDefaultAsync(q => q.IdQuestao == resposta.IdQuestao);
+
+            if (questao is not null && resposta.FinalResposta == questao.RespostacertaQuestao)
+                acertos++;
+        }
+
+        // 5️⃣ Calcula a média (nota de 0 a 10)
+        double media = (double)acertos / totalQuestoes * 10.0;
+
+        // 6️⃣ Retorna os dados
+        return Results.Ok(new
+        {
+            Media = Math.Round(media, 2),
+            Acertos = acertos,
+            Total = totalQuestoes
+        });
+    });
+
         }
     }
 }
