@@ -25,11 +25,12 @@ DROP TABLE IF EXISTS `tb_alunos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tb_alunos` (
-  `id_aluno` int NOT NULL AUTO_INCREMENT,
-  `nome_aluno` varchar(45) NOT NULL,
-  `idade_aluno` int NOT NULL,
-  `progresso_aluno` int NOT NULL,
-  `contato_aluno` varchar(45) NOT NULL,
+  `id_aluno` INT NOT NULL AUTO_INCREMENT,
+  `nome_aluno` VARCHAR(45) NOT NULL,
+  `nascimento_aluno` DATE NOT NULL,
+  `progresso_aluno` INT NOT NULL,
+  `contato_aluno` VARCHAR(45) NULL,
+  `email_aluno` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_aluno`),
   UNIQUE KEY `nome_aluno_UNIQUE` (`nome_aluno`),
   UNIQUE KEY `id_aluno_UNIQUE` (`id_aluno`)
@@ -371,4 +372,5 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-05-31 14:51:41
+
 
