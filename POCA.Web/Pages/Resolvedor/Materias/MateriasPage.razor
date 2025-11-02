@@ -69,12 +69,12 @@
                             </MudButton>
                         </MudListItem>
 
-                        @if (media is not null)
+                       @*  @if (media is not null)
                         {
                             <MudListItem>
                                 <MudText Typo="Typo.body1">Média: @media.Value.ToString("F2")</MudText>
                             </MudListItem>
-                        }
+                        } *@
                     }
                 </MudList>
             </MudExpansionPanel>
@@ -244,7 +244,7 @@
     {
         if (UserSession.CurrentUser?.IdAluno != null)
         {
-            media = await RespostasAPI.GetMediaPorMateriaAsync(UserSession.CurrentUser.IdAluno.Value, idMateria);
+            // media = await RespostasAPI.GetMediaPorMateriaAsync(UserSession.CurrentUser.IdAluno.Value, idMateria);
             StateHasChanged();
         }
     }
