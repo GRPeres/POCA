@@ -7,25 +7,29 @@
 @inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+
     @if (_currentStep == 1)
     {
         <!-- STEP 1: Basic Activity Info -->
         <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-            <div class="d-flex align-center mb-4">
+
+            <!-- Header -->
+            <div class="d-flex align-center mb-4 mobile-column">
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                Color="Color.Primary"
                                Variant="Variant.Text"
                                Href="/atividades"
-                               Class="mr-2" />
-                <MudText Typo="Typo.h4">Editar Atividade</MudText>
+                               Class="mr-2 mobile-full" />
+                <MudText Typo="Typo.h4" Class="mobile-full">Editar Atividade</MudText>
             </div>
-            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0">
-                <!-- STEP 1 -->
+
+            <!-- Stepper -->
+            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Horizontal="false">
                 <MudStep Label="Informações Básicas" Completed="_currentStep > 0">
                     <MudStepContent>
                         @Step1Content
 
-                        <div class="d-flex justify-end mt-4">
+                        <div class="d-flex justify-end mt-4 mobile-buttons">
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
                                        OnClick="ProceedToStep2"
@@ -36,12 +40,11 @@
                     </MudStepContent>
                 </MudStep>
 
-                <!-- STEP 2 -->
                 <MudStep Label="Selecionar Questões" Completed="_currentStep == 1">
                     <MudStepContent>
                         @Step2Content
 
-                        <div class="d-flex justify-space-between mt-4">
+                        <div class="d-flex justify-space-between mt-4 mobile-buttons">
                             <MudButton Variant="Variant.Text"
                                        Color="Color.Primary"
                                        OnClick="BackToStep1">
@@ -75,39 +78,41 @@
     {
         <!-- STEP 2: Select Questions -->
         <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-            <div class="d-flex align-center mb-4">
+
+            <!-- Header -->
+            <div class="d-flex align-center mb-4 mobile-column">
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                Color="Color.Primary"
                                Variant="Variant.Text"
                                OnClick="BackToStep1"
-                               Class="mr-2" />
-                <MudText Typo="Typo.h4">Editar Questões para: @_atividadeModel.NomeAtividade</MudText>
+                               Class="mr-2 mobile-full" />
+
+                <MudText Typo="Typo.h4" Class="mobile-full">
+                    Editar Questões para: @_atividadeModel.NomeAtividade
+                </MudText>
             </div>
 
-            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Editable="true">
+            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Editable="true" Horizontal="false">
                 <MudStep Completed="_currentStep > 1" Label="Informações Básicas" />
                 <MudStep Completed="_currentStep == 2" Label="Selecionar Questões" />
             </MudStepper>
 
-            <!-- Filter Options -->
+            <!-- Filter Area -->
             <MudPaper Class="pa-4 mb-4 mt-4" Elevation="1">
-                <div class="d-flex align-center">
+                <MudStack Spacing="2">
+
                     <MudTextField @bind-Value="_searchString"
                                   Placeholder="Pesquisar questões..."
                                   Variant="Variant.Outlined"
-                                  AdornmentIcon="@Icons.Material.Filled.Search"
                                   Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
                                   Immediate="true"
-                                  Class="mr-4"
-                                  Style="flex-grow: 1;" />
+                                  FullWidth="true" />
 
                     <MudSelect @bind-Value="_selectedDifficulty"
                                Label="Dificuldade"
                                Variant="Variant.Outlined"
-                               AnchorOrigin="Origin.BottomRight"
-                               Class="mr-4"
-                               Style="min-width: 150px;">
-                        <MudSelectItem Value="@("")">Todas</MudSelectItem>
+                               FullWidth="true">
                         <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
                         <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
                         <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
@@ -116,25 +121,25 @@
                     <MudSelect @bind-Value="_selectedTopic"
                                Label="Tema"
                                Variant="Variant.Outlined"
-                               AnchorOrigin="Origin.BottomRight"
-                               Style="min-width: 150px;">
-                        <MudSelectItem Value="@("")">Todos</MudSelectItem>
+                               FullWidth="true">
                         @foreach (var topic in _uniqueTopics)
                         {
                             <MudSelectItem Value="@topic">@topic</MudSelectItem>
                         }
                     </MudSelect>
-                </div>
+
+                </MudStack>
             </MudPaper>
 
-            <!-- Questions Table with Selection -->
-            <MudPaper Elevation="2" Class="overflow-hidden">
+            <!-- Questions Table -->
+            <MudPaper Elevation="2" Class="overflow-hidden table-responsive">
+
                 <MudTable Items="@FilteredQuestions"
                           Dense="true"
                           Hover="true"
-                          Striped="false"
                           Bordered="true"
                           Loading="@_isLoading">
+
                     <HeaderContent>
                         <MudTh>Selecionar</MudTh>
                         <MudTh>Enunciado</MudTh>
@@ -145,13 +150,16 @@
                     <RowTemplate Context="questao">
                         <MudTd>
                             <MudCheckBox T="bool"
-                                 @bind-Value="IsSelected[questao.IdQuestao]"
-                                 Disabled="@(_isSubmitting)"/>
+                                         @bind-Value="IsSelected[questao.IdQuestao]"
+                                         Disabled="@(_isSubmitting)" />
                         </MudTd>
-                        <MudTd Style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+
+                        <MudTd class="text-ellipsis">
                             @questao.EnunciadoQuestao
                         </MudTd>
+
                         <MudTd>@questao.TemaQuestao</MudTd>
+
                         <MudTd>
                             <MudChip T="string"
                                      Text="@questao.DificuldadeQuestao"
@@ -163,12 +171,14 @@
                     <PagerContent>
                         <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
                     </PagerContent>
+
                 </MudTable>
             </MudPaper>
 
             <!-- Selected Questions Summary -->
-            <MudPaper Elevation="1" Class="pa-4 mt-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary);">
-                <div class="d-flex align-center justify-space-between">
+            <MudPaper Elevation="1"
+                      Class="pa-4 mt-4 rounded-lg border-primary-left">
+                <div class="d-flex align-center justify-space-between mobile-column">
                     <MudText Typo="Typo.subtitle1">
                         Questões Selecionadas: @SelectedQuestionsCount
                     </MudText>
@@ -177,14 +187,15 @@
                                Size="Size.Small"
                                StartIcon="@Icons.Material.Filled.Clear"
                                OnClick="ClearSelection"
-                               Disabled="@(SelectedQuestionsCount == 0 || _isSubmitting)">
+                               Disabled="@(SelectedQuestionsCount == 0 || _isSubmitting)"
+                               Class="mobile-full">
                         Limpar Seleção
                     </MudButton>
                 </div>
             </MudPaper>
 
-            <!-- Action Buttons -->
-            <div class="d-flex justify-space-between mt-6">
+            <!-- Footer Buttons -->
+            <div class="d-flex justify-space-between mt-6 mobile-buttons">
                 <MudButton Variant="Variant.Text"
                            Color="Color.Primary"
                            StartIcon="@Icons.Material.Filled.ArrowBack"
@@ -192,12 +203,12 @@
                            Disabled="@(_isSubmitting)">
                     Voltar
                 </MudButton>
+
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            EndIcon="@Icons.Material.Filled.Save"
                            OnClick="HandleSubmit"
-                           Disabled="@(_isSubmitting)"
-                           Class="ml-auto">
+                           Disabled="@(_isSubmitting)">
                     @(_isSubmitting ? "Salvando..." : "Salvar Alterações")
                 </MudButton>
             </div>

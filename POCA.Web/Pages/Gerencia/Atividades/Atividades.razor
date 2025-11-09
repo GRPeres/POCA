@@ -6,45 +6,14 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
-    <!-- Page Header with Action Button -->
-    <div class="d-flex align-center justify-space-between mb-6">
-        <MudText Typo="Typo.h4" Class="mb-0">Lista de Atividades</MudText>
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   Href="/adicionar-atividade"
-                   Size="Size.Small">
-            Nova Atividade
-        </MudButton>
-    </div>
+<!-- Activities Table / Cards -->
+<MudPaper Elevation="2" Class="overflow-hidden">
 
-    <!-- Search Bar -->
-    <MudPaper Class="pa-4 mb-4" Elevation="1">
-        <div class="d-flex align-center">
-            <MudTextField @bind-Value="_searchString"
-                          Placeholder="Pesquisar atividades..."
-                          Variant="Variant.Outlined"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Adornment="Adornment.Start"
-                          Immediate="true"
-                          Style="flex-grow: 1;" />
-
-            <MudTooltip Text="Limpar filtro">
-                <MudIconButton Icon="@Icons.Material.Filled.Clear"
-                               Color="Color.Primary"
-                               OnClick="ClearFilters"
-                               Class="ml-1" />
-            </MudTooltip>
-        </div>
-    </MudPaper>
-
-    <!-- Activities Table -->
-    <MudPaper Elevation="2" Class="overflow-hidden">
+    <!-- Desktop Table -->
+    <div class="d-none d-md-block">
         <MudTable Items="@FilteredActivities"
                   Dense="true"
                   Hover="true"
-                  Striped="false"
                   Bordered="true"
                   Loading="@_isLoading">
             <ToolBarContent>
@@ -64,60 +33,48 @@
             <HeaderContent>
                 <MudTh>ID</MudTh>
                 <MudTh>Nome</MudTh>
-                <MudTh>Questões Associadas</MudTh>
-                <MudTh Style="width: 160px;">Ações</MudTh>
+                <MudTh>Questões</MudTh>
+                <MudTh class="text-center">Ações</MudTh>
             </HeaderContent>
 
             <RowTemplate Context="atividade">
                 <MudTd>@atividade.IdAtividade</MudTd>
-                <MudTd Style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    @atividade.NomeAtividade
-                </MudTd>
+                <MudTd>@atividade.NomeAtividade</MudTd>
                 <MudTd>
                     @if (atividade.TbQuestoesIdQuestoes?.Count() > 0)
                     {
                         <div class="d-flex flex-wrap gap-1">
                             @foreach (var questaoId in atividade.TbQuestoesIdQuestoes)
                             {
-                                <MudButton Variant="Variant.Outlined"
-                                           Color="Color.Primary"
-                                           Size="Size.Small"
-                                           Href="@($"/questao/{questaoId}")"
-                                           Class="px-2">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary">
                                     Q-@questaoId
-                                </MudButton>
+                                </MudChip>
                             }
                         </div>
                     }
                     else
                     {
-                        <MudText Typo="Typo.body2" Color="Color.Transparent">Nenhuma questão associada</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Transparent">Nenhuma</MudText>
                     }
                 </MudTd>
                 <MudTd>
-                    <div class="d-flex">
-                        <MudTooltip Text="Visualizar">
-                            <MudIconButton Icon="@Icons.Material.Filled.Visibility"
-                                           Color="Color.Primary"
-                                           Size="Size.Small"
-                                           Href="@($"/atividade/{atividade.IdAtividade}")" />
-                        </MudTooltip>
+                    <div class="d-flex justify-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Href="@($"/atividade/{atividade.IdAtividade}")" />
 
-                        <MudTooltip Text="Editar">
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                           Color="Color.Secondary"
-                                           Size="Size.Small"
-                                           Href="@($"/editar-atividade/{atividade.IdAtividade}")"
-                                           Class="ml-2" />
-                        </MudTooltip>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Secondary"
+                                       Size="Size.Small"
+                                       Href="@($"/editar-atividade/{atividade.IdAtividade}")"
+                                       Class="ml-2" />
 
-                        <MudTooltip Text="Excluir">
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                           Color="Color.Error"
-                                           Size="Size.Small"
-                                           OnClick="@(() => OpenDeleteDialog(atividade.IdAtividade))"
-                                           Class="ml-2" />
-                        </MudTooltip>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => OpenDeleteDialog(atividade.IdAtividade))"
+                                       Class="ml-2" />
                     </div>
                 </MudTd>
             </RowTemplate>
@@ -126,23 +83,76 @@
                 <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
             </PagerContent>
         </MudTable>
-    </MudPaper>
-</MudContainer>
+    </div>
 
-<!-- Delete Confirmation Dialog -->
-<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Confirmar Exclusão</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudText>Deseja realmente excluir esta atividade?</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ConfirmDelete">Excluir</MudButton>
-    </DialogActions>
-</MudDialog>
+    <!-- Mobile Header -->
+    <div class="d-md-none px-3 pt-2 pb-1">
+        <MudText Typo="Typo.h6" Class="mb-0">
+            Atividades
+        </MudText>
+
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            @FilteredActivities.Count() atividades encontradas
+        </MudText>
+
+        <MudDivider Class="my-2" />
+    </div>
+
+    <!-- Mobile Card List -->
+    <div class="d-md-none p-2">
+        @foreach (var atividade in FilteredActivities)
+        {
+            <MudPaper Class="pa-3 mb-3 rounded-lg border-success-left mobile-max-height" Elevation="1">
+
+                <!-- Title + ID -->
+                <div class="mobile-column">
+                    <MudText Typo="Typo.subtitle1">@atividade.NomeAtividade</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">ID: @atividade.IdAtividade</MudText>
+                </div>
+
+                <!-- Questions Chips -->
+                @if (atividade.TbQuestoesIdQuestoes?.Count() > 0)
+                {
+                    <div class="d-flex flex-wrap gap-1 mt-2 mobile-max-height">
+                        @foreach (var questaoId in atividade.TbQuestoesIdQuestoes)
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary"
+                                     Class="text-ellipsis">
+                                Q-@questaoId
+                            </MudChip>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">Nenhuma questão</MudText>
+                }
+
+                <!-- Actions -->
+                <div class="d-flex justify-end gap-2 mt-3 mobile-buttons">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Visibility"
+                               Href="@($"/atividade/{atividade.IdAtividade}")"
+                               Class="mobile-full">
+                        Ver
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Edit"
+                               Href="@($"/editar-atividade/{atividade.IdAtividade}")"
+                               Class="mobile-full">
+                        Editar
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="@(() => OpenDeleteDialog(atividade.IdAtividade))"
+                               Class="mobile-full">
+                        Excluir
+                    </MudButton>
+                </div>
+            </MudPaper>
+        }
+    </div>
+
+</MudPaper>
 
 @code {
     private List<AtividadeResponse> _atividades = new();

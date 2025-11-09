@@ -6,40 +6,50 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JS
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
-    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-        <div class="d-flex align-center mb-4">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-4 px-2 px-sm-0">
+    <MudPaper Elevation="4" Class="pa-4 pa-sm-6 rounded-lg">
+
+        <!-- Header -->
+        <div class="d-flex align-center mb-4 flex-wrap">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                            Color="Color.Primary"
                            Variant="Variant.Text"
                            Href="/questoes"
-                           Class="mr-2" />
-            <MudText Typo="Typo.h4">Importar Questões</MudText>
+                           Class="mr-2 mb-2 mb-sm-0" />
+
+            <MudText Typo="Typo.h5" TypoSm="Typo.h4">
+                Importar Questões
+            </MudText>
         </div>
 
-        <!-- Zona de Upload -->
+        <!-- Upload Zone -->
         <MudPaper Elevation="2"
-                  Class="pa-6 mb-4 rounded-lg border-dashed border-2"
+                  Class="pa-4 pa-sm-6 mb-4 rounded-lg border-dashed border-2 d-flex flex-column align-center text-center upload-zone"
                   Style="cursor: pointer;"
                   OnClick="OpenFileDialog">
-            <div class="d-flex flex-column align-center text-center">
-                <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Class="mb-2" />
-                <MudText Typo="Typo.h6" Class="mb-2">Selecione seu arquivo CSV</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-                    O arquivo deve conter as colunas: Enunciado, Resposta Correta, Resposta Errada 1,
-                    Resposta Errada 2, Resposta Errada 3, Dificuldade, Tema
-                </MudText>
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Upload"
-                           OnClick="OpenFileDialog">
-                    Selecionar Arquivo
-                </MudButton>
-                <InputFile @ref="_fileInput"
-                           style="display: none;"
-                           accept=".csv"
-                           OnChange="OnFileSelected" />
-            </div>
+
+            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large" Class="mb-2" />
+
+            <MudText Typo="Typo.subtitle1" TypoSm="Typo.h6" Class="mb-2">
+                Selecione seu arquivo CSV
+            </MudText>
+
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Deve conter: Enunciado, Resposta Correta, Respostas Erradas, Dificuldade, Tema
+            </MudText>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Upload"
+                       Class="w-100 w-sm-auto"
+                       OnClick="OpenFileDialog">
+                Selecionar Arquivo
+            </MudButton>
+
+            <InputFile @ref="_fileInput"
+                       style="display: none;"
+                       accept=".csv"
+                       OnChange="OnFileSelected" />
         </MudPaper>
 
         @if (_isProcessing)
@@ -49,13 +59,14 @@
 
         @if (_responseMessage != null)
         {
-            <MudAlert Severity="@(_responseMessage.IsSuccessStatusCode ? Severity.Success : Severity.Error)"
+            <MudAlert Severity="@(_responseMessage.IsSuccessStatusCode? Severity.Success: Severity.Error)"
                       Class="mb-4">
                 @_responseMessage.ReasonPhrase
             </MudAlert>
         }
     </MudPaper>
 </MudContainer>
+
 
 @code {
     private InputFile? _fileInput;

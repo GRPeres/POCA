@@ -7,203 +7,187 @@
 @inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
-    @if (_currentStep == 1)
-    {
-        <!-- STEP 1: Basic Activity Info -->
-        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-            <div class="d-flex align-center mb-4">
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
-                               Color="Color.Primary"
-                               Variant="Variant.Text"
-                               Href="/atividades"
-                               Class="mr-2" />
-                <MudText Typo="Typo.h4">Criar Nova Atividade</MudText>
-            </div>
-            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0">
-                <!-- STEP 1 -->
-                <MudStep Label="Informações Básicas" Completed="_currentStep > 0">
-                    <MudStepContent>
-                        @Step1Content
 
-                        <div class="d-flex justify-end mt-4">
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       OnClick="ProceedToStep2"
-                                       Disabled="@(!_isValidStep1)">
-                                Próximo
-                            </MudButton>
-                        </div>
-                    </MudStepContent>
-                </MudStep>
+@if (_currentStep == 1)
+{
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+        <!-- Header -->
+        <div class="d-flex align-center mb-4 mobile-column">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Color="Color.Primary"
+                           Variant="Variant.Text"
+                           Href="/atividades"
+                           Class="mr-2 mobile-full" />
+            <MudText Typo="Typo.h4" Class="mobile-full">Criar Nova Atividade</MudText>
+        </div>
+
+        <MudStepper @bind-ActiveStep="_currentStep" Elevation="0">
+            <!-- STEP 1 -->
+            <MudStep Label="Informações Básicas" Completed="_currentStep > 0">
+                <MudStepContent>
+                    @Step1Content
+                    <div class="d-flex justify-end mt-4 mobile-buttons">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="ProceedToStep2"
+                                   Disabled="@(!_isValidStep1)"
+                                   Class="mobile-full">
+                            Próximo
+                        </MudButton>
+                    </div>
+                </MudStepContent>
+            </MudStep>
+
+            <!-- STEP 2 -->
+            <MudStep Label="Selecionar Questões" Completed="_currentStep == 1">
+                <MudStepContent>
+                    @Step2Content
+                    <div class="d-flex justify-space-between mt-4 mobile-buttons">
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Primary"
+                                   OnClick="BackToStep1"
+                                   Class="mobile-full">
+                            Voltar
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   OnClick="HandleSubmit"
+                                   Disabled="@(SelectedQuestionsCount == 0)"
+                                   Class="mobile-full">
+                            Criar Atividade
+                        </MudButton>
+                    </div>
+                </MudStepContent>
+            </MudStep>
+        </MudStepper>
+
+        <MudDivider Class="my-4" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Disabled="@(!CanSubmit)"
+                   OnClick="HandleStepAction"
+                   StartIcon="@Icons.Material.Filled.Save">
+            Salvar
+        </MudButton>
+
+    </MudPaper>
+}
+else if (_currentStep == 2)
+{
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+        <!-- Header -->
+        <div class="d-flex align-center mb-4 mobile-column">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                           Color="Color.Primary"
+                           Variant="Variant.Text"
+                           OnClick="BackToStep1"
+                           Class="mr-2 mobile-full" />
+
+            <MudText Typo="Typo.h4" Class="mobile-full">
+                Selecionar Questões para: @_atividadeModel.NomeAtividade
+            </MudText>
+        </div>
+
+        <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Editable="true">
+            <MudStep Completed="_currentStep > 1" Label="Informações Básicas" />
+            <MudStep Completed="_currentStep == 2" Label="Selecionar Questões" />
+        </MudStepper>
+
+        <!-- Filter Options -->
+        <MudPaper Class="pa-4 mb-4 mt-4" Elevation="1">
+            <MudStack Spacing="2">
+
+                <MudTextField @bind-Value="_searchString"
+                                Placeholder="Pesquisar questões..."
+                                Variant="Variant.Outlined"
+                                Adornment="Adornment.Start"
+                                AdornmentIcon="@Icons.Material.Filled.Search"
+                                Immediate="true"
+                                FullWidth="true" />
+
+                <MudSelect @bind-Value="_selectedDifficulty"
+                            Label="Dificuldade"
+                            Variant="Variant.Outlined"
+                            FullWidth="true">
+                    <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
+                    <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
+                    <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
+                </MudSelect>
+
+                <MudSelect @bind-Value="_selectedTopic"
+                            Label="Tema"
+                            Variant="Variant.Outlined"
+                            FullWidth="true">
+                    @foreach (var topic in _uniqueTopics)
+                    {
+                        <MudSelectItem Value="@topic">@topic</MudSelectItem>
+                    }
+                </MudSelect>
+
+            </MudStack>
+        </MudPaper>
 
 
-                <!-- STEP 2 -->
-                <MudStep Label="Selecionar Questões" Completed="_currentStep == 1">
-                    <MudStepContent>
-                        @Step2Content
+        <!-- Questions Table -->
+        <MudPaper Elevation="2" Class="overflow-hidden table-responsive">
+            <MudTable Items="@FilteredQuestions"
+                      Dense="true"
+                      Hover="true"
+                      Bordered="true"
+                      Loading="@_isLoading">
+                <HeaderContent>
+                    <MudTh>Selecionar</MudTh>
+                    <MudTh>Enunciado</MudTh>
+                    <MudTh>Tema</MudTh>
+                    <MudTh>Dificuldade</MudTh>
+                </HeaderContent>
 
-                        <div class="d-flex justify-space-between mt-4">
-                            <MudButton Variant="Variant.Text"
-                                       Color="Color.Primary"
-                                       OnClick="BackToStep1">
-                                Voltar
-                            </MudButton>
+                <RowTemplate Context="questao">
+                    <MudTd>
+                        <MudCheckBox T="bool" @bind-Value="IsSelected[questao.IdQuestao]" />
+                    </MudTd>
+                    <MudTd class="text-ellipsis">
+                        @questao.EnunciadoQuestao
+                    </MudTd>
+                    <MudTd>@questao.TemaQuestao</MudTd>
+                    <MudTd>
+                        <MudChip T="string"
+                                 Text="@questao.DificuldadeQuestao"
+                                 Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
+                                 Size="Size.Small" />
+                    </MudTd>
+                </RowTemplate>
 
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       OnClick="HandleSubmit"
-                                       Disabled="@(SelectedQuestionsCount == 0)">
-                                Criar Atividade
-                            </MudButton>
-                        </div>
-                    </MudStepContent>
-                </MudStep>
-            </MudStepper>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
+                </PagerContent>
+            </MudTable>
+        </MudPaper>
 
-
-            <MudDivider Class="my-4" />
+        <!-- Bottom Buttons -->
+        <div class="d-flex justify-space-between mt-6 mobile-buttons">
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Primary"
+                       OnClick="BackToStep1"
+                       Class="mobile-full">
+                Voltar
+            </MudButton>
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
-                       FullWidth="true"
-                       Disabled="@(!CanSubmit)"
-                       OnClick="HandleStepAction"
-                       StartIcon="@Icons.Material.Filled.Save">
-                Salvar
+                       OnClick="HandleSubmit"
+                       Disabled="@(_isSubmitting || SelectedQuestionsCount == 0)"
+                       Class="mobile-full">
+                @(_isSubmitting ? "Salvando..." : "Criar Atividade")
             </MudButton>
-
-        </MudPaper>
-    }
-    else if (_currentStep == 2)
-    {
-        <!-- STEP 2: Select Questions -->
-        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-            <div class="d-flex align-center mb-4">
-                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
-                               Color="Color.Primary"
-                               Variant="Variant.Text"
-                               OnClick="BackToStep1"
-                               Class="mr-2" />
-                <MudText Typo="Typo.h4">Selecionar Questões para: @_atividadeModel.NomeAtividade</MudText>
-            </div>
-
-            <MudStepper @bind-ActiveStep="_currentStep" Elevation="0" Editable="true">
-                <MudStep Completed="_currentStep > 1" Label="Informações Básicas" />
-                <MudStep Completed="_currentStep == 2" Label="Selecionar Questões" />
-            </MudStepper>
-
-
-            <!-- Filter Options -->
-            <MudPaper Class="pa-4 mb-4 mt-4" Elevation="1">
-                <div class="d-flex align-center">
-                    <MudTextField @bind-Value="_searchString"
-                                  Placeholder="Pesquisar questões..."
-                                  Variant="Variant.Outlined"
-                                  AdornmentIcon="@Icons.Material.Filled.Search"
-                                  Adornment="Adornment.Start"
-                                  Immediate="true"
-                                  Class="mr-4"
-                                  Style="flex-grow: 1;" />
-
-                    <MudSelect @bind-Value="_selectedDifficulty"
-                               Label="Dificuldade"
-                               Variant="Variant.Outlined"
-                               AnchorOrigin="Origin.BottomRight"
-                               Class="mr-4"
-                               Style="min-width: 150px;">
-                        <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
-                        <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
-                        <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
-                    </MudSelect>
-
-                    <MudSelect @bind-Value="_selectedTopic"
-                               Label="Tema"
-                               Variant="Variant.Outlined"
-                               AnchorOrigin="Origin.BottomRight"
-                               Style="min-width: 150px;">
-                        @foreach (var topic in _uniqueTopics)
-                        {
-                            <MudSelectItem Value="@topic">@topic</MudSelectItem>
-                        }
-                    </MudSelect>
-                </div>
-            </MudPaper>
-
-            <!-- Questions Table with Selection -->
-            <MudPaper Elevation="2" Class="overflow-hidden">
-                <MudTable Items="@FilteredQuestions"
-                          Dense="true"
-                          Hover="true"
-                          Striped="false"
-                          Bordered="true"
-                          Loading="@_isLoading">
-                    <HeaderContent>
-                        <MudTh>Selecionar</MudTh>
-                        <MudTh>Enunciado</MudTh>
-                        <MudTh>Tema</MudTh>
-                        <MudTh>Dificuldade</MudTh>
-                    </HeaderContent>
-
-                    <RowTemplate Context="questao">
-                        <MudTd>
-                           <MudCheckBox T="bool"
-                                 @bind-Value="IsSelected[questao.IdQuestao]"/>
-                        </MudTd>
-                        <MudTd Style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            @questao.EnunciadoQuestao
-                        </MudTd>
-                        <MudTd>@questao.TemaQuestao</MudTd>
-                        <MudTd>
-                            <MudChip T="string"
-                                     Text="@questao.DificuldadeQuestao"
-                                     Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
-                                     Size="Size.Small" />
-                        </MudTd>
-                    </RowTemplate>
-
-                    <PagerContent>
-                        <MudTablePager PageSizeOptions="@(new[] {10, 25, 50})" />
-                    </PagerContent>
-                </MudTable>
-            </MudPaper>
-
-            <!-- Selected Questions Summary -->
-            <MudPaper Elevation="1" Class="pa-4 mt-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary);">
-                <div class="d-flex align-center justify-space-between">
-                    <MudText Typo="Typo.subtitle1">
-                        Questões Selecionadas: @SelectedQuestionsCount
-                    </MudText>
-                    <MudButton Variant="Variant.Text"
-                               Color="Color.Error"
-                               Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.Clear"
-                               OnClick="ClearSelection"
-                               Disabled="@(SelectedQuestionsCount == 0)">
-                        Limpar Seleção
-                    </MudButton>
-                </div>
-            </MudPaper>
-
-            <!-- Action Buttons -->
-            <div class="d-flex justify-space-between mt-6">
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.ArrowBack"
-                           OnClick="BackToStep1">
-                    Voltar
-                </MudButton>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           EndIcon="@Icons.Material.Filled.Save"
-                           OnClick="HandleSubmit"
-                           Disabled="@(_isSubmitting || SelectedQuestionsCount == 0)"
-                           Class="ml-auto">
-                    @(_isSubmitting ? "Salvando..." : "Criar Atividade")
-                </MudButton>
-            </div>
-        </MudPaper>
-    }
+        </div>
+    </MudPaper>
+}
 </MudContainer>
+
 
 @code {
     // Auxiliary model class for binding

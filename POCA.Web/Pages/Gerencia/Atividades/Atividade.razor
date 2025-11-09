@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+
     @if (atividade == null)
     {
         <MudPaper Elevation="2" Class="pa-8 d-flex justify-center align-center" style="height: 300px;">
@@ -15,101 +16,123 @@
     else
     {
         <MudPaper Elevation="4" Class="pa-6 rounded-lg">
-            <!-- Header with activity name -->
-            <div class="d-flex align-center mb-4">
-                <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h5" Class="mb-0">@atividade.NomeAtividade</MudText>
-            </div>
+
+            <!-- Header -->
+            <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="2" Class="mb-4 mobile-column">
+                <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.h5" Class="mb-0">
+                    @atividade.NomeAtividade
+                </MudText>
+            </MudStack>
 
             <!-- Questions Section -->
-            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary);">
-                <div class="d-flex align-center mb-2">
-                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Color="Color.Primary" Class="mr-2" />
-                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Questões Associadas</MudText>
-                </div>
+            <MudPaper Elevation="1" Class="pa-4 mb-4 rounded-lg"
+                      Style="border-left: 4px solid var(--mud-palette-primary);">
+
+                <MudStack Direction="Row" AlignItems="AlignItems.Center" Spacing="1" Class="mb-2 mobile-column">
+                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Color="Color.Primary" />
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">
+                        Questões Associadas
+                    </MudText>
+                </MudStack>
 
                 @if (questoes?.Count > 0)
                 {
-                    <MudList T="string" Dense="true" Class="py-0">
+                    <MudStack Spacing="2">
                         @foreach (var questao in questoes)
                         {
-                            <MudListItem T="string" Class="px-0">
-                                <MudPaper Elevation="0" Class="pa-3 mb-2 rounded" Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1); width: 100%;">
-                                    <div class="d-flex justify-space-between align-center">
-                                        <div>
-                                            <MudText Typo="Typo.body1">@questao.EnunciadoQuestao</MudText>
-                                            <div class="d-flex gap-2 mt-1">
-                                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Size="Size.Small">
-                                                    @questao.TemaQuestao
-                                                </MudChip>
-                                                <MudChip T="string" Color="@GetDifficultyColor(questao.DificuldadeQuestao)" 
-                                                         Variant="Variant.Outlined" Size="Size.Small">
-                                                    @questao.DificuldadeQuestao
-                                                </MudChip>
-                                            </div>
-                                        </div>
-                                        <MudButton Variant="Variant.Text"
-                                                   Color="Color.Primary"
-                                                   Size="Size.Small"
-                                                   Href="@($"/questao/{questao.IdQuestao}")"
-                                                   EndIcon="@Icons.Material.Filled.ArrowForward">
-                                            Ver
-                                        </MudButton>
+                            <MudPaper Elevation="0"
+                                      Class="pa-3 rounded"
+                                      Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.08);">
+
+                                <MudStack Direction="Row"
+                                          Justify="Justify.SpaceBetween"
+                                          AlignItems="AlignItems.Start"
+                                          Class="mobile-column"
+                                          Spacing="1">
+
+                                    <!-- Text + Chips -->
+                                    <div style="flex:1">
+                                        <MudText Typo="Typo.body1">@questao.EnunciadoQuestao</MudText>
+
+                                        <MudStack Direction="Row" Spacing="1" Class="mt-1 mobile-column">
+                                            <MudChip T="string"
+                                                     Color="Color.Secondary"
+                                                     Variant="Variant.Outlined"
+                                                     Size="Size.Small"
+                                                     Class="mobile-full">
+                                                @questao.TemaQuestao
+                                            </MudChip>
+
+                                            <MudChip T="string"
+                                                     Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
+                                                     Variant="Variant.Outlined"
+                                                     Size="Size.Small"
+                                                     Class="mobile-full">
+                                                @questao.DificuldadeQuestao
+                                            </MudChip>
+                                        </MudStack>
                                     </div>
-                                </MudPaper>
-                            </MudListItem>
+
+                                    <!-- Button -->
+                                    <MudButton Variant="Variant.Text"
+                                               Color="Color.Primary"
+                                               Size="Size.Small"
+                                               Href="@($"/questao/{questao.IdQuestao}")"
+                                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                                               Class="mobile-full">
+                                        Ver
+                                    </MudButton>
+                                </MudStack>
+
+                            </MudPaper>
                         }
-                    </MudList>
+                    </MudStack>
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Color="Color.Transparent">Nenhuma questão associada</MudText>
+                    <MudText>Nenhuma questão associada</MudText>
                 }
             </MudPaper>
 
-            <!-- Action Buttons -->
             <MudDivider Class="my-6" />
-            <div class="d-flex justify-space-between">
+
+            <!-- Action Buttons -->
+            <MudStack Direction="Row" Justify="Justify.SpaceBetween" Class="mobile-buttons">
+
                 <MudButton Variant="Variant.Text"
                            Color="Color.Primary"
                            Href="/atividades"
-                           StartIcon="@Icons.Material.Filled.ArrowBack">
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Class="mobile-full">
                     Voltar
                 </MudButton>
-                <div>
+
+                <MudStack Direction="Row" Spacing="1" Class="mobile-full mobile-column">
+
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Secondary"
                                Href="@($"/editar-atividade/{atividade.IdAtividade}")"
                                StartIcon="@Icons.Material.Filled.Edit"
-                               Class="mr-2">
+                               Class="mobile-full">
                         Editar
                     </MudButton>
+
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Error"
                                StartIcon="@Icons.Material.Filled.Delete"
-                               OnClick="() => deleteDialog.ShowAsync()">
+                               OnClick="() => deleteDialog.ShowAsync()"
+                               Class="mobile-full">
                         Excluir
                     </MudButton>
-                </div>
-            </div>
+
+                </MudStack>
+            </MudStack>
+
         </MudPaper>
     }
 </MudContainer>
 
-<!-- Delete Confirmation Dialog -->
-<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Confirmar Exclusão</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudText>Deseja realmente excluir esta atividade?</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="DeleteAtividadeAsync">Excluir</MudButton>
-    </DialogActions>
-</MudDialog>
 
 @code {
     [Parameter]

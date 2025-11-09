@@ -1,19 +1,22 @@
-@page "/questoes"
-@using POCA.Web.Services.APIs
-@inject QuestoesAPI QuestoesAPI
-@inject ISnackbar Snackbar
+@page "/questoes" 
+@using POCA.Web.Services.APIs 
+@inject QuestoesAPI QuestoesAPI 
+@inject ISnackbar Snackbar 
 @inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="py-4">
-    <div class="d-flex align-center justify-space-between mb-6">
-        <MudText Typo="Typo.h4">Lista de Questões</MudText>
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-4 px-2 px-sm-0">
+    
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-center justify-space-between gap-2 mb-4">
+        <MudText Typo="Typo.h5" TypoSm="Typo.h4">Lista de Questões</MudText>
 
         <MudMenu Color="Color.Primary"
                  Variant="Variant.Filled"
                  Size="Size.Small"
                  Label="Nova Questão"
                  EndIcon="@Icons.Material.Filled.ArrowDropDown"
-                 Dense="true">
+                 Dense="true"
+                 Class="w-100 w-sm-auto">
             <MudMenuItem OnClick="@(() => Navigation.NavigateTo("/adicionar-questao"))">
                 Criar Manualmente
             </MudMenuItem>
@@ -21,50 +24,68 @@
                 Gerar com AI
             </MudMenuItem>
         </MudMenu>
-
     </div>
 
-    <!-- Search & Filters -->
+    <!-- Search & filters -->
     <MudPaper Class="pa-4 mb-4" Elevation="1">
-        <div class="d-flex align-center">
-            <MudTextField @bind-Value="_searchString" Placeholder="Pesquisar questões..." Variant="Variant.Outlined"
-                          AdornmentIcon="@Icons.Material.Filled.Search" Adornment="Adornment.Start"
-                          Immediate="true" Class="mr-4" Style="flex-grow: 1;" />
+        <div class="d-flex flex-wrap align-center gap-2">
+
+            <MudTextField @bind-Value="_searchString"
+                          Placeholder="Pesquisar questões..."
+                          Variant="Variant.Outlined"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Adornment="Adornment.Start"
+                          Immediate="true"
+                          Class="flex-grow-1 w-100 w-sm-auto" />
 
             <MudSelect @bind-Value="_selectedDifficulty"
                        Label="Dificuldade"
                        Variant="Variant.Outlined"
-                       AnchorOrigin="Origin.BottomRight"
-                       Class="mr-4"
-                       Style="min-width: 150px;">
-                <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem>
-                <MudSelectItem Value="@("Médio")">Médio</MudSelectItem>
+                       Class="w-100 w-sm-auto"
+                       Style="min-width:150px;">
+                <MudSelectItem Value="@("Fácil")">Fácil</MudSelectItem> 
+                <MudSelectItem Value="@("Médio")">Médio</MudSelectItem> 
                 <MudSelectItem Value="@("Difícil")">Difícil</MudSelectItem>
             </MudSelect>
 
-            <MudSelect @bind-Value="_selectedTopic" Label="Assunto" Variant="Variant.Outlined"
-                       AnchorOrigin="Origin.BottomRight" Style="min-width: 150px;">
+            <MudSelect @bind-Value="_selectedTopic"
+                       Label="Assunto"
+                       Variant="Variant.Outlined"
+                       Class="w-100 w-sm-auto"
+                       Style="min-width:150px;">
                 @foreach (var topic in _uniqueTopics)
                 {
                     <MudSelectItem Value="@topic">@topic</MudSelectItem>
                 }
             </MudSelect>
-            <MudTooltip Text="Limpar todos filtros">
-                <MudIconButton Icon="@Icons.Material.Filled.Clear" Color="Color.Primary"
-                               OnClick="ClearFilters" Class="ml-1" />
+
+            <MudTooltip Text="Limpar filtros">
+                <MudIconButton Icon="@Icons.Material.Filled.Clear"
+                               Color="Color.Primary"
+                               OnClick="ClearFilters" />
             </MudTooltip>
         </div>
     </MudPaper>
 
-    <!-- Questions Table -->
-    <MudPaper Elevation="2" Class="overflow-hidden">
-        <MudTable Items="@FilteredQuestions" Dense="true" Hover="true" Striped="false" Bordered="true"
-                  Loading="@_isLoading">
+    <!-- Table wrapper for mobile scroll -->
+    <MudPaper Elevation="2" Class="overflow-x-auto">
+        <MudTable Items="@FilteredQuestions"
+                  Dense="true"
+                  Hover="true"
+                  Bordered="true"
+                  Loading="@_isLoading"
+                  Breakpoint="Breakpoint.Sm">
+
             <ToolBarContent>
-                <MudText Typo="Typo.body2" Class="ml-2">Total: @FilteredQuestions.Count() questões</MudText>
+                <MudText Typo="Typo.body2" Class="ml-2">
+                    Total: @FilteredQuestions.Count() questões
+                </MudText>
                 <MudSpacer />
-                <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
-                           StartIcon="@Icons.Material.Filled.Refresh" OnClick="RefreshData">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           OnClick="RefreshData">
                     Atualizar
                 </MudButton>
             </ToolBarContent>
@@ -73,34 +94,39 @@
                 <MudTh>Enunciado</MudTh>
                 <MudTh>Assunto</MudTh>
                 <MudTh>Dificuldade</MudTh>
-                <MudTh Style="width: 160px;">Ações</MudTh>
+                <MudTh style="width: 150px;">Ações</MudTh>
             </HeaderContent>
 
             <RowTemplate Context="questao">
-                <MudTd Style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                <MudTd style="max-width:350px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     @questao.EnunciadoQuestao
                 </MudTd>
+
                 <MudTd>@questao.TemaQuestao</MudTd>
+
                 <MudTd>
-                    <MudChip T="string" Text="@questao.DificuldadeQuestao"
-                             Color="@GetDifficultyColor(questao.DificuldadeQuestao)" Size="Size.Small" />
+                    <MudChip T="string"
+                             Text="@questao.DificuldadeQuestao"
+                             Color="@GetDifficultyColor(questao.DificuldadeQuestao)"
+                             Size="Size.Small" />
                 </MudTd>
+
                 <MudTd>
-                    <div class="d-flex">
-                        <MudTooltip Text="Visualizar">
-                            <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Primary"
-                                           Size="Size.Small" Href="@($"/questao/{questao.IdQuestao}")" />
-                        </MudTooltip>
-                        <MudTooltip Text="Editar">
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Secondary"
-                                           Size="Size.Small" Href="@($"/editar-questao/{questao.IdQuestao}")"
-                                           Class="ml-2" />
-                        </MudTooltip>
-                        <MudTooltip Text="Excluir">
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                           Size="Size.Small" OnClick="@(() => OpenDeleteDialog(questao.IdQuestao))"
-                                           Class="ml-2" />
-                        </MudTooltip>
+                    <div class="d-flex gap-1">
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       Href="@($"/questao/{questao.IdQuestao}")" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Secondary"
+                                       Size="Size.Small"
+                                       Href="@($"/editar-questao/{questao.IdQuestao}")" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => OpenDeleteDialog(questao.IdQuestao))" />
                     </div>
                 </MudTd>
             </RowTemplate>
@@ -111,44 +137,6 @@
         </MudTable>
     </MudPaper>
 </MudContainer>
-
-<!-- Delete Dialog -->
-<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
-    <TitleContent><MudText Typo="Typo.h6">Confirmar Exclusão</MudText></TitleContent>
-    <DialogContent>
-        <MudText>Deseja realmente excluir esta questão?</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ConfirmDelete">Excluir</MudButton>
-    </DialogActions>
-</MudDialog>
-
-<!-- Generate AI Dialog with Multi-Select -->
-<MudDialog @ref="generateDialog" MaxWidth="MaxWidth.Large">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Gerar Novas Questões</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudText Class="mb-2">Selecione as questões base para gerar novas questões:</MudText>
-        <MudSelect T="int" @bind-SelectedValues="_selectedBaseQuestionIds" MultiSelection="true" FullWidth="true">
-            @foreach (var q in _questoes)
-            {
-                <MudSelectItem T="int" Value="@q.IdQuestao">@q.EnunciadoQuestao</MudSelectItem>
-            }
-        </MudSelect>
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
-            Se não selecionar nada, serão usadas as primeiras 10 questões do banco.
-        </MudText>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="() => generateDialog.CloseAsync()">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="GenerateQuestions">
-            Gerar
-        </MudButton>
-    </DialogActions>
-</MudDialog>
 
 @code {
     private List<QuestaoResponse> _questoes = new();
