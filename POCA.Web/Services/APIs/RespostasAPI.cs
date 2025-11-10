@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using POCA.API.Response;
 using POCA.Web.Response;
+using static POCA.Web.Pages.Resolvedor.Materias.MateriasPage;
 
 namespace POCA.Web.Services.APIs
 {
@@ -26,16 +27,13 @@ namespace POCA.Web.Services.APIs
             }
         }
 
-        // ✅ Calcular média por matéria (tratando int? para idAluno)
-        public async Task<double?> GetMediaPorMateriaAsync(int? idAluno, int idMateria)
+        // ✅ Buscar média do aluno por matéria
+        public async Task<MediaResponse?> GetMediaPorMateriaAsync(int idAluno, int idMateria)
         {
-            if (!idAluno.HasValue)
-                return null; // retorna null se não for aluno
-
             try
             {
-                return await _httpClient.GetFromJsonAsync<double>(
-                    $"alunos/{idAluno.Value}/materias/{idMateria}/media");
+                return await _httpClient.GetFromJsonAsync<MediaResponse>(
+                    $"alunos/{idAluno}/materias/{idMateria}/media");
             }
             catch (HttpRequestException)
             {
