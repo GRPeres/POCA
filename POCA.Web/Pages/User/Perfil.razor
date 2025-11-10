@@ -8,58 +8,60 @@
 @inject NavigationManager NavigationManager
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
-    <MudText Color="Color.Error">@Erro</MudText>
-
-    <MudPaper Class="pa-6" Elevation="3">
-        @if (paginicial)
-        {
-            @if (UserSession.CurrentUser != null && UserSession.CurrentUser.IdProfessor.HasValue)
+    @if (UserSession.IsLoggedIn)
+    {
+        <MudPaper Class="pa-6" Elevation="3">
+            @if (paginicial)
             {
-                <MudText Typo="Typo.h5" Class="mb-4">Perfil do Professor</MudText>
+                @if (UserSession.CurrentUser != null && UserSession.CurrentUser.IdProfessor.HasValue)
+                {
+                    <MudText Typo="Typo.h5" Class="mb-4">Perfil do Professor</MudText>
 
-                <MudGrid>
-                    <MudItem xs="12" sm="4">
-                        <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
-                    </MudItem>
-                    <MudItem xs="12" sm="8">
-                        <MudTextField Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Professor.NomeProfessor</MudTextField>
-                        <MudTextField Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.ContatoProfessor</MudTextField>
-                        <MudTextField Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.MateriaProfessor</MudTextField>
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
+                        </MudItem>
+                        <MudItem xs="12" sm="8">
+                            <MudText Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Professor.NomeProfessor</MudText>
+                            <MudText Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.ContatoProfessor</MudText>
+                            <MudText Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.MateriaProfessor</MudText>
+                        </MudItem>
+                    </MudGrid>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h5" Class="mb-4">Perfil do Aluno</MudText>
 
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SalvarPerfil" Class="mt-4">
-                            Salvar Alterações
-                        </MudButton>
-                    </MudItem>
-                </MudGrid>
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
+                        </MudItem>
+                        <MudItem xs="12" sm="8">
+                            <MudText Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Aluno.NomeAluno</MudText>
+                            <MudText Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.EmailAluno</MudText>
+                            <MudText Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.ContatoAluno</MudText>
+                            <MudText Label="Data de Nascimento" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.NascimentoAluno</MudText>
+                        </MudItem>
+                    </MudGrid>
+                }
             }
             else
             {
-                <MudText Typo="Typo.h5" Class="mb-4">Perfil do Aluno</MudText>
-
                 <MudGrid>
-                    <MudItem xs="12" sm="4">
-                        <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
-                    </MudItem>
-                    <MudItem xs="12" sm="8">
-                        <MudTextField Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Aluno.NomeAluno</MudTextField>
-                        <MudTextField Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.EmailAluno</MudTextField>
-                        <MudTextField Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.ContatoAluno</MudTextField>
-                        <MudDatePicker Label="Data de Nascimento" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.NascimentoAluno</MudDatePicker>
-
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SalvarPerfil" Class="mt-4">
-                            Salvar Alterações
-                        </MudButton>
-                    </MudItem>
+                    <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
                 </MudGrid>
             }
-        }
-        else
-        {
-            <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-        }
 
 
-    </MudPaper>
+        </MudPaper>
+
+    }
+    else if(!UserSession.IsLoggedIn)
+    {
+        <MudText>Você não está logado</MudText>
+        <MudButton Href="/login">Logar</MudButton>  
+        <MudButton Href="/cadastro">Cadastrar</MudButton>
+    }
 </MudContainer>
 
 @code
