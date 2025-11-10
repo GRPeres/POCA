@@ -7,44 +7,65 @@
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
 
-<MudPaper Elevation="4" Class="pa-4 ma-2 rounded">
-    <MudText>@Erro</MudText>
-    @if (paginicial)
-    {
-        <MudStack Spacing="2">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    <MudText Color="Color.Error">@Erro</MudText>
+
+    <MudPaper Class="pa-6" Elevation="3">
+        @if (paginicial)
+        {
             @if (UserSession.CurrentUser != null && UserSession.CurrentUser.IdProfessor.HasValue)
             {
-                <MudText Typo="Typo.h6" Color="Color.Primary">Informações do Professor</MudText>
-                <MudDivider />
-                <MudText><b>Nome:</b> @Professor.NomeProfessor</MudText>
-                <MudText><b>Contato:</b> @Professor.ContatoProfessor</MudText>
+                <MudText Typo="Typo.h5" Class="mb-4">Perfil do Professor</MudText>
+
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
+                    </MudItem>
+                    <MudItem xs="12" sm="8">
+                        <MudTextField Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Professor.NomeProfessor</MudTextField>
+                        <MudTextField Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.ContatoProfessor</MudTextField>
+                        <MudTextField Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.MateriaProfessor</MudTextField>
+
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SalvarPerfil" Class="mt-4">
+                            Salvar Alterações
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
             }
             else
             {
-                <MudText Typo="Typo.h6" Color="Color.Primary">Informações do Aluno</MudText>
-                <MudDivider />
-                <MudText><b>Nome:</b> @Aluno.NomeAluno</MudText>
-                <MudText><b>Contato:</b> @Aluno.ContatoAluno</MudText>
-                <MudText><b>Idade:</b> @Aluno.NascimentoAluno</MudText>
-            }
-        </MudStack>
-    }
-    else
-    {
-        <MudText>IsLoggedIn: @UserSession.IsLoggedIn</MudText>
-        <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-        <MudText>Professor: @Professor.NomeProfessor</MudText>
-        <MudText>Aluno: @Aluno.NomeAluno</MudText>
-        <MudText>Page loaded: @paginicial</MudText>
+                <MudText Typo="Typo.h5" Class="mb-4">Perfil do Aluno</MudText>
 
-    }
-</MudPaper>
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
+                    </MudItem>
+                    <MudItem xs="12" sm="8">
+                        <MudTextField Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Aluno.NomeAluno</MudTextField>
+                        <MudTextField Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.EmailAluno</MudTextField>
+                        <MudTextField Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.ContatoAluno</MudTextField>
+                        <MudDatePicker Label="Data de Nascimento" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.NascimentoAluno</MudDatePicker>
+
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SalvarPerfil" Class="mt-4">
+                            Salvar Alterações
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            }
+        }
+        else
+        {
+            <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
+        }
+
+
+    </MudPaper>
+</MudContainer>
 
 @code
 {
-    public string Erro = "";
-
     public bool paginicial = false;
+    public string Erro = string.Empty;
     public ProfessorResponse Professor { get; set; } = new ProfessorResponse(0, "", "", "");
     public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", DateTime.MinValue, 0, "", "", null, null);
 
@@ -70,6 +91,12 @@
             Erro = "Usuário não está logado.";
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    protected void SalvarPerfil()
+    {
+        // Aqui você salvaria no banco de dados
+        Erro = "Não existe esse botão";
     }
 
     private async Task LoadUserDataAsync()
