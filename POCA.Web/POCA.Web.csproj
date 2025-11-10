@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\appsettings.json" />
     <None Include="Pages\User\Login.razor" />
     <None Include="Pages\User\Cadastro.razor" />
   </ItemGroup>

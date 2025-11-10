@@ -19,6 +19,7 @@ builder.Services.AddScoped<QuestoesAPI>();
 builder.Services.AddScoped<PessoasAPI>();
 builder.Services.AddScoped<AtividadesAPI>();
 builder.Services.AddScoped<RespostaAPI>();
+builder.Services.AddScoped<RespostasAPI>();
 
 builder.Services.AddScoped<UserTrackingService>();
 

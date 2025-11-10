@@ -7,7 +7,6 @@
 @inject POCA.Web.Services.APIs.RespostasAPI RespostasAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
-@inject HttpClient Http
 
 <PageTitle>Matéria</PageTitle>
 
@@ -36,22 +35,15 @@
             }
         </MudStack>
 
-        @if (mediaAluno.HasValue && (mediaAluno.Value < 5 || mediaAluno.Value == 0))
+        @if (mediaAluno.HasValue && mediaAluno.Value < 5)
         {
             <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4">
-                Sua média está baixa ( @mediaAluno ). Vamos fazer um reforço?
-                <MudButton Color="Color.Error" Variant="Variant.Outlined" Class="ml-4" OnClick="RecarregarPagina">
+                Sua média está baixa (@mediaAluno). Vamos fazer um reforço?
+                <MudButton Color="Color.Error" Variant="Variant.Outlined" Class="ml-4" OnClick="IrParaReforco">
                     Fazer Reforço
                 </MudButton>
             </MudAlert>
         }
-
-        @if (!mediaAluno.HasValue)
-        {
-            <MudText>Carregando a média...</MudText>  <!-- Para monitorar o processo de carregamento -->
-        }
-
-
 
         <MudExpansionPanels MultiExpansion="true" ExpandIcon="@Icons.Material.Filled.ExpandMore">
             <MudExpansionPanel Text="Geral">
@@ -63,18 +55,20 @@
                         <MudListItem>
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Secondary"
-                                       OnClick="@CalcularMedia"
+                                       OnClick="@ObterMediaAlunoAsync"
                                        StartIcon="@Icons.Material.Filled.Calculate">
                                 Calcular Média
                             </MudButton>
                         </MudListItem>
 
-                       @*  @if (media is not null)
+                        @if (mediaAluno.HasValue)
                         {
                             <MudListItem>
-                                <MudText Typo="Typo.body1">Média: @media.Value.ToString("F2")</MudText>
+                                <MudText Typo="Typo.body1">
+                                    Média atual: @mediaAluno.Value.ToString("F2")
+                                </MudText>
                             </MudListItem>
-                        } *@
+                        }
                     }
                 </MudList>
             </MudExpansionPanel>
@@ -132,25 +126,17 @@
         if (UserSession.IsLoggedIn)
         {
             await MateriasAtividades();
-            await BuscarMediaAluno();
+            await ObterMediaAlunoAsync();
         }
-    }
-
-    private void RecarregarPagina()
-    {
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task MateriasAtividades()
     {
-        if (!UserSession.IsLoggedIn)
-            return;
-
         materia = await MateriasAPI.GetMateriaAsync(idMateria);
 
         if (materia is not null)
         {
-            // Buscar atividades da matéria
+            // Buscar atividades
             if (materia.tbAtividadesIdAtividades is not null)
             {
                 foreach (var id in materia.tbAtividadesIdAtividades)
@@ -161,7 +147,7 @@
                 }
             }
 
-            // Buscar nome do professor (apenas para professores)
+            // Buscar nome do professor
             if (UserSession.CurrentUser?.IsProfessor == true)
             {
                 var idProf = materia.tbProfessoresIdProfessors?.FirstOrDefault();
@@ -181,31 +167,29 @@
         }
     }
 
-    // ✅ Função que chama o endpoint de média
-    private async Task BuscarMediaAluno()
+    // ✅ Função unificada para buscar média
+    private async Task ObterMediaAlunoAsync()
     {
         var idAluno = UserSession.CurrentUser?.IdAluno;
-        if (idAluno is null) return;
+        if (idAluno is null)
+            return;
 
         try
         {
-            // URL base do seu backend (verifique a porta que a API está rodando)
-            var apiBase = "http://localhost:5000";  // Use http:// em vez de https://
+            var resultado = await RespostasAPI.GetMediaPorMateriaAsync(idAluno.Value, idMateria);
 
-            // Chama o endpoint completo para buscar a média
-            var result = await Http.GetFromJsonAsync<MediaResponse>(
-                $"{apiBase}/alunos/{idAluno}/materias/{idMateria}/media");
-
-            if (result != null)
+            if (resultado is not null)
             {
-                mediaAluno = result.Media;
+                mediaAluno = resultado.Media;
                 Console.WriteLine($"✅ Média do aluno: {mediaAluno}");
             }
             else
             {
                 mediaAluno = 0;
-                Console.WriteLine("⚠️ Nenhuma média retornada.");
+                Console.WriteLine("⚠️ Nenhum resultado de média retornado.");
             }
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -214,43 +198,23 @@
         }
     }
 
-
-
-
-    private void IrParaReforco()
-    {
+    private void IrParaReforco() =>
         NavigationManager.NavigateTo($"/reforco/{idMateria}");
-    }
 
-    private void HandleUserSessionChanged()
-    {
+    private void HandleUserSessionChanged() =>
         InvokeAsync(async () =>
         {
             if (UserSession.IsLoggedIn)
             {
                 await MateriasAtividades();
-                await BuscarMediaAluno();
+                await ObterMediaAlunoAsync();
                 StateHasChanged();
             }
         });
-    }
 
-    private void NavegarParaAtividade(int idAtividade)
-    {
+    private void NavegarParaAtividade(int idAtividade) =>
         NavigationManager.NavigateTo($"/atividadepage/{idAtividade}");
-    }
-
-    private async Task CalcularMedia()
-    {
-        if (UserSession.CurrentUser?.IdAluno != null)
-        {
-            // media = await RespostasAPI.GetMediaPorMateriaAsync(UserSession.CurrentUser.IdAluno.Value, idMateria);
-            StateHasChanged();
-        }
-    }
 
     public record ItemMateria(string Titulo);
-
-    // ✅ Record auxiliar para deserializar a resposta do endpoint
     public record MediaResponse(double Media, int Acertos, int Total);
 }
