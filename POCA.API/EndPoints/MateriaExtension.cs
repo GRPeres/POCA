@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using POCA.API.Requests.Materia;
 using POCA.API.Responses;
 using POCA.Banco.Model;
 using System.Collections.Generic;

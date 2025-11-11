@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -31,7 +32,7 @@ namespace POCA.Teste.API
             var serviceProvider = services.BuildServiceProvider();
             _context = serviceProvider.GetRequiredService<DbPocaContext>();
 
-            _app = WebApplication.Create(new WebApplicationOptions());
+           var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
             _app.AddEndpointsRespostas();
         }
 
@@ -76,13 +77,12 @@ namespace POCA.Teste.API
         {
             // Arrange
             var client = _app.GetTestClient();
-            var request = new RespostaRequest
-            {
-                FinalResposta = "New Resposta",
-                IdAtividade = 1,
-                IdAluno = 1,
-                IdQuestao = 1
-            };
+            var request = new RespostaRequest(
+                "New Resposta",
+                1,
+                1,
+                1
+            );
             var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
             // Act

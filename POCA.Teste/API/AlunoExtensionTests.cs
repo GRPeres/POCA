@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -31,7 +32,8 @@ namespace POCA.Teste.API
             var serviceProvider = services.BuildServiceProvider();
             _context = serviceProvider.GetRequiredService<DbPocaContext>();
 
-            _app = WebApplication.Create(new WebApplicationOptions());
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
+            _app = builder.Build();
             _app.AddEndpointsAlunos();
         }
 
@@ -40,6 +42,8 @@ namespace POCA.Teste.API
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            _app.DisposeAsync();
+
         }
 
         [Test]

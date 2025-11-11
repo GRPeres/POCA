@@ -1,5 +1,5 @@
 ﻿// AtividadeCreateRequest.cs (updated)
-namespace POCA.API.Requests.Atividade
+namespace POCA.Web.Requests.Atividade
 {
     public record AtividadeCreateRequest(
         string NomeAtividade

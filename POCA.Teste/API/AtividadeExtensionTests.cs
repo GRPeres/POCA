@@ -1,15 +1,15 @@
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
 using POCA.API.EndPoints;
 using POCA.API.Requests.Atividade;
 using POCA.Banco.Model;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+
 
 namespace POCA.Teste.API
 {
@@ -31,7 +31,7 @@ namespace POCA.Teste.API
             var serviceProvider = services.BuildServiceProvider();
             _context = serviceProvider.GetRequiredService<DbPocaContext>();
 
-            _app = WebApplication.Create(new WebApplicationOptions());
+           var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
             _app.AddEndpointsAtividades();
         }
 
@@ -76,7 +76,7 @@ namespace POCA.Teste.API
         {
             // Arrange
             var client = _app.GetTestClient();
-            var request = new AtividadeCreateRequest("New Atividade");
+            var request = new AtividadeCreateRequest(0,"New Atividade",0);
             var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
             // Act

@@ -9,6 +9,7 @@ using POCA.Web.Requests.Pessoa;
 using RichardSzalay.MockHttp;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using POCA.Web.Response.Login;
 
 namespace POCA.Teste.Web.Pages
 {

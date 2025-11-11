@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using POCA.API.Requests.Atividade;
 using POCA.API.Responses;
+using POCA.Web.Requests.Atividade;
 
 namespace POCA.Web.Services.APIs
 {
