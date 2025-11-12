@@ -1,6 +1,4 @@
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,69 +19,86 @@ namespace POCA.Teste.API
         private DbPocaContext _context;
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            var services = new ServiceCollection();
-            services.AddDbContext<DbPocaContext>(options =>
-                options.UseInMemoryDatabase(databaseName: "TestDatabase"));
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
 
-            var serviceProvider = services.BuildServiceProvider();
-            _context = serviceProvider.GetRequiredService<DbPocaContext>();
+            // ✅ Enable TestServer
+            builder.WebHost.UseTestServer();
 
-           var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
+            // ✅ DI config
+            builder.Services.AddDbContext<DbPocaContext>(opt =>
+                opt.UseInMemoryDatabase("TestDatabase"));
+            builder.Services.AddEndpointsApiExplorer();
+
+            // ✅ Build app
+            _app = builder.Build();
+
+            // ✅ Map endpoints
             _app.AddEndpointsProfessores();
+
+            // ✅ Start HTTP pipeline
+            await _app.StartAsync();
+
+            // ✅ Resolve db
+            _context = _app.Services.GetRequiredService<DbPocaContext>();
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _context.Database.EnsureDeleted();
+            await _context.Database.EnsureDeletedAsync();
             _context.Dispose();
+            await _app.DisposeAsync();
         }
 
         [Test]
         public async Task GetProfessores_ReturnsOk()
         {
-            // Arrange
             var client = _app.GetTestClient();
-
-            // Act
             var response = await client.GetAsync("/professores");
-
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task GetProfessorById_ReturnsOk()
         {
-            // Arrange
-            var professor = new TbProfessore { IdProfessor = 1, NomeProfessor = "Test Professor" };
+            var professor = new TbProfessore
+            {
+                IdProfessor = 1,
+                NomeProfessor = "Test Professor",
+                ContatoProfessor = "123456789",
+                MateriaProfessor = "Math"
+            };
+
             _context.TbProfessores.Add(professor);
             await _context.SaveChangesAsync();
-            var client = _app.GetTestClient();
 
-            // Act
+            var client = _app.GetTestClient();
             var response = await client.GetAsync("/professores/1");
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task CreateProfessor_ReturnsCreated()
         {
-            // Arrange
             var client = _app.GetTestClient();
-            var request = new ProfessorCreateRequest("New Professor", "Test Materia", "123456789");
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            // Act
+            var request = new ProfessorCreateRequest(
+                "New Professor",
+                "Test Materia",
+                "123456789"
+            );
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(request),
+                Encoding.UTF8,
+                "application/json"
+            );
+
             var response = await client.PostAsync("/professores", content);
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         }
     }

@@ -4,6 +4,17 @@ using POCA.Web.Response;
 
 namespace POCA.Web.Services.APIs
 {
+    public interface IProfessoresAPI
+    {
+        Task<ICollection<ProfessorResponse>?> GetProfessoresAsync(CancellationToken cancellationToken = default);
+        Task<ProfessorResponse?> GetProfessorbyidAsync(int idProfessor, CancellationToken cancellationToken = default);
+        Task<ProfessorResponse?> AddProfessorAsync(ProfessorCreateRequest professor, CancellationToken cancellationToken = default);
+        Task UpdateProfessorAsync(ProfessorEditRequest professor, CancellationToken cancellationToken = default);
+        Task DeleteProfessorAsync(int idProfessor, CancellationToken cancellationToken = default);
+        Task<ICollection<MateriaResponse>?> GetMateriasByProfessorAsync(int idProfessor);
+        Task AddMateriaToProfessorAsync(int idProfessor, int idMateria, CancellationToken cancellationToken = default);
+        Task RemoveMateriaFromProfessorAsync(int idProfessor, int idMateria, CancellationToken cancellationToken = default);
+    }
     public class ProfessoresAPI
     {
         private readonly HttpClient _httpClient;

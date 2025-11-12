@@ -1,7 +1,4 @@
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,87 +19,104 @@ namespace POCA.Teste.API
         private DbPocaContext _context;
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            var services = new ServiceCollection();
-            services.AddDbContext<DbPocaContext>(options =>
-                options.UseInMemoryDatabase(databaseName: "TestDatabase"));
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
 
-            var serviceProvider = services.BuildServiceProvider();
-            _context = serviceProvider.GetRequiredService<DbPocaContext>();
+            // ✅ run in memory TestServer mode
+            builder.WebHost.UseTestServer();
 
-           var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
+            // ✅ DI setup
+            builder.Services.AddDbContext<DbPocaContext>(opt =>
+                opt.UseInMemoryDatabase("TestDatabase"));
+            builder.Services.AddEndpointsApiExplorer();
+
+            // ✅ build app
+            _app = builder.Build();
+
+            // ✅ register endpoints
             _app.AddEndpointsPessoas();
+
+            // ✅ start pipeline so routing works
+            await _app.StartAsync();
+
+            // ✅ resolve DB context from app
+            _context = _app.Services.GetRequiredService<DbPocaContext>();
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _context.Database.EnsureDeleted();
+            await _context.Database.EnsureDeletedAsync();
             _context.Dispose();
+            await _app.DisposeAsync();
         }
 
         [Test]
         public async Task GetPessoas_ReturnsOk()
         {
-            // Arrange
             var client = _app.GetTestClient();
-
-            // Act
             var response = await client.GetAsync("/pessoas");
-
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task GetPessoaById_ReturnsOk()
         {
-            // Arrange
-            var pessoa = new TbPessoa { IdPessoa = 1, LoginPessoa = "test", SenhaPessoa = "test" };
+            var pessoa = new TbPessoa
+            {
+                IdPessoa = 1,
+                LoginPessoa = "test",
+                SenhaPessoa = "test",
+            };
+
             _context.TbPessoas.Add(pessoa);
             await _context.SaveChangesAsync();
-            var client = _app.GetTestClient();
 
-            // Act
+            var client = _app.GetTestClient();
             var response = await client.GetAsync("/pessoas/1");
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task CreatePessoa_ReturnsCreated()
         {
-            // Arrange
             var client = _app.GetTestClient();
-            var request = new PessoaCreateRequest("newuser", "password", false, 1, null);
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            // Act
+            var request = new PessoaCreateRequest("newuser", "password", false, 1, null);
+            var content = new StringContent(
+                JsonSerializer.Serialize(request),
+                Encoding.UTF8,
+                "application/json");
+
             var response = await client.PostAsync("/pessoas", content);
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         }
 
         [Test]
         public async Task Login_ReturnsOk()
         {
-            // Arrange
-            var pessoa = new TbPessoa { LoginPessoa = "testuser", SenhaPessoa = "password" };
+            var pessoa = new TbPessoa
+            {
+                LoginPessoa = "testuser",
+                SenhaPessoa = "password"
+            };
+
             _context.TbPessoas.Add(pessoa);
             await _context.SaveChangesAsync();
-            var client = _app.GetTestClient();
-            var request = new PessoaLoginRequest("testuser", "password");
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            // Act
+            var client = _app.GetTestClient();
+
+            var request = new PessoaLoginRequest("testuser", "password");
+            var content = new StringContent(
+                JsonSerializer.Serialize(request),
+                Encoding.UTF8,
+                "application/json");
+
             var response = await client.PostAsync("/pessoas/login", content);
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
     }

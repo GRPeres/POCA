@@ -3,7 +3,20 @@ using System.Security.Claims;
 using System.Text.Json;
 using POCA.Web.Response.Login;
 
-public class UserSessionService
+public interface IUserSessionService
+{
+    UserInfo CurrentUser { get; }
+    string AuthToken { get; }
+    bool IsLoggedIn { get; }
+    event Action OnChange;
+
+    Task InitializeAsync();
+    Task Login(PessoaAuthResponse authResponse);
+    Task Logout();
+    ClaimsPrincipal GetClaimsPrincipal();
+}
+
+public class UserSessionService : IUserSessionService
 {
     private readonly IJSRuntime _jsRuntime;
     private const string TokenStorageKey = "authToken";
@@ -52,6 +65,7 @@ public class UserSessionService
 
         await SaveToStorage(TokenStorageKey, AuthToken);
         await SaveToStorage(UserStorageKey, JsonSerializer.Serialize(CurrentUser));
+
         NotifyStateChanged();
     }
 
@@ -59,8 +73,10 @@ public class UserSessionService
     {
         CurrentUser = null;
         AuthToken = null;
+
         await RemoveFromStorage(TokenStorageKey);
         await RemoveFromStorage(UserStorageKey);
+
         NotifyStateChanged();
     }
 
@@ -100,7 +116,6 @@ public class UserSessionService
         }
         catch
         {
-            // Handle JS interop errors if needed
             return null;
         }
     }

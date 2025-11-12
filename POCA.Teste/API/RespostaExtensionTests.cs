@@ -1,6 +1,4 @@
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,74 +19,85 @@ namespace POCA.Teste.API
         private DbPocaContext _context;
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            var services = new ServiceCollection();
-            services.AddDbContext<DbPocaContext>(options =>
-                options.UseInMemoryDatabase(databaseName: "TestDatabase"));
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
 
-            var serviceProvider = services.BuildServiceProvider();
-            _context = serviceProvider.GetRequiredService<DbPocaContext>();
+            // ✅ Use TestServer
+            builder.WebHost.UseTestServer();
 
-           var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
+            // ✅ Add in-memory DB
+            builder.Services.AddDbContext<DbPocaContext>(options =>
+                options.UseInMemoryDatabase("TestDatabase"));
+
+            builder.Services.AddEndpointsApiExplorer();
+
+            // ✅ Build app
+            _app = builder.Build();
+
+            // ✅ Register endpoints
             _app.AddEndpointsRespostas();
+
+            // ✅ Start app
+            await _app.StartAsync();
+
+            // ✅ Get DB context from DI
+            _context = _app.Services.GetRequiredService<DbPocaContext>();
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _context.Database.EnsureDeleted();
+            await _context.Database.EnsureDeletedAsync();
             _context.Dispose();
+            await _app.DisposeAsync();
         }
 
         [Test]
         public async Task GetRespostas_ReturnsOk()
         {
-            // Arrange
             var client = _app.GetTestClient();
-
-            // Act
             var response = await client.GetAsync("/respostas");
-
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task GetRespostaById_ReturnsOk()
         {
-            // Arrange
-            var resposta = new TbResposta { IdResposta = 1, FinalResposta = "Test Resposta" };
+            var resposta = new TbResposta
+            {
+                IdResposta = 1,
+                FinalResposta = "Test Resposta"
+            };
+
             _context.TbRespostas.Add(resposta);
             await _context.SaveChangesAsync();
-            var client = _app.GetTestClient();
 
-            // Act
+            var client = _app.GetTestClient();
             var response = await client.GetAsync("/respostas/1");
 
-            // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Test]
         public async Task CreateResposta_ReturnsCreated()
         {
-            // Arrange
             var client = _app.GetTestClient();
+
             var request = new RespostaRequest(
                 "New Resposta",
                 1,
                 1,
                 1
             );
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            // Act
+            var content = new StringContent(
+                JsonSerializer.Serialize(request),
+                Encoding.UTF8,
+                "application/json"
+            );
+
             var response = await client.PostAsync("/respostas", content);
-
-            // Assert
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         }
     }

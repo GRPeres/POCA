@@ -3,6 +3,17 @@ using POCA.Web.Requests.Aluno;
 
 namespace POCA.Web.Services.APIs
 {
+    public interface IAlunosAPI
+    {
+        Task<ICollection<AlunoResponse>?> GetAlunosAsync();
+        Task<AlunoResponse?> GetAlunosbyIDAsync(int idAluno);
+        Task<AlunoResponse?> AddAlunosAsync(AlunoCreateRequest aluno);
+        Task<bool> UpdateAlunosAsync(AlunoEditRequest aluno);
+        Task<bool> DeleteAlunosAsync(int idAluno);
+        Task<ICollection<MateriaResponse>?> GetMateriasByAlunoAsync(int idAluno);
+        Task<bool> AddMateriaToAlunoAsync(int idAluno, int idMateria);
+        Task<bool> RemoveMateriaFromAlunoAsync(int idAluno, int idMateria);
+    }
     public class AlunosAPI
     {
         private readonly HttpClient _httpClient;

@@ -5,6 +5,15 @@ using System.Net.Http.Json;
 
 namespace POCA.Web.Services
 {
+    public interface IPessoasAPI
+    {
+        Task<List<PessoaResponse>?> GetPessoasAsync();
+        Task<PessoaResponse?> GetPessoaAsync(int id);
+        Task<PessoaResponse?> CreatePessoaAsync(PessoaCreateRequest request);
+        Task<bool> UpdatePessoaAsync(PessoaEditRequest request);
+        Task<bool> DeletePessoaAsync(int id);
+        Task<PessoaAuthResponse?> LoginAsync(PessoaLoginRequest request);
+    }
     public class PessoasAPI
     {
         private readonly HttpClient _httpClient;

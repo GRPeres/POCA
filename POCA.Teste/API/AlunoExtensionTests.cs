@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -23,18 +23,23 @@ namespace POCA.Teste.API
         [SetUp]
         public void Setup()
         {
-            var services = new ServiceCollection();
-            services.AddDbContext<DbPocaContext>(options =>
-                options.UseInMemoryDatabase(databaseName: "TestDatabase"));
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-
-            var serviceProvider = services.BuildServiceProvider();
-            _context = serviceProvider.GetRequiredService<DbPocaContext>();
-
             var builder = WebApplication.CreateBuilder(new WebApplicationOptions());
+
+            builder.WebHost.UseTestServer(); // ✅ Use TestServer
+
+            builder.Services.AddDbContext<DbPocaContext>(options =>
+                options.UseInMemoryDatabase("TestDatabase"));
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
             _app = builder.Build();
+
             _app.AddEndpointsAlunos();
+
+            _app.RunAsync(); // ✅ Required so routing works
+
+            // Resolve DB
+            _context = _app.Services.GetRequiredService<DbPocaContext>();
         }
 
         [TearDown]
@@ -63,7 +68,15 @@ namespace POCA.Teste.API
         public async Task GetAlunoById_ReturnsOk()
         {
             // Arrange
-            var aluno = new TbAluno { IdAluno = 1, NomeAluno = "Test Aluno" };
+            var aluno = new TbAluno
+            {
+                IdAluno = 1,
+                NomeAluno = "Test Aluno",
+                NascimentoAluno = DateTime.Now,
+                ContatoAluno = "40028922",
+                ProgressoAluno = 1,
+                EmailAluno = "test@test.com"
+            };
             _context.TbAlunos.Add(aluno);
             await _context.SaveChangesAsync();
             var client = _app.GetTestClient();
