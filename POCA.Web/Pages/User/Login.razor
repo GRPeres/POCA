@@ -2,6 +2,7 @@
 @using MudBlazor
 @using POCA.Web
 @using POCA.Web.Requests.Pessoa
+@using POCA.Web.Response.Login
 @using POCA.Web.Services
 @using System.Security.Cryptography
 @using System.Text
@@ -10,11 +11,14 @@
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject IConfiguration Configuration
+@inject IJSRuntime JS
+@inject AuthAPI AuthAPI
 
 <MudPaper Class="pa-6 mx-auto mt-12" Elevation="10" MaxWidth="400px">
+
     @if (!UserSession.IsLoggedIn)
     {
-		<MudText Typo="Typo.h5" Class="mb-4 text-center<Login />">Login</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
 
         @if (LoginFalha)
         {
@@ -23,6 +27,7 @@
             </MudAlert>
         }
 
+        <!-- USERNAME -->
         <MudTextField @bind-Value="Credenciais.Login"
                       Label="Usuário"
                       Variant="Variant.Outlined"
@@ -32,18 +37,20 @@
                       AdornmentIcon="@Icons.Material.Filled.Person"
                       Class="mb-3" />
 
+        <!-- PASSWORD -->
         <MudTextField @bind-Value="Credenciais.Senha"
                       Label="Senha"
                       Variant="Variant.Outlined"
                       InputType="(_showPassword ? InputType.Text : InputType.Password)"
                       Adornment="Adornment.End"
-                      AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                      AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       OnAdornmentClick="TogglePasswordVisibility"
                       Required
                       RequiredError="Por favor insira sua senha"
                       Class="mb-4" />
 
         <MudStack Direction="Column" Spacing="2">
+            <!-- LOCAL LOGIN -->
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        OnClick="EfetuarLogin"
@@ -52,17 +59,32 @@
                 Entrar
             </MudButton>
 
+            <!-- REGISTER -->
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
                        Href="/cadastro"
                        FullWidth="true">
                 Criar conta
             </MudButton>
+
+            <MudDivider Class="my-3" />
+
+            <!-- GOOGLE LOGIN -->
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Error"
+                       StartIcon="@Icons.Material.Filled.Login"
+                       OnClick="EfetuarLoginGoogle"
+                       FullWidth="true">
+                Entrar com Google
+            </MudButton>
         </MudStack>
     }
     else
     {
-        <MudText Typo="Typo.h6" Class="text-center mb-4">Você já está logado</MudText>
+        <MudText Typo="Typo.h6" Class="text-center mb-4">
+            Você já está logado
+        </MudText>
+
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    Href="/"
@@ -76,25 +98,22 @@
 @code {
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
-    private bool IsLoading = false;
     private bool _showPassword = false;
 
-    private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.Login) &&
-                              !string.IsNullOrWhiteSpace(Credenciais.Senha);
+    private bool IsFormValid =>
+        !string.IsNullOrWhiteSpace(Credenciais.Login) &&
+        !string.IsNullOrWhiteSpace(Credenciais.Senha);
 
     protected override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
+    }
 
-    }
-    private void HandleUserSessionChanged()
-    {
+    private void HandleUserSessionChanged() =>
         InvokeAsync(StateHasChanged);
-    }
-    public void Dispose()
-    {
+
+    public void Dispose() =>
         UserSession.OnChange -= HandleUserSessionChanged;
-    }
 
     private class LoginModel
     {
@@ -104,54 +123,81 @@
 
     private string HashPassword(string password)
     {
-        // Get pepper from configuration
         var pepper = Configuration["Security:Pepper"] ?? string.Empty;
 
         using var sha256 = SHA256.Create();
         byte[] hashedBytes = sha256.ComputeHash(
             Encoding.UTF8.GetBytes(password + pepper));
+
         return Convert.ToBase64String(hashedBytes);
     }
 
+    // LOCAL LOGIN
     private async Task EfetuarLogin()
     {
-        IsLoading = true;
         LoginFalha = false;
 
         try
         {
-            // Hash the password before sending
             var hashedPassword = HashPassword(Credenciais.Senha);
 
-            var authResponse = await PessoasAPI.LoginAsync(new PessoaLoginRequest(
-                Login: Credenciais.Login,
-                Senha: hashedPassword
-            ));
+            var authResponse = await PessoasAPI.LoginAsync(
+                new PessoaLoginRequest(Credenciais.Login, hashedPassword)
+            );
 
             if (authResponse != null)
             {
                 await UserSession.Login(authResponse);
                 Snackbar.Add("Login bem-sucedido!", Severity.Success);
                 NavigationManager.NavigateTo("/");
+                return;
             }
-            else
-            {
-                LoginFalha = true;
-            }
+
+            LoginFalha = true;
         }
         catch (Exception ex)
         {
+            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
             LoginFalha = true;
-            Snackbar.Add($"Erro durante o login: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 
-    private void TogglePasswordVisibility()
-    {
+    private void TogglePasswordVisibility() =>
         _showPassword = !_showPassword;
+
+
+    // --------------------------------------------------------------
+    //  GOOGLE LOGIN (FINAL - matches API callback + popup method)
+    // --------------------------------------------------------------
+
+    private async Task EfetuarLoginGoogle()
+    {
+        try
+        {
+            // 1. Ask your API for the correct Google redirect URL
+            var result = await AuthAPI.GetGoogleLoginUrl();
+
+            if (result?.Url == null)
+            {
+                Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
+                return;
+            }
+
+            // 2. Open popup window
+            await JS.InvokeVoidAsync("openGooglePopup", result.Url);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro Google: {ex.Message}", Severity.Error);
+        }
+    }
+
+    // Called from JS when popup OAuth finishes
+    [JSInvokable]
+    public async Task ReceiveGoogleAuth(PessoaAuthResponse auth)
+    {
+        await UserSession.Login(auth);
+        Snackbar.Add("Login com Google bem-sucedido!", Severity.Success);
+        NavigationManager.NavigateTo("/");
     }
 }

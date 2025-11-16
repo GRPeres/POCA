@@ -21,6 +21,8 @@ builder.Services.AddScoped<AtividadesAPI>();
 builder.Services.AddScoped<RespostaAPI>();
 builder.Services.AddScoped<RespostasAPI>();
 
+builder.Services.AddScoped<AuthAPI>();
+
 builder.Services.AddScoped<UserTrackingService>();
 
 builder.Services.AddSingleton<AtividadeState>();
