@@ -4,7 +4,6 @@
 @using POCA.Web.Requests.Pessoa
 @using POCA.Web.Response.Login
 @using POCA.Web.Services
-@using System.Security.Cryptography
 @using System.Text
 @inject PessoasAPI PessoasAPI
 @inject UserSessionService UserSession
@@ -27,17 +26,14 @@
             </MudAlert>
         }
 
-        <!-- USERNAME -->
         <MudTextField @bind-Value="Credenciais.Login"
                       Label="Usuário"
                       Variant="Variant.Outlined"
                       Required
-                      RequiredError="Por favor insira seu usuário"
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Person"
                       Class="mb-3" />
 
-        <!-- PASSWORD -->
         <MudTextField @bind-Value="Credenciais.Senha"
                       Label="Senha"
                       Variant="Variant.Outlined"
@@ -46,11 +42,9 @@
                       AdornmentIcon="@(_showPassword? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       OnAdornmentClick="TogglePasswordVisibility"
                       Required
-                      RequiredError="Por favor insira sua senha"
                       Class="mb-4" />
 
         <MudStack Direction="Column" Spacing="2">
-            <!-- LOCAL LOGIN -->
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        OnClick="EfetuarLogin"
@@ -59,7 +53,6 @@
                 Entrar
             </MudButton>
 
-            <!-- REGISTER -->
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
                        Href="/cadastro"
@@ -69,7 +62,6 @@
 
             <MudDivider Class="my-3" />
 
-            <!-- GOOGLE LOGIN -->
             <MudButton Variant="Variant.Filled"
                        Color="Color.Error"
                        StartIcon="@Icons.Material.Filled.Login"
@@ -94,7 +86,6 @@
     }
 </MudPaper>
 
-
 @code {
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
@@ -104,35 +95,28 @@
         !string.IsNullOrWhiteSpace(Credenciais.Login) &&
         !string.IsNullOrWhiteSpace(Credenciais.Senha);
 
-    protected override void OnInitialized()
-    {
-        UserSession.OnChange += HandleUserSessionChanged;
-    }
-
-    private void HandleUserSessionChanged() =>
-        InvokeAsync(StateHasChanged);
-
-    public void Dispose() =>
-        UserSession.OnChange -= HandleUserSessionChanged;
-
     private class LoginModel
     {
         public string Login { get; set; } = string.Empty;
         public string Senha { get; set; } = string.Empty;
     }
 
-    private string HashPassword(string password)
+    protected override void OnInitialized()
     {
-        var pepper = Configuration["Security:Pepper"] ?? string.Empty;
+        UserSession.OnChange += HandleUserSessionChanged;
 
-        using var sha256 = SHA256.Create();
-        byte[] hashedBytes = sha256.ComputeHash(
-            Encoding.UTF8.GetBytes(password + pepper));
-
-        return Convert.ToBase64String(hashedBytes);
+        JS.InvokeVoidAsync("registerGoogleMessageHandler",
+            DotNetObjectReference.Create(this));
     }
 
-    // LOCAL LOGIN
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
+    }
+
+    private void HandleUserSessionChanged() =>
+        InvokeAsync(StateHasChanged);
+
     private async Task EfetuarLogin()
     {
         LoginFalha = false;
@@ -162,29 +146,34 @@
         }
     }
 
+    private string HashPassword(string password)
+    {
+        var pepper = Configuration["Security:Pepper"] ?? "";
+
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password + pepper));
+
+        return Convert.ToBase64String(bytes);
+    }
+
     private void TogglePasswordVisibility() =>
         _showPassword = !_showPassword;
 
-
-    // --------------------------------------------------------------
-    //  GOOGLE LOGIN (FINAL - matches API callback + popup method)
-    // --------------------------------------------------------------
-
+    // ------------------------------
+    // GOOGLE LOGIN (final form)
+    // ------------------------------
     private async Task EfetuarLoginGoogle()
     {
         try
         {
-            // 1. Ask your API for the correct Google redirect URL
-            var result = await AuthAPI.GetGoogleLoginUrl();
-
-            if (result?.Url == null)
+            var urlObj = await AuthAPI.GetGoogleLoginUrl();
+            if (urlObj?.Url is null)
             {
                 Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
                 return;
             }
 
-            // 2. Open popup window
-            await JS.InvokeVoidAsync("openGooglePopup", result.Url);
+            await JS.InvokeVoidAsync("openGooglePopup", urlObj.Url);
         }
         catch (Exception ex)
         {
@@ -192,7 +181,6 @@
         }
     }
 
-    // Called from JS when popup OAuth finishes
     [JSInvokable]
     public async Task ReceiveGoogleAuth(PessoaAuthResponse auth)
     {

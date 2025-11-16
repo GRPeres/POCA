@@ -19,10 +19,22 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<AtividadeService>();
 builder.Services.AddHttpClient<GENAIService>();
 
-// Google ID Token validation (NO redirects)
-builder.Services.AddSingleton(new GoogleAuthConfig
+// Google
+builder.Services.AddAuthentication(options =>
 {
-    ClientId = builder.Configuration["GoogleAuth:ClientId"]
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Google";
+})
+.AddCookie("Cookies")
+.AddGoogle("Google", options =>
+{
+    options.ClientId = builder.Configuration["Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Google:ClientSecret"];
+
+    // Google redirect URI must match console.developers.google.com
+    options.CallbackPath = "/auth/google/callback";
+
+    options.SaveTokens = true;
 });
 
 // JSON options

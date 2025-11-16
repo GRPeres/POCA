@@ -18,18 +18,21 @@ public static class GoogleAuthExtension
 
         // Step 1 — Frontend calls: GET /auth/google/login-url
         // API returns the Google login URL
-        group.MapGet("/login-url", () =>
+        group.MapGet("/login-url", (HttpContext ctx) =>
+        {
+            var googleAuthUrl = $"{ctx.Request.Scheme}://{ctx.Request.Host}/auth/google/login";
+
+            return Results.Ok(new { url = googleAuthUrl });
+        });
+
+        group.MapGet("/login", () =>
         {
             var props = new AuthenticationProperties
             {
                 RedirectUri = "/auth/google/callback"
             };
 
-            var challenge = Results.Challenge(props, ["Google"]) as ChallengeHttpResult;
-
-            // Extract Google URL from the challenge
-            var redirectUrl = challenge?.Properties?.RedirectUri;
-            return Results.Ok(new { url = redirectUrl });
+            return Results.Challenge(props, ["Google"]);
         });
 
         // Step 2 — Google redirects to callback

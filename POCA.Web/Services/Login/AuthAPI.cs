@@ -2,17 +2,20 @@
 
 public class AuthAPI
 {
-    private readonly HttpClient _http;
+    private readonly HttpClient _client;
+
     public AuthAPI(IHttpClientFactory factory)
     {
-        _http = factory.CreateClient("API");
+        _client = factory.CreateClient("API");
     }
 
-    public async Task<GoogleLoginUrlResponse?> GetGoogleLoginUrl()
-        => await _http.GetFromJsonAsync<GoogleLoginUrlResponse>("auth/google/login-url");
+    public async Task<GoogleUrlResponse?> GetGoogleLoginUrl()
+    {
+        return await _client.GetFromJsonAsync<GoogleUrlResponse>("auth/google/login-url");
+    }
 }
 
-public class GoogleLoginUrlResponse
+public class GoogleUrlResponse
 {
-    public string Url { get; set; } = "";
+    public string? Url { get; set; }
 }
