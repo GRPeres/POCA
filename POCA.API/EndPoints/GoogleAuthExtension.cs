@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using POCA.API.Response;
 using POCA.Banco.Model;
 using System.Security.Claims;
@@ -16,85 +16,126 @@ public static class GoogleAuthExtension
         var group = app.MapGroup("/auth/google")
                        .WithTags("GoogleAuth");
 
-        // Step 1 — Frontend calls: GET /auth/google/login-url
-        // API returns the Google login URL
-        group.MapGet("/login-url", (HttpContext ctx) =>
+        // Step 1 — Backend gives frontend the login URL
+        group.MapGet("/login-url", (
+            IOptions<ExternalAuthSettings> opts
+        ) =>
         {
-            var googleAuthUrl = $"{ctx.Request.Scheme}://{ctx.Request.Host}/auth/google/login";
+            var backend = opts.Value.BackendBaseUrl.TrimEnd('/');
+            var loginUrl = $"{backend}/auth/google/login";
 
-            return Results.Ok(new { url = googleAuthUrl });
+            return Results.Ok(new { url = loginUrl });
         });
 
-        group.MapGet("/login", () =>
+        // Step 2 — User starts Google login
+        group.MapMethods("/login", new[] { "GET" }, (
+             IOptions<ExternalAuthSettings> opts
+         ) =>
         {
+            var backend = opts.Value.BackendBaseUrl.TrimEnd('/');
+
             var props = new AuthenticationProperties
             {
-                RedirectUri = "/auth/google/callback"
+                RedirectUri = $"{backend}/auth/google/callback"
             };
 
             return Results.Challenge(props, ["Google"]);
         });
 
-        // Step 2 — Google redirects to callback
+
+        // Step 3 — Google returns here
         group.MapGet("/callback", async (
             HttpContext http,
-            [FromServices] DbPocaContext db) =>
+            DbPocaContext db,
+            IOptions<ExternalAuthSettings> opts
+        ) =>
         {
-            var result = await http.AuthenticateAsync("Google");
-            if (!result.Succeeded)
-                return Results.BadRequest("Google authentication failed");
-
-            var email = result.Principal.FindFirstValue(ClaimTypes.Email);
-            if (email is null)
-                return Results.BadRequest("Google did not return email.");
-
-            // Look up or create user
-            var pessoa = await db.TbPessoas
-                .Include(p => p.TbAlunosIdAlunos)
-                .Include(p => p.TbProfessoresIdProfessors)
-                .FirstOrDefaultAsync(p => p.LoginPessoa == email);
-
-            if (pessoa == null)
+            try
             {
-                pessoa = new TbPessoa
+                var result = await http.AuthenticateAsync("Google");
+
+                if (!result.Succeeded)
                 {
-                    LoginPessoa = email,
-                    SenhaPessoa = "", // Google login → no password
-                    BoolProfessorPessoa = 0
-                };
+                    var failHtml = @"
+            <html>
+            <body>
+            <h3>Google login failed or already processed.</h3>
+            <script>window.close();</script>
+            </body>
+            </html>";
+                    return Results.Content(failHtml, "text/html");
+                }
 
-                db.TbPessoas.Add(pessoa);
-                await db.SaveChangesAsync();
+                var email = result.Principal.FindFirstValue(ClaimTypes.Email);
+                if (email is null)
+                {
+                    var failHtml = @"
+            <html>
+            <body>
+            <h3>Google did not return an email.</h3>
+            <script>window.close();</script>
+            </body>
+            </html>";
+                    return Results.Content(failHtml, "text/html");
+                }
+
+                // Lookup or create user
+                var pessoa = await db.TbPessoas
+                    .Include(p => p.TbAlunosIdAlunos)
+                    .Include(p => p.TbProfessoresIdProfessors)
+                    .FirstOrDefaultAsync(p => p.LoginPessoa == email);
+
+                if (pessoa == null)
+                {
+                    pessoa = new TbPessoa
+                    {
+                        LoginPessoa = email,
+                        SenhaPessoa = "", // Google login → no password
+                        BoolProfessorPessoa = 0
+                    };
+
+                    db.TbPessoas.Add(pessoa);
+                    await db.SaveChangesAsync();
+                }
+
+                var authResponse = new PessoaAuthResponse(
+                    pessoa.IdPessoa,
+                    pessoa.LoginPessoa,
+                    pessoa.BoolProfessorPessoa == 1,
+                    pessoa.TbAlunosIdAlunos.FirstOrDefault()?.IdAluno,
+                    pessoa.TbProfessoresIdProfessors.FirstOrDefault()?.IdProfessor,
+                    $"google-{Guid.NewGuid()}"
+                );
+
+                var json = JsonSerializer.Serialize(authResponse);
+                var frontendUrl = opts.Value.FrontendBaseUrl + "/login";
+                var redirectUrl = $"{frontendUrl}?googleToken={Uri.EscapeDataString(json)}";
+
+                var html = $@"
+        <html>
+        <body>
+        <script>
+            if (window.opener) {{
+                 window.opener.location.href = '{redirectUrl}';
+            }}
+            window.close();
+        </script>
+        </body>
+        </html>";
+
+                return Results.Content(html, "text/html");
             }
-
-            var authResponse = new PessoaAuthResponse(
-                pessoa.IdPessoa,
-                pessoa.LoginPessoa,
-                pessoa.BoolProfessorPessoa == 1,
-                pessoa.TbAlunosIdAlunos.FirstOrDefault()?.IdAluno,
-                pessoa.TbProfessoresIdProfessors.FirstOrDefault()?.IdProfessor,
-                $"google-{Guid.NewGuid()}"
-            );
-
-            // Instead of redirecting to Blazor,
-            // we output JS that posts the auth data to the client
-            var json = JsonSerializer.Serialize(authResponse);
-
-            var html = $@"
-                        <html>
-                        <body>
-                        <script>
-                            // Send auth data to opener window (Blazor)
-                            window.opener.postMessage(
-                                {json},
-                                '*'
-                            );
-                            window.close();
-                        </script>
-                        </body>
-                        </html>";
-
-            return Results.Content(html, "text/html");
+            catch
+            {
+                var fallbackHtml = @"
+        <html>
+        <body>
+        <h3>Google login could not be processed.</h3>
+        <script>window.close();</script>
+        </body>
+        </html>";
+                return Results.Content(fallbackHtml, "text/html");
+            }
         });
     }
 }

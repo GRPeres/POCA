@@ -5,6 +5,7 @@
 @using POCA.Web.Response.Login
 @using POCA.Web.Services
 @using System.Text
+@using System.Web
 @inject PessoasAPI PessoasAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
@@ -62,11 +63,8 @@
 
             <MudDivider Class="my-3" />
 
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Error"
-                       StartIcon="@Icons.Material.Filled.Login"
-                       OnClick="EfetuarLoginGoogle"
-                       FullWidth="true">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="height:18px; margin-right:8px;" />
                 Entrar com Google
             </MudButton>
         </MudStack>
@@ -90,6 +88,7 @@
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
     private bool _showPassword = false;
+    private DotNetObjectReference<Login>? _dotNetRef;
 
     private bool IsFormValid =>
         !string.IsNullOrWhiteSpace(Credenciais.Login) &&
@@ -104,14 +103,30 @@
     protected override void OnInitialized()
     {
         UserSession.OnChange += HandleUserSessionChanged;
+    }
 
-        JS.InvokeVoidAsync("registerGoogleMessageHandler",
-            DotNetObjectReference.Create(this));
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            var tokenJson = HttpUtility.ParseQueryString(uri.Query).Get("googleToken");
+
+            if (!string.IsNullOrEmpty(tokenJson))
+            {
+                var auth = JsonSerializer.Deserialize<PessoaAuthResponse>(tokenJson);
+                if (auth != null)
+                {
+                    await ReceiveGoogleAuth(auth);
+                }
+            }
+        }
     }
 
     public void Dispose()
     {
         UserSession.OnChange -= HandleUserSessionChanged;
+        _dotNetRef?.Dispose();
     }
 
     private void HandleUserSessionChanged() =>
@@ -185,7 +200,14 @@
     public async Task ReceiveGoogleAuth(PessoaAuthResponse auth)
     {
         await UserSession.Login(auth);
-        Snackbar.Add("Login com Google bem-sucedido!", Severity.Success);
-        NavigationManager.NavigateTo("/");
+
+        await InvokeAsync(() =>
+        {
+            StateHasChanged(); // forces Blazor to re-render
+            Snackbar.Add("Login com Google bem-sucedido!", Severity.Success);
+            NavigationManager.NavigateTo("/"); // optional redirect
+        });
+
+        await UserSession.InitializeAsync();
     }
 }

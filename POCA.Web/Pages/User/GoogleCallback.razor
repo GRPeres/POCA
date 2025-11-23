@@ -1,0 +1,24 @@
+﻿@page "/google-callback"
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<h3>Processing Google login...</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var code = query["code"];
+        var state = query["state"];
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            await JS.InvokeVoidAsync("sendGoogleCodeToApi", code, state);
+        }
+        else
+        {
+            Navigation.NavigateTo("/login");
+        }
+    }
+}
