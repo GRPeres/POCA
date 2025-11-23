@@ -177,10 +177,15 @@
                                    Color="Color.Primary"
                                    OnClick="@ToggleTheme"
                                    Class="ml-2" />
+                
+                    <MudText Typo="Typo.h6" Class="ml-1 font-weight-bold"
+                              Style="font-family: 'Helvetica', sans-serif;"
+                              Color="@(_isDarkMode ? Color.Default : Color.Dark)">
+                              @UserSession.CurrentUser.Login
+                    </MudText>
 
                     <MudMenu Direction="Direction.Left">
                         <ActivatorContent>
-                            <MudText>@UserSession.CurrentUser.Login</MudText>
                             <MudAvatar Color="Color.Primary" Class="ml-2">
                                 <MudIcon Icon="@Icons.Material.Filled.Person" />
                             </MudAvatar>

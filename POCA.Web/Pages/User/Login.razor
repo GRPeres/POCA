@@ -44,19 +44,26 @@
                       Class="mb-4" />
 
         <MudStack Direction="Column" Spacing="2">
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="EfetuarLogin"
-                       Disabled="@(!IsFormValid)"
-                       FullWidth="true">
-                Entrar
-            </MudButton>
-
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
                        Href="/cadastro"
                        FullWidth="true">
                 Criar conta
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="EfetuarLogin"
+                       Disabled="@(!IsFormValid || IsLoading)"
+                       FullWidth="true">
+                @if (IsLoading)
+                {
+                    <MudProgressCircular Indeterminate = "true" Color = "Color.Primary" Size="Size.Small"/>
+                }
+                else
+                {
+                    <MudText>Entrar</MudText>
+                }
             </MudButton>
         </MudStack>
     }

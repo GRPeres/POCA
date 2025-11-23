@@ -67,9 +67,9 @@
     <MudMainContent Class="pt-2 pb-0 px-6 gap-10">
         @if (isLoading)
         {
-            <div class="d-flex justify-center mt-10">
+            <MudGrid class="d-flex justify-center mt-10">
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
-            </div>
+            </MudGrid>
         }
         else if (UserSession.IsLoggedIn)
         {
