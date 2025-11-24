@@ -56,9 +56,16 @@
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        OnClick="EfetuarLogin"
-                       Disabled="@(!IsFormValid)"
+                       Disabled="@(!IsFormValid || IsLoading)"
                        FullWidth="true">
+                @if (IsLoading)
+                {
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
+                }
+                else
+                {
                     <MudText>Entrar</MudText>
+                }
             </MudButton>
 
             <MudDivider Class="my-3" />
@@ -87,6 +94,7 @@
 @code {
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
+    private bool IsLoading = false;
     private bool _showPassword = false;
     private DotNetObjectReference<Login>? _dotNetRef;
 
@@ -135,6 +143,7 @@
     private async Task EfetuarLogin()
     {
         LoginFalha = false;
+        IsLoading = true;
 
         try
         {
@@ -158,6 +167,10 @@
         {
             Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
             LoginFalha = true;
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
