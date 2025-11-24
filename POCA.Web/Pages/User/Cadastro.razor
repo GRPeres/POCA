@@ -104,17 +104,17 @@
                       Class="mb-3" />
 
         <MudStack class="justify-space-between mx-2" Row="true">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Href="/login">
+                Já tenho uma conta
+            </MudButton>
+
             <MudButton Variant="Variant.Filled"
                         Color="Color.Primary"
                         OnClick="EfetuarCadastro"
                         Disabled="@(!IsFormValid)" >
                 Criar Conta
-            </MudButton>
-
-            <MudButton Variant="Variant.Outlined"
-                        Color="Color.Secondary"
-                        Href="/login" >
-                Já tenho uma conta
             </MudButton>
         </MudStack>
 
