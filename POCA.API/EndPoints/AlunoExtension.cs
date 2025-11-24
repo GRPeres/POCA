@@ -270,6 +270,55 @@ namespace POCA.API.EndPoints
         });
     });
 
+            group.MapGet("/{idAluno}/materias/{idMateria}/reforco",
+            async ([FromServices] DbPocaContext context, int idAluno, int idMateria) =>
+            {
+                // 1️⃣ Busca o aluno com as relações necessárias
+                var aluno = await context.TbAlunos
+                    .Include(a => a.TbMateriasIdMateria)
+                        .ThenInclude(m => m.TbAtividadesIdAtividades)
+                            .ThenInclude(a => a.TbRespostasIdRespostas)
+                    .FirstOrDefaultAsync(a => a.IdAluno == idAluno);
+
+                if (aluno is null)
+                    return Results.NotFound("Aluno não encontrado");
+
+                // 2️⃣ Localiza a matéria
+                var materia = aluno.TbMateriasIdMateria
+                    .FirstOrDefault(m => m.IdMateria == idMateria);
+
+                if (materia is null)
+                    return Results.NotFound("Matéria não encontrada ou não associada ao aluno.");
+
+                var questoesErradas = new List<int>();
+
+                // 3️⃣ Percorre atividades da matéria
+                foreach (var atividade in materia.TbAtividadesIdAtividades)
+                {
+                    foreach (var resposta in atividade.TbRespostasIdRespostas.Where(r => r.IdAluno == idAluno))
+                    {
+                        var questao = await context.TbQuestoes
+                            .FirstOrDefaultAsync(q => q.IdQuestao == resposta.IdQuestao);
+
+                        if (questao != null &&
+                            resposta.FinalResposta != questao.RespostacertaQuestao)
+                        {
+                            questoesErradas.Add(questao.IdQuestao);
+                        }
+                    }
+                }
+
+                // 4️⃣ Seleciona até 5
+                var ids = questoesErradas
+                    .Distinct()
+                    .Take(5)
+                    .ToList();
+
+                return Results.Ok(ids);
+            })
+        .WithName("GerarReforcoAlunoMateria")
+        .Produces<List<int>>(StatusCodes.Status200OK);
+
         }
     }
 }

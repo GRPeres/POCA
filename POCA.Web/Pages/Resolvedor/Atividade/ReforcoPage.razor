@@ -1,0 +1,109 @@
+﻿@page "/reforcoatividade/{idAluno:int}/{idMateria:int}"
+@inject POCA.Web.Services.APIs.ReforcoAPI ReforcoAPI
+@inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
+@inject NavigationManager Navigation
+
+<PageTitle>Atividade de Reforço</PageTitle>
+
+<MudPaper Class="p-4">
+
+    <MudText Typo="Typo.h4" Class="mb-4">Atividade de Reforço</MudText>
+
+    @if (carregando)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else if (questoesGeradas is null || !questoesGeradas.Any())
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Filled">
+            Nenhuma questão errada encontrada para gerar reforço.
+        </MudAlert>
+    }
+    else
+    {
+        <EditForm Model="respostas" OnValidSubmit="EnviarReforco">
+            <MudStack Spacing="3">
+
+                @foreach (var q in questoesGeradas)
+                {
+                    <MudPaper Class="p-4">
+
+                        <MudText Typo="Typo.h6">@q.EnunciadoQuestao</MudText>
+
+                        <MudRadioGroup T="string" @bind-SelectedOption="respostas[q.IdQuestao]">
+
+                            @foreach (var alt in alternativas[q.IdQuestao])
+                            {
+                                <MudRadio T="string" Option="@alt" Color="Color.Primary" />
+                            }
+
+                        </MudRadioGroup>
+
+                    </MudPaper>
+                }
+
+                <MudButton Color="Color.Success" Variant="Variant.Filled" Type="Submit">
+                    Enviar Respostas
+                </MudButton>
+
+            </MudStack>
+        </EditForm>
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public int idAluno { get; set; }
+    [Parameter] public int idMateria { get; set; }
+
+    private List<QuestaoResponse>? questoesGeradas;
+    private Dictionary<int, string> respostas = new();
+    private Dictionary<int, List<string>> alternativas = new();
+    private bool carregando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        carregando = true;
+
+        // 1️⃣ Buscar IDs das questões que o aluno errou
+        var ids = await ReforcoAPI.GetReforcoAsync(idAluno, idMateria);
+
+        if (ids.Any())
+        {
+            // 2️⃣ Gerar novas questões com IA
+            questoesGeradas = await QuestoesAPI.GenerateBasedOnExistingAsync(ids);
+
+            // 3️⃣ Preparar estrutura de respostas e alternativas
+            foreach (var q in questoesGeradas)
+            {
+                respostas[q.IdQuestao] = "";
+
+                var listaAlternativas = new List<string>
+                {
+                    q.RespostaCertaQuestao,
+                    q.RespostaErrada1Questao,
+                    q.RespostaErrada2Questao,
+                    q.RespostaErrada3Questao
+                };
+
+                // 🔀 Embaralhar alternativas
+                listaAlternativas = listaAlternativas
+                    .OrderBy(a => Guid.NewGuid())
+                    .ToList();
+
+                alternativas[q.IdQuestao] = listaAlternativas;
+            }
+        }
+        else
+        {
+            questoesGeradas = new();
+        }
+
+        carregando = false;
+    }
+
+    private void EnviarReforco()
+    {
+        // (salvamento das respostas é opcional e ainda não solicitado)
+        Navigation.NavigateTo($"/materia-sala/{idMateria}");
+    }
+}
