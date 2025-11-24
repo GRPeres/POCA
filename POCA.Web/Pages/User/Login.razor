@@ -56,21 +56,14 @@
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        OnClick="EfetuarLogin"
-                       Disabled="@(!IsFormValid || IsLoading)"
+                       Disabled="@(!IsFormValid)"
                        FullWidth="true">
-                @if (IsLoading)
-                {
-                    <MudProgressCircular Indeterminate = "true" Color = "Color.Primary" Size="Size.Small"/>
-                }
-                else
-                {
                     <MudText>Entrar</MudText>
-                }
             </MudButton>
 
             <MudDivider Class="my-3" />
 
-            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" OnClick="EfetuarLoginGoogle">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="height:18px; margin-right:8px;" />
                 Entrar com Google
             </MudButton>
