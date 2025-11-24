@@ -108,7 +108,7 @@ public static class GoogleAuthExtension
                 );
 
                 var json = JsonSerializer.Serialize(authResponse);
-                var frontendUrl = opts.Value.FrontendBaseUrl + "/login";
+                var frontendUrl = opts.Value.FrontendBaseUrl.TrimEnd('/') + "/login";
                 var redirectUrl = $"{frontendUrl}?googleToken={Uri.EscapeDataString(json)}";
 
                 var html = $@"
