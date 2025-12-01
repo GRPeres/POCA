@@ -74,7 +74,7 @@
 
                     <MudText Typo="Typo.body1" Class="mb-4">@questoes[posicao].EnunciadoQuestao</MudText>
 
-                    <MudGrid xs="12" md="1">
+                    <MudStack xs="12" md="1" Row="true">
                         <MudRadioGroup T="int"
                                        @bind-Value="currentSelection"
                                        SelectedOption="-1"
@@ -89,7 +89,7 @@
                                 </MudItem>
                             }
                         </MudRadioGroup>
-                    </MudGrid>
+                    </MudStack>
 
                     <MudStack class="justify-space-between mx-8" Row="true">
                         <MudButton Variant="Variant.Outlined"
