@@ -232,9 +232,13 @@
 
     private void ToggleTheme() => _isDarkMode = !_isDarkMode;
 
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
     private async Task Logout()
     {
-        UserSession.Logout();
+        NavigationManager.NavigateTo("/login", true);
+        await UserSession.Logout();
     }
 
     protected override async Task OnInitializedAsync()
