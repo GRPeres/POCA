@@ -201,8 +201,14 @@
         }
     }
 
-    private void IrParaReforco() =>
-        NavigationManager.NavigateTo($"/reforco/{idMateria}");
+    private void IrParaReforco()
+    {
+        var idAluno = UserSession.CurrentUser?.IdAluno;
+        if (idAluno is null)
+            return;
+
+        NavigationManager.NavigateTo($"/reforcoatividade/{idAluno}/{idMateria}");
+    }
 
     private void HandleUserSessionChanged() =>
         InvokeAsync(async () =>
