@@ -135,7 +135,7 @@
         var materia = await MateriasAPI.GetMateriaAsync(id);
         if (materia is null)
         {
-            Snackbar.Add("Matéria não encontrada.", Severity.Error);
+            // Snackbar.Add("Matéria não encontrada.", Severity.Error);
             NavManager.NavigateTo("/materias");
             return;
         }
@@ -201,7 +201,7 @@
             var updatedMateria = await MateriasAPI.UpdateMateriaAsync(materiaUpdateRequest);
             if (updatedMateria == null)
             {
-                Snackbar.Add("Erro ao atualizar matéria.", Severity.Error);
+                // Snackbar.Add("Erro ao atualizar matéria.", Severity.Error);
                 return;
             }
 
@@ -209,7 +209,7 @@
             var currentMateria = await MateriasAPI.GetMateriaAsync(id);
             if (currentMateria == null)
             {
-                Snackbar.Add("Erro ao obter matéria atualizada.", Severity.Error);
+                // Snackbar.Add("Erro ao obter matéria atualizada.", Severity.Error);
                 return;
             }
 
@@ -242,7 +242,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
         }
         finally
         {

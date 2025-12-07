@@ -6,6 +6,8 @@
 @inject POCA.Web.Services.APIs.ProfessoresAPI ProfessoresAPI
 @inject UserSessionService UserSession
 @inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     @if (UserSession.IsLoggedIn)
@@ -17,14 +19,25 @@
                 {
                     <MudText Typo="Typo.h5" Class="mb-4">Perfil do Professor</MudText>
 
+
                     <MudGrid>
                         <MudItem xs="12" sm="4">
                             <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
                         </MudItem>
                         <MudItem xs="12" sm="8">
-                            <MudText Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Professor.NomeProfessor</MudText>
-                            <MudText Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.ContatoProfessor</MudText>
-                            <MudText Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Professor.MateriaProfessor</MudText>
+                            @if (!editMode)
+                            {
+                                <MudText Class="mt-1">Nome: @Professor.NomeProfessor</MudText>
+                                <MudText Class="mt-3">Email: @Professor.ContatoProfessor</MudText>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" OnClick="ToggleEdit">Editar</MudButton>
+                            }
+                            else
+                            {
+                                <MudTextField @bind-Value="NomeAlterado" Label="Nome" Variant="Variant.Outlined" FullWidth="true" />
+                                <MudTextField @bind-Value="EmailAlterado" Label="Email" Variant="Variant.Outlined" FullWidth="true" Class="mt-3" />
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" OnClick="SalvarAlteracoes">Salvar</MudButton>
+                                <MudButton Color="Color.Secondary" Variant="Variant.Text" Class="mt-4 ml-2" OnClick="ToggleEdit">Cancelar</MudButton>
+                            }
                         </MudItem>
                     </MudGrid>
                 }
@@ -32,15 +45,66 @@
                 {
                     <MudText Typo="Typo.h5" Class="mb-4">Perfil do Aluno</MudText>
 
+
                     <MudGrid>
                         <MudItem xs="12" sm="4">
                             <MudAvatar Size="Size.Large" Icon="@Icons.Material.Filled.Person" />
                         </MudItem>
                         <MudItem xs="12" sm="8">
-                            <MudText Label="Nome" T="string" Variant="Variant.Filled" FullWidth="true">@Aluno.NomeAluno</MudText>
-                            <MudText Label="Email" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.EmailAluno</MudText>
-                            <MudText Label="Contato" T="string" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.ContatoAluno</MudText>
-                            <MudText Label="Data de Nascimento" Variant="Variant.Filled" FullWidth="true" Class="mt-3">@Aluno.NascimentoAluno</MudText>
+                            @if (!editMode)
+                            {
+                                <MudText Class="mt-1">Nome: @Aluno.NomeAluno</MudText>
+                                <MudText Class="mt-3">Email: @Aluno.EmailAluno</MudText>
+                                <MudText Class="mt-3">Contato: @Aluno.ContatoAluno</MudText>
+                                <MudText Class="mt-3">Data de Nascimento: @Aluno.NascimentoAluno</MudText>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" OnClick="ToggleEdit">Editar</MudButton>
+                            }
+                            else
+                            {
+                                <MudTextField @bind-Value="NomeAlterado"
+                                              Label="Nome"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true"
+                                              OnInput="@ChecarAlteracoes" />
+
+                                <MudTextField @bind-Value="EmailAlterado"
+                                              Label="Email"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true"
+                                              Class="mt-3"
+                                              OnInput="@( (string _) => ChecarAlteracoes() )" />
+
+                                <MudTextField @bind-Value="ContatoAlterado"
+                                              Label="Contato"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true"
+                                              Class="mt-3"
+                                              OnInput="@( (string _) => ChecarAlteracoes() )" />
+
+                                <MudText>não ta funcionando não clicar</MudText>
+                                <MudDatePicker Label="Data de Nascimento"
+                                               Editable="true"
+                                               @bind-Value="DataAlterado"
+                                               Variant="Variant.Outlined"
+                                               Class="mt-3"
+                                               OnInput="@( (string _) => ChecarAlteracoes() )"
+                                               Mask="@(new DateMask("dd/MM/yyyy"))"
+                                               DateFormat="dd/MM/yyyy"
+                                               Placeholder="DD/MM/YYYY" />
+
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" Disabled="@(carregando)" OnClick="SalvarAlteracoes">
+                                    @if (!carregando)
+                                    {
+                                        <MudText>Salvar</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.h5" Class="mb-4 text-center">Login</MudText>
+                                    }
+                                </MudButton>
+                                <MudButton Color="Color.Secondary" Variant="Variant.Text" Class="mt-4 ml-2" OnClick="ToggleEdit">Cancelar</MudButton>
+
+                            }
                         </MudItem>
                     </MudGrid>
                 }
@@ -51,25 +115,47 @@
                     <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
                 </MudGrid>
             }
-
-
         </MudPaper>
-
     }
-    else if(!UserSession.IsLoggedIn)
+    else if (!UserSession.IsLoggedIn)
     {
         <MudText>Você não está logado</MudText>
-        <MudButton Href="/login">Logar</MudButton>  
+        <MudButton Href="/login">Logar</MudButton>
         <MudButton Href="/cadastro">Cadastrar</MudButton>
     }
 </MudContainer>
-
 @code
 {
     public bool paginicial = false;
     public string Erro = string.Empty;
+    public bool editMode = false;
+    public bool carregando = false;
+
     public ProfessorResponse Professor { get; set; } = new ProfessorResponse(0, "", "", "");
     public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", DateTime.MinValue, 0, "", "", null, null);
+
+    public bool NomeAlt { get; set; }
+    private string NomeAlterado = "";
+
+    public bool EmailAlt { get; set; }
+    private string EmailAlterado = "";
+
+    public bool ContatoAlt { get; set; }
+    private string ContatoAlterado = "";
+
+    public bool DatAlt { get; set; }
+    private DateTime DataAlterado = DateTime.MinValue;
+
+    private void ChecarAlteracoes()
+    {
+        NomeAlt = NomeAlterado != Aluno.NomeAluno || !string.IsNullOrEmpty(NomeAlterado);
+        EmailAlt = EmailAlterado != Aluno.EmailAluno || !string.IsNullOrEmpty(EmailAlterado);
+        ContatoAlt = ContatoAlterado != Aluno.ContatoAluno || !string.IsNullOrEmpty(ContatoAlterado);
+        DatAlt = DataAlterado != Aluno.NascimentoAluno || DataAlterado != DateTime.MinValue;
+
+    }
+
+    void ToggleEdit() => editMode = !editMode;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,10 +181,50 @@
         }
     }
 
-    protected void SalvarPerfil()
+    private async void SalvarAlteracoes()
     {
-        // Aqui você salvaria no banco de dados
-        Erro = "Não existe esse botão";
+        carregando = true;
+
+        try
+        {
+            AlunoEditRequest AlunoEdit = new(Aluno.IdAluno,
+                                             NomeAlt ? NomeAlterado : Aluno.NomeAluno,
+                                             DatAlt ? DataAlterado : Aluno.NascimentoAluno,
+                                             Aluno.ProgressoAluno,
+                                             EmailAlt ? EmailAlterado : Aluno.EmailAluno,
+                                             ContatoAlt ? ContatoAlterado : Aluno.ContatoAluno);
+
+
+            bool Alteracao = await AlunosAPI.UpdateAlunosAsync(AlunoEdit);
+
+            if (Alteracao)
+            {
+                Snackbar.Add("Alterações feitas", Severity.Success);
+                await LoadUserDataAsync();
+            }
+            else
+            {
+                Snackbar.Add("Erro na alteração", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            carregando = false;
+            ToggleEdit();
+            ResetarVar();
+            StateHasChanged();
+        }
+    }
+
+    private void ResetarVar()
+    {
+        NomeAlt = EmailAlt = ContatoAlt = DatAlt = false;
+        NomeAlterado = EmailAlterado = ContatoAlterado = string.Empty;
+        DataAlterado = DateTime.MinValue;
     }
 
     private async Task LoadUserDataAsync()
@@ -121,9 +247,7 @@
                 Aluno = await AlunosAPI.GetAlunosbyIDAsync(UserSession.CurrentUser.IdAluno.Value);
             }
 
-
             paginicial = true;
-            Console.WriteLine("paginicial set to true");
         }
         catch (Exception ex)
         {

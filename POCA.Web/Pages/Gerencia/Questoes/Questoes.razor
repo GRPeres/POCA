@@ -162,7 +162,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -211,7 +211,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
         }
     }
@@ -235,7 +235,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao gerar questões: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao gerar questões: {ex.Message}", Severity.Error);
             await generateDialog.CloseAsync();
         }
         finally

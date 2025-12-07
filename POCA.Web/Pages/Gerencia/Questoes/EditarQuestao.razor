@@ -185,7 +185,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar questão: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar questão: {ex.Message}", Severity.Error);
             NavManager.NavigateTo("/questoes");
         }
     }
@@ -222,7 +222,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao atualizar questão: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao atualizar questão: {ex.Message}", Severity.Error);
             _isSubmitting = false;
             StateHasChanged(); // Force UI update
         }

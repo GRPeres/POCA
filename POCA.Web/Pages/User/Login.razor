@@ -165,7 +165,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
             LoginFalha = true;
         }
         finally
@@ -197,7 +197,7 @@
             var urlObj = await AuthAPI.GetGoogleLoginUrl();
             if (urlObj?.Url is null)
             {
-                Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
+                // Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
                 return;
             }
 
@@ -205,7 +205,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro Google: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro Google: {ex.Message}", Severity.Error);
         }
     }
 

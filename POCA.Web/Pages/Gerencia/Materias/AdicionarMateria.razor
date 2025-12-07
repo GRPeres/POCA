@@ -203,31 +203,19 @@
                 // Associate selected Professores
                 foreach (var professorId in IsSelectedProfessor.Where(p => p.Value).Select(p => p.Key))
                 {
-                    Console.WriteLine($"Adding Professor Id: {professorId} to Materia Id: {idMateria}");
                     var success = await MateriasAPI.AddProfessorToMateriaAsync(idMateria, professorId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Professor {professorId}"
-                        : $"Failed to add Professor {professorId}");
                 }
 
                 // Associate selected Alunos
                 foreach (var alunoId in IsSelectedAluno.Where(a => a.Value).Select(a => a.Key))
                 {
-                    Console.WriteLine($"Adding Aluno Id: {alunoId} to Materia Id: {idMateria}");
                     var success = await MateriasAPI.AddAlunoToMateriaAsync(idMateria, alunoId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Aluno {alunoId}"
-                        : $"Failed to add Aluno {alunoId}");
                 }
 
                 // Associate selected Atividades
                 foreach (var atividadeId in IsSelectedAtividade.Where(a => a.Value).Select(a => a.Key))
                 {
-                    Console.WriteLine($"Adding Atividade Id: {atividadeId} to Materia Id: {idMateria}");
                     var success = await MateriasAPI.AddAtividadeToMateriaAsync(idMateria, atividadeId);
-                    Console.WriteLine(success
-                        ? $"Successfully added Atividade {atividadeId}"
-                        : $"Failed to add Atividade {atividadeId}");
                 }
 
                 Snackbar.Add("Matéria criada com sucesso!", Severity.Success);
@@ -235,14 +223,12 @@
             }
             else
             {
-                Console.WriteLine("Failed to create Materia.");
-                Snackbar.Add("Erro ao criar matéria.", Severity.Error);
+                // Snackbar.Add("Erro ao criar matéria.", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception: {ex.Message}");
-            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
         }
         finally
         {
