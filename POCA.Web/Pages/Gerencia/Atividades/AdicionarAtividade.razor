@@ -232,7 +232,7 @@ else if (_currentStep == 2)
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -312,7 +312,7 @@ else if (_currentStep == 2)
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao criar atividade: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao criar atividade: {ex.Message}", Severity.Error);
             _isSubmitting = false;
         }
     }

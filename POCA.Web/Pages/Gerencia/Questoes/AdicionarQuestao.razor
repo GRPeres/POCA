@@ -190,7 +190,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao salvar questão: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao salvar questão: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -203,11 +203,14 @@
         try
         {
             _generatedQuestions = await QuestoesService.GenerateQuestionsFromPromptAsync(_aiPrompt);
-            Snackbar.Add("Questões geradas com sucesso!", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao gerar questões: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao gerar questões: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            Snackbar.Add("Questões geradas com sucesso!", Severity.Success);
         }
     }
 

@@ -265,7 +265,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar atividade: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar atividade: {ex.Message}", Severity.Error);
             NavManager.NavigateTo("/atividades");
         }
     }
@@ -290,7 +290,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar questões: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -384,7 +384,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao atualizar atividade: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao atualizar atividade: {ex.Message}", Severity.Error);
             _isSubmitting = false;
         }
     }
