@@ -161,9 +161,9 @@
                 {
                     @if (UserSession.CurrentUser.IsProfessor)
                     {
-                        <MudMenu Direction="Direction.Left">
+                        <MudMenu Direction="Direction.Left" class="d-none d-md-flex">
                             <ActivatorContent>
-                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mr-2" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" class="mr-2" />
                             </ActivatorContent>
                             <ChildContent>
                                 <MudMenuItem Href="/adicionar-questao">Nova Questão</MudMenuItem>
@@ -177,11 +177,12 @@
                                    Color="Color.Primary"
                                    OnClick="@ToggleTheme"
                                    Class="ml-2" />
-                
-                    <MudText Typo="Typo.h6" Class="ml-1 font-weight-bold"
-                              Style="font-family: 'Helvetica', sans-serif;"
-                              Color="@(_isDarkMode ? Color.Default : Color.Dark)">
-                              @UserSession.CurrentUser.Login
+
+                    <MudText Typo="Typo.h6"
+                             class="ml-1 font-weight-bold d-none d-md-block"
+                             Style="font-family: 'Helvetica', sans-serif;"
+                             Color="@(_isDarkMode ? Color.Default : Color.Dark)">
+                        @UserSession.CurrentUser.Login
                     </MudText>
 
                     <MudMenu Direction="Direction.Left">
