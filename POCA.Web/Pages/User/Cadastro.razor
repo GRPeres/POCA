@@ -27,32 +27,32 @@
         }
 
         <MudTextField @bind-Value="Credenciais.LoginUsuario"
-                        Label="Login"
-                        Variant="Variant.Outlined"
-                        Required
-                        RequiredError="Coloque um nome de usuário"
-                        Adornment="Adornment.Start"
-                        AdornmentIcon="@Icons.Material.Filled.AccountCircle"
-                        Class="mb-3" />
+                      Label="Login"
+                      Variant="Variant.Outlined"
+                      Required
+                      RequiredError="Coloque um nome de usuário"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.AccountCircle"
+                      Class="mb-3" />
 
         <MudTextField @bind-Value="Credenciais.nomeUsuario"
-                        Label="Nome"
-                        Variant="Variant.Outlined"
-                        Required
-                        RequiredError="Coloque seu nome"
-                        Adornment="Adornment.Start"
-                        AdornmentIcon="@Icons.Material.Filled.Person"
-                        Class="mb-3" />
+                      Label="Nome"
+                      Variant="Variant.Outlined"
+                      Required
+                      RequiredError="Coloque seu nome"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Person"
+                      Class="mb-3" />
 
         <MudTextField @bind-Value="Credenciais.EmailUsuario"
-                        Label="Email"
-                        Variant="Variant.Outlined"
-                        InputType="InputType.Email"
-                        Required
-                        RequiredError="Coloque seu email"
-                        Adornment="Adornment.Start"
-                        AdornmentIcon="@Icons.Material.Filled.Email"
-                        Class="mb-3" />
+                      Label="Email"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Email"
+                      Required
+                      RequiredError="Coloque seu email"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Email"
+                      Class="mb-3" />
 
         <MudTextField @bind-Value="Credenciais.ContatoUsuario"
                       Label="Contato"
@@ -66,9 +66,10 @@
         <MudDatePicker Label="Data de Nascimento"
                        Editable="true"
                        @bind-Date="dtNascimento2"
-                       Mask="@(new DateMask("dd/MM/yyyy"))" 
-                       DateFormat="dd/MM/yyyy" 
+                       Mask="@(new DateMask("dd/MM/yyyy"))"
+                       DateFormat="dd/MM/yyyy"
                        Placeholder="DD/MM/YYYY"
+                       MaxDate="DateTime.Today"
                        Required
                        Variant="Variant.Outlined" />
 
@@ -82,7 +83,7 @@
                       Required
                       RequiredError="Coloque sua senha"
                       Class="mb-3" />
-        
+
         @if (SenhaErrada)
         {
             <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
@@ -109,9 +110,9 @@
             </MudButton>
 
             <MudButton Variant="Variant.Filled"
-                        Color="Color.Primary"
-                        OnClick="EfetuarCadastro"
-                        Disabled="@(!IsFormValid || IsLoading)" >
+                       Color="Color.Primary"
+                       OnClick="EfetuarCadastro"
+                       Disabled="@(!IsFormValid || IsLoading)">
                 @if (IsLoading)
                 {
                     <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
@@ -171,7 +172,7 @@
 
     // Para o cadastro
 
-    private void TogglePasswordVisibility() =>_showPassword = !_showPassword;
+    private void TogglePasswordVisibility() => _showPassword = !_showPassword;
 
     private void TogglePasswordConfirmationVisibility() => _showPasswordConfirmation = !_showPasswordConfirmation;
 
@@ -270,9 +271,9 @@
     private string FormatJsonResponse(object obj)
     {
         return JsonSerializer.Serialize(obj, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
+        {
+            WriteIndented = true
+        });
     }
 
     private async Task EfetuarLogin()

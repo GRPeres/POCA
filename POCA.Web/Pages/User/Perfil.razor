@@ -62,35 +62,32 @@
                             else
                             {
                                 <MudTextField @bind-Value="NomeAlterado"
-                                              Label="Nome" 
+                                              Label="Nome"
                                               Variant="Variant.Outlined"
                                               FullWidth="true"
-                                              OnInput="@ChecarAlteracoes" />
+                                              OnInput="@( (string _) => ChecarAlteracoes() )" />
 
                                 <MudTextField @bind-Value="EmailAlterado"
-                                              Label="Email" 
-                                              Variant="Variant.Outlined" 
-                                              FullWidth="true" 
+                                              Label="Email"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true"
                                               Class="mt-3"
                                               OnInput="@( (string _) => ChecarAlteracoes() )" />
 
-                                <MudTextField @bind-Value="ContatoAlterado" 
-                                              Label="Contato" 
-                                              Variant="Variant.Outlined" 
-                                              FullWidth="true" 
+                                <MudTextField @bind-Value="ContatoAlterado"
+                                              Label="Contato"
+                                              Variant="Variant.Outlined"
+                                              FullWidth="true"
                                               Class="mt-3"
                                               OnInput="@( (string _) => ChecarAlteracoes() )" />
 
-                                <MudText>não ta funcionando não clicar</MudText>
                                 <MudDatePicker Label="Data de Nascimento"
-                                               Editable="true"
                                                @bind-Value="DataAlterado"
-                                               Variant="Variant.Outlined" 
+                                               Variant="Variant.Outlined"
                                                Class="mt-3"
-                                               OnInput="@( (string _) => ChecarAlteracoes() )"
-                                               Mask="@(new DateMask("dd/MM/yyyy"))"
                                                DateFormat="dd/MM/yyyy"
-                                               Placeholder="DD/MM/YYYY"/>
+                                               MaxDate="DateTime.Today"
+                                               Placeholder="DD/MM/YYYY" />
 
                                 <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" Disabled="@(carregando)" OnClick="SalvarAlteracoes">
                                     @if (!carregando)
@@ -184,12 +181,13 @@
     private async void SalvarAlteracoes()
     {
         carregando = true;
-
+        ChecarAlteracoes();
         try
         {
+            DateTime Datamedio = DataAlterado ?? DateTime.MinValue;
             AlunoEditRequest AlunoEdit = new(Aluno.IdAluno,
                                              NomeAlt ? NomeAlterado : Aluno.NomeAluno,
-                                             DatAlt ? DataAlterado : Aluno.NascimentoAluno,
+                                             DatAlt ? Datamedio : Aluno.NascimentoAluno,
                                              Aluno.ProgressoAluno,
                                              EmailAlt ? EmailAlterado : Aluno.EmailAluno,
                                              ContatoAlt ? ContatoAlterado : Aluno.ContatoAluno);
@@ -233,7 +231,6 @@
         {
             if (UserSession.CurrentUser == null)
             {
-                Console.WriteLine("UserSession.CurrentUser is null");
                 Erro = "Usuário não encontrado.";
                 return;
             }
