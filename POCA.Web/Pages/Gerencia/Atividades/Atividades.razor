@@ -176,7 +176,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar atividades: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar atividades: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -218,7 +218,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao excluir questão: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
         }
     }

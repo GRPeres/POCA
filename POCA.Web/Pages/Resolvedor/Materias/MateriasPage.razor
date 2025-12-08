@@ -48,32 +48,33 @@
         }
 
         <MudExpansionPanels MultiExpansion="true" ExpandIcon="@Icons.Material.Filled.ExpandMore">
-            <MudExpansionPanel Text="Geral">
-                <MudList T="string" Dense="true">
-                    <MudListItem Icon="@Icons.Material.Filled.Notifications">Avisos</MudListItem>
+            @if (UserSession.CurrentUser?.IdAluno != null)
+            {
+                <MudExpansionPanel Text="Geral">
+                    <MudList T="string" Dense="true">
+                        @* <MudListItem Icon="@Icons.Material.Filled.Notifications">Avisos</MudListItem> *@
 
-                    @if (UserSession.CurrentUser?.IdAluno != null)
-                    {
-                        <MudListItem>
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Secondary"
-                                       OnClick="@ObterMediaAlunoAsync"
-                                       StartIcon="@Icons.Material.Filled.Calculate">
-                                Calcular Média
-                            </MudButton>
-                        </MudListItem>
-
-                        @if (mediaAluno.HasValue)
-                        {
+                   
                             <MudListItem>
-                                <MudText Typo="Typo.body1">
-                                    Média atual: @mediaAluno.Value.ToString("F2")
-                                </MudText>
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Secondary"
+                                           OnClick="@ObterMediaAlunoAsync"
+                                           StartIcon="@Icons.Material.Filled.Calculate">
+                                    Calcular Média
+                                </MudButton>
                             </MudListItem>
-                        }
-                    }
-                </MudList>
-            </MudExpansionPanel>
+
+                            @if (mediaAluno.HasValue)
+                            {
+                                <MudListItem>
+                                    <MudText Typo="Typo.body1">
+                                        Média atual: @mediaAluno.Value.ToString("F2")
+                                    </MudText>
+                                </MudListItem>
+                            }
+                    </MudList>
+                </MudExpansionPanel>
+            }
 
             <MudExpansionPanel Text="Quizes e Atividades">
                 @if (avaliacoes.Any())
@@ -95,7 +96,7 @@
                 }
             </MudExpansionPanel>
 
-            <MudExpansionPanel Text="Materiais">
+           @*  <MudExpansionPanel Text="Materiais">
                 @if (materiais.Any())
                 {
                     @foreach (var m in materiais)
@@ -107,7 +108,7 @@
                 {
                     <MudText>Nenhum material encontrado.</MudText>
                 }
-            </MudExpansionPanel>
+            </MudExpansionPanel> *@
         </MudExpansionPanels>
     }
 </MudPaper>
@@ -160,12 +161,12 @@
                 }
             }
 
-            // Mock de materiais
-            materiais = new()
-            {
-                new("Slides - Introdução"),
-                new("PDF - Leitura obrigatória")
-            };
+            // // Mock de materiais
+            // materiais = new()
+            // {
+            //     new("Slides - Introdução"),
+            //     new("PDF - Leitura obrigatória")
+            // };
         }
     }
 
@@ -200,8 +201,14 @@
         }
     }
 
-    private void IrParaReforco() =>
-        NavigationManager.NavigateTo($"/reforco/{idMateria}");
+    private void IrParaReforco()
+    {
+        var idAluno = UserSession.CurrentUser?.IdAluno;
+        if (idAluno is null)
+            return;
+
+        NavigationManager.NavigateTo($"/reforcoatividade/{idAluno}/{idMateria}");
+    }
 
     private void HandleUserSessionChanged() =>
         InvokeAsync(async () =>

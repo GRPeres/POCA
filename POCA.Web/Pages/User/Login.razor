@@ -45,28 +45,35 @@
                       Required
                       Class="mb-4" />
 
-        <MudStack Direction="Column" Spacing="2">
-            <MudButton Variant="Variant.Outlined"
-                       Color="Color.Secondary"
-                       Href="/cadastro"
-                       FullWidth="true">
-                Criar conta
-            </MudButton>
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="EfetuarLogin"
-                       Disabled="@(!IsFormValid)"
-                       FullWidth="true">
-                    <MudText>Entrar</MudText>
-            </MudButton>
-
-            <MudDivider Class="my-3" />
-
-            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" OnClick="EfetuarLoginGoogle">
+        <MudStack class="justify-space-between mx-2">
+            <MudButton Variant="Variant.Text" Color="Color.Default" FullWidth="true" OnClick="EfetuarLoginGoogle">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="height:18px; margin-right:8px;" />
                 Entrar com Google
             </MudButton>
+
+            <MudButtonGroup class="justify-space-between mx-2" Color="Color.Primary" Variant="Variant.Text" Vertical="false">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Secondary"
+                           Href="/cadastro"
+                           FullWidth="true">
+                    Criar conta
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="EfetuarLogin"
+                           Disabled="@(!IsFormValid || IsLoading)"
+                           FullWidth="true">
+                    @if (IsLoading)
+                    {
+                        <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
+                    }
+                    else
+                    {
+                        <MudText>Entrar</MudText>
+                    }
+                </MudButton>
+            </MudButtonGroup>
         </MudStack>
     }
     else
@@ -87,12 +94,13 @@
 @code {
     private LoginModel Credenciais = new();
     private bool LoginFalha = false;
+    private bool IsLoading = false;
     private bool _showPassword = false;
     private DotNetObjectReference<Login>? _dotNetRef;
 
     private bool IsFormValid =>
-        !string.IsNullOrWhiteSpace(Credenciais.Login) &&
-        !string.IsNullOrWhiteSpace(Credenciais.Senha);
+        !string.IsNullOrEmpty(Credenciais.Login) &&
+        !string.IsNullOrEmpty(Credenciais.Senha);
 
     private class LoginModel
     {
@@ -135,6 +143,7 @@
     private async Task EfetuarLogin()
     {
         LoginFalha = false;
+        IsLoading = true;
 
         try
         {
@@ -156,8 +165,12 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro: {ex.Message}", Severity.Error);
             LoginFalha = true;
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
@@ -184,7 +197,7 @@
             var urlObj = await AuthAPI.GetGoogleLoginUrl();
             if (urlObj?.Url is null)
             {
-                Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
+                // Snackbar.Add("Erro ao iniciar login com Google.", Severity.Error);
                 return;
             }
 
@@ -192,7 +205,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro Google: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro Google: {ex.Message}", Severity.Error);
         }
     }
 

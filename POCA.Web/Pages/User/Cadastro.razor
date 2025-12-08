@@ -26,8 +26,6 @@
             </MudAlert>
         }
 
-        <MudText>@apiResponse</MudText>
-
         <MudTextField @bind-Value="Credenciais.LoginUsuario"
                         Label="Login"
                         Variant="Variant.Outlined"
@@ -100,7 +98,7 @@
                       AdornmentIcon="@(_showPasswordConfirmation? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                       OnAdornmentClick="TogglePasswordConfirmationVisibility"
                       Required
-                      RequiredError="Confirme a senha"
+                      RequiredError="Confirme sua senha"
                       Class="mb-3" />
 
         <MudStack class="justify-space-between mx-2" Row="true">
@@ -113,8 +111,15 @@
             <MudButton Variant="Variant.Filled"
                         Color="Color.Primary"
                         OnClick="EfetuarCadastro"
-                        Disabled="@(!IsFormValid)" >
-                Criar Conta
+                        Disabled="@(!IsFormValid || IsLoading)" >
+                @if (IsLoading)
+                {
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" Size="Size.Small" />
+                }
+                else
+                {
+                    <MudText>Entrar</MudText>
+                }
             </MudButton>
         </MudStack>
 
@@ -136,14 +141,15 @@
     public string apiResponse = "";
     private bool SenhaErrada = false;
     private bool deuErro = false;
+    private bool IsLoading = false;
     private bool _showPassword = false;
     private bool _showPasswordConfirmation = false;
     private DateTime? dtNascimento2;
 
-    private bool IsFormValid => !string.IsNullOrWhiteSpace(Credenciais.nomeUsuario) &&
-                            !string.IsNullOrWhiteSpace(Credenciais.EmailUsuario) &&
-                            !string.IsNullOrWhiteSpace(Credenciais.SenhaUsuario) &&
-                            !string.IsNullOrWhiteSpace(Credenciais.confirmarSenhaUsuario);
+    private bool IsFormValid => !string.IsNullOrEmpty(Credenciais.nomeUsuario) &&
+                            !string.IsNullOrEmpty(Credenciais.EmailUsuario) &&
+                            !string.IsNullOrEmpty(Credenciais.SenhaUsuario) &&
+                            !string.IsNullOrEmpty(Credenciais.confirmarSenhaUsuario);
 
     private CadastroModel Credenciais = new();
 
@@ -183,6 +189,7 @@
 
     public async Task EfetuarCadastro()
     {
+        IsLoading = true;
         if (Credenciais.SenhaUsuario == Credenciais.confirmarSenhaUsuario)
         {
             await CreateAluno();
@@ -193,6 +200,7 @@
         {
             SenhaErrada = true;
         }
+        IsLoading = false;
     }
 
     private async Task CreateAluno()
@@ -232,6 +240,12 @@
             );
 
             var createdPessoa = await PessoasAPI.CreatePessoaAsync(pessoaRequest);
+
+            if (createdPessoa == null)
+            {
+                apiResponse = "Failed to create aluno";
+                return;
+            }
 
             apiResponse = $"Created aluno and pessoa accounts:\n" +
                          $"Aluno: {FormatJsonResponse(createdAluno)}\n" +

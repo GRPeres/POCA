@@ -20,6 +20,7 @@ builder.Services.AddScoped<PessoasAPI>();
 builder.Services.AddScoped<AtividadesAPI>();
 builder.Services.AddScoped<RespostaAPI>();
 builder.Services.AddScoped<RespostasAPI>();
+builder.Services.AddScoped<ReforcoAPI>();
 
 builder.Services.AddScoped<AuthAPI>();
 

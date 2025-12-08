@@ -22,7 +22,7 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
             </MudStack>
         }
-        else if (isloading)
+        else if (isLoading)
         {
             <MudStack AlignItems="AlignItems.Center" JustifyContent="Center" Class="my-10">
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
@@ -35,13 +35,13 @@
                 <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resumo das Respostas</MudText>
 
-                    <MudList T="int" Dense="true">
-                    @foreach (var resposta in Resposta)
-                    {
-                        <MudListItem>
-                            <MudText>Resposta: @(resposta != -1 ? "Marcado" : "Não marcado")</MudText>
-                        </MudListItem>
-                    }
+                    <MudList T="QuestionState" Dense="true">
+                        @foreach (var q in Questions)
+                        {
+                            <MudListItem>
+                                <MudText>Resposta: @(q.Selected != null ? "Marcado" : "Não marcado")</MudText>
+                            </MudListItem>
+                        }
                     </MudList>
 
                     <MudStack Direction="Row" Spacing="2" Class="mt-4">
@@ -50,46 +50,43 @@
                     </MudStack>
                 </MudStack>
             }
-
             else if (MostrarRespostas)
             {
                 <MudStack Class="pa-4 mb-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-2">Resultado Final</MudText>
                     <MudText Class="mb-2">Quantidade de acertos: @QuantidadeCerta</MudText>
 
-                    <MudList T="int" Dense="true">
-                    @foreach (var certo in RespostaFinal)
-                    {
-                        <MudListItem>
-                                <MudText>Questão: @(certo ? "✅ Correta" : "❌ Errada")</MudText>
-                        </MudListItem>
-                    }
+                    <MudList T="QuestionState" Dense="true">
+                        @foreach (var q in Questions)
+                        {
+                            <MudListItem>
+                                <MudText>Questão: @(q.IsCorrect ? "✅ Correta" : "❌ Errada")</MudText>
+                            </MudListItem>
+                        }
                     </MudList>
                 </MudStack>
             }
             else
             {
+                var atual = Questions[posicao];
+
                 <MudStack Class="pa-4 ma-2">
                     <MudText Typo="Typo.subtitle1" Class="mb-4">Questão @(posicao + 1)</MudText>
 
-                    <MudText Typo="Typo.body1" Class="mb-4">@questoes[posicao].EnunciadoQuestao</MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">@atual.Questao.EnunciadoQuestao</MudText>
 
-                    <MudGrid xs="12" md="1">
-                        <MudRadioGroup T="int"
-                                       @bind-Value="currentSelection"
-                                       SelectedOption="-1"
-                                       Label="Escolha uma opção"
-                                       Class="d-flex flex-column gap-2 mb-4"
-                                       Row="false">
+                    <MudRadioGroup T="OptionItem"
+                                   @bind-Value="atual.Selected"
+                                   Label="Escolha uma opção"
+                                   Class="d-flex flex-column gap-2 mb-4">
 
-                            @foreach (var option in ShuffledOptions)
-                            {
-                                <MudItem>
-                                        <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
-                                </MudItem>
-                            }
-                        </MudRadioGroup>
-                    </MudGrid>
+                        @foreach (var option in atual.Options)
+                        {
+                            <MudItem>
+                                <MudRadio T="OptionItem" Value="@option">@option.Text</MudRadio>
+                            </MudItem>
+                        }
+                    </MudRadioGroup>
 
                     <MudStack class="justify-space-between mx-8" Row="true">
                         <MudButton Variant="Variant.Outlined"
@@ -101,7 +98,7 @@
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    OnClick="QuestaoProximo">
-                            @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
+                            @((posicao < Questions.Count - 1) ? "Avançar" : "Terminar")
                         </MudButton>
                     </MudStack>
                 </MudStack>
@@ -113,194 +110,124 @@
 @code {
     [Parameter] public int idAtividade { get; set; }
 
-    public AtividadeResponse? atividade = new(0, "", null, null);
-    public List<QuestaoResponse> questoes = new();
-    public List<int> Resposta = new();
-    public List<String> RespostaString = new();
-    public List<bool> RespostaFinal = new();
-    public int posicao = 0;
-    public bool isloading = true;
     public string erro = "";
+    public bool isLoading = true;
+
     public bool MostrarResumo = false;
     public bool MostrarRespostas = false;
-    public int currentSelection = -1;
-    public int QuantidadeCerta = 0;
 
-    // Class for holding option data
     public class OptionItem
     {
-        public int Value { get; set; }
         public string Text { get; set; } = "";
         public bool IsCorrect { get; set; }
     }
 
-    private List<OptionItem> ShuffledOptions = new();
+    public class QuestionState
+    {
+        public QuestaoResponse Questao { get; set; } = default!;
+        public List<OptionItem> Options { get; set; } = new();
+        public OptionItem? Selected { get; set; }
+        public bool IsCorrect => Selected?.IsCorrect == true;
+    }
+
+    public List<QuestionState> Questions = new();
+    public int posicao = 0;
+    public int QuantidadeCerta => Questions.Count(q => q.IsCorrect);
 
     protected override async Task OnInitializedAsync()
     {
-        UserSession.OnChange += HandleUserSessionChanged;
-
-        await CarregarAtividade();
-
-        ShuffleCurrentQuestionOptions();
-
-        await InvokeAsync(StateHasChanged); // Ensure re-render
+        await LoadActivity();
+        isLoading = false;
     }
 
-    public async Task CarregarAtividade()
+    private async Task LoadActivity()
     {
         try
         {
-            var atividadeAPI = await AtividadesAPI.GetAtividadeByIdAsync(idAtividade);
-            if (atividadeAPI == null)
-                return;
+            var atividade = await AtividadesAPI.GetAtividadeByIdAsync(idAtividade);
+            if (atividade == null) return;
 
-            atividade = atividadeAPI;
-
-            foreach (var questaoid in atividadeAPI.TbQuestoesIdQuestoes)
+            foreach (var qid in atividade.TbQuestoesIdQuestoes)
             {
-                var questao = await QuestoesAPI.GetQuestaoByIdAsync(questaoid);
-                if (questao != null)
-                    questoes.Add(questao);
+                var q = await QuestoesAPI.GetQuestaoByIdAsync(qid);
+                if (q != null)
+                    Questions.Add(CreateQuestionState(q));
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Erro ao carregar atividade: {ex.Message}");
             erro = "Erro ao carregar atividade.";
         }
-
-        Resposta = Enumerable.Repeat(-1, questoes.Count).ToList();
-        RespostaString = Enumerable.Repeat("", questoes.Count).ToList();
-        RespostaFinal = Enumerable.Repeat(false, questoes.Count).ToList();
-        currentSelection = Resposta.Any() ? Resposta[0] : -1;
-        isloading = false;
     }
 
-    private void ShuffleCurrentQuestionOptions()
+    private QuestionState CreateQuestionState(QuestaoResponse q)
     {
-        if (questoes.Count == 0 || posicao < 0 || posicao >= questoes.Count)
-        {
-            ShuffledOptions = new List<OptionItem>();
-            return;
-        }
-
         var options = new List<OptionItem>
         {
-            new OptionItem { Value = 1, Text = questoes[posicao].RespostaCertaQuestao, IsCorrect = true },
-            new OptionItem { Value = 2, Text = questoes[posicao].RespostaErrada1Questao, IsCorrect = false },
-            new OptionItem { Value = 3, Text = questoes[posicao].RespostaErrada2Questao, IsCorrect = false },
-            new OptionItem { Value = 4, Text = questoes[posicao].RespostaErrada3Questao, IsCorrect = false },
+            new() { Text = q.RespostaCertaQuestao,  IsCorrect = true  },
+            new() { Text = q.RespostaErrada1Questao, IsCorrect = false },
+            new() { Text = q.RespostaErrada2Questao, IsCorrect = false },
+            new() { Text = q.RespostaErrada3Questao, IsCorrect = false }
         };
 
         var rng = new Random();
-        ShuffledOptions = options.OrderBy(x => rng.Next()).ToList();
-    }
 
-    public void VerificarResposta()
-    {
-        QuantidadeCerta = 0;
-
-        for (int i = 0; i < Resposta.Count; i++)
+        return new QuestionState
         {
-            if (i >= RespostaFinal.Count) continue;
-
-            // Determine correctness by matching selected Value with correct option
-            var correctOption = new List<string>
-            {
-                questoes[i].RespostaCertaQuestao,
-                questoes[i].RespostaErrada1Questao,
-                questoes[i].RespostaErrada2Questao,
-                questoes[i].RespostaErrada3Questao
-            };
-
-            // Note: Because options are shuffled, you should store selected answer text, or map properly.
-            // Here, we'll just check if selected Value == 1 (original correct)
-            if (Resposta[i] == 1)
-            {
-                QuantidadeCerta++;
-                RespostaFinal[i] = true;
-            }
-            else
-            {
-                RespostaFinal[i] = false;
-            }
-        }
-    }
-
-    public async void EnviarPraAPI()
-    {
-        for (int i = 0; i < questoes.Count; i++)
-        {
-            int? idPessoa = (UserSession.CurrentUser.IsProfessor ? UserSession.CurrentUser.IdProfessor : UserSession.CurrentUser.IdAluno);
-            RespostaCreateRequest respostaAPI = new RespostaCreateRequest(
-                RespostaString[i], 
-                atividade.IdAtividade, 
-                idPessoa ?? 0, 
-                questoes[i].IdQuestao
-            );
-
-            await RespostaAPI.AddRespostaAsync(respostaAPI);
-        }
+            Questao = q,
+            Options = options.OrderBy(_ => rng.Next()).ToList()
+        };
     }
 
     public void QuestaoProximo()
     {
+        // At "Resumo" → finalize + show results
         if (MostrarResumo)
         {
             EnviarPraAPI();
-            VerificarResposta();
-            MostrarRespostas = true;
             MostrarResumo = false;
+            MostrarRespostas = true;
+            return;
         }
-        else
+
+        if (posicao == Questions.Count - 1)
         {
-            Resposta[posicao] = currentSelection;
-            RespostaString[posicao] = ShuffledOptions[posicao].Text.ToString();
-
-            if (posicao < questoes.Count - 1)
-            {
-                posicao++;
-                currentSelection = -1;
-            }
-            else
-            {
-                posicao = 0;
-                MostrarResumo = true;
-            }
-
-
-            currentSelection = Resposta[posicao];
-            ShuffleCurrentQuestionOptions();
+            MostrarResumo = true;
+            return;
         }
+
+        posicao++;
     }
 
     public void QuestaoVoltar()
     {
         if (MostrarResumo)
         {
-            MostrarRespostas = false;
             MostrarResumo = false;
+            MostrarRespostas = false;
+            return;
         }
-        else
-        {
-            Resposta[posicao] = currentSelection;
-            RespostaString[posicao] = ShuffledOptions[posicao].Text.ToString();
+
+        if (posicao > 0)
             posicao--;
+    }
 
-            currentSelection = Resposta[posicao];
+    public async void EnviarPraAPI()
+    {
+        int? idPessoa = UserSession.CurrentUser.IsProfessor
+            ? UserSession.CurrentUser.IdProfessor
+            : UserSession.CurrentUser.IdAluno;
 
-            ShuffleCurrentQuestionOptions();
+        foreach (var q in Questions)
+        {
+            var resposta = new RespostaCreateRequest(
+                q.Selected?.Text ?? "",
+                idAtividade,
+                idPessoa ?? 0,
+                q.Questao.IdQuestao
+            );
+
+            await RespostaAPI.AddRespostaAsync(resposta);
         }
-    }
-
-    private void HandleUserSessionChanged()
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        UserSession.OnChange -= HandleUserSessionChanged;
     }
 }

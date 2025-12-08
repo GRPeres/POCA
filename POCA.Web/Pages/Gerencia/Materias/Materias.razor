@@ -230,7 +230,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao carregar matérias: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao carregar matérias: {ex.Message}", Severity.Error);
             _materias = new List<MateriaResponse>();
             _professoresCache.Clear();
             _alunosCache.Clear();
@@ -281,7 +281,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao excluir matéria: {ex.Message}", Severity.Error);
+            // Snackbar.Add($"Erro ao excluir matéria: {ex.Message}", Severity.Error);
             await deleteDialog.CloseAsync();
         }
     }

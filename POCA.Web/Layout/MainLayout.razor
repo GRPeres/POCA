@@ -42,10 +42,10 @@
                             <MudNavLink Href="/matriculas">Matrículas</MudNavLink>
                         </MudNavGroup>
 
-                        <MudNavGroup Title="Relatórios" Icon="@Icons.Material.Filled.Analytics">
+                    @*     <MudNavGroup Title="Relatórios" Icon="@Icons.Material.Filled.Analytics">
                             <MudNavLink Href="/relatorios/desempenho">Desempenho</MudNavLink>
                             <MudNavLink Href="/relatorios/participacao">Participação</MudNavLink>
-                        </MudNavGroup>
+                        </MudNavGroup> *@
 
                         <MudDivider Class="my-2" />
 
@@ -139,7 +139,7 @@
                         </ChildContent>
                     </MudMenu>
 
-                    <MudMenu>
+                   @*  <MudMenu>
                         <ActivatorContent>
                             <MudButton Variant="Variant.Text" Color="Color.Secondary"
                                        EndIcon="@Icons.Material.Filled.ArrowDropDown" Class="px-3">
@@ -150,7 +150,7 @@
                             <MudMenuItem Href="/relatorios/desempenho">Desempenho</MudMenuItem>
                             <MudMenuItem Href="/relatorios/participacao">Participação</MudMenuItem>
                         </ChildContent>
-                    </MudMenu>
+                    </MudMenu> *@
                 </div>
             }
 
@@ -161,9 +161,9 @@
                 {
                     @if (UserSession.CurrentUser.IsProfessor)
                     {
-                        <MudMenu Direction="Direction.Left">
+                        <MudMenu Direction="Direction.Left" class="d-none d-md-flex">
                             <ActivatorContent>
-                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mr-2" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" class="mr-2" />
                             </ActivatorContent>
                             <ChildContent>
                                 <MudMenuItem Href="/adicionar-questao">Nova Questão</MudMenuItem>
@@ -177,11 +177,12 @@
                                    Color="Color.Primary"
                                    OnClick="@ToggleTheme"
                                    Class="ml-2" />
-                
-                    <MudText Typo="Typo.h6" Class="ml-1 font-weight-bold"
-                              Style="font-family: 'Helvetica', sans-serif;"
-                              Color="@(_isDarkMode ? Color.Default : Color.Dark)">
-                              @UserSession.CurrentUser.Login
+
+                    <MudText Typo="Typo.h6"
+                             class="ml-1 font-weight-bold d-none d-md-block"
+                             Style="font-family: 'Helvetica', sans-serif;"
+                             Color="@(_isDarkMode ? Color.Default : Color.Dark)">
+                        @UserSession.CurrentUser.Login
                     </MudText>
 
                     <MudMenu Direction="Direction.Left">
@@ -232,9 +233,13 @@
 
     private void ToggleTheme() => _isDarkMode = !_isDarkMode;
 
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
     private async Task Logout()
     {
-        UserSession.Logout();
+        NavigationManager.NavigateTo("/login", true);
+        await UserSession.Logout();
     }
 
     protected override async Task OnInitializedAsync()
