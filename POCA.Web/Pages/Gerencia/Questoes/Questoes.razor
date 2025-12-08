@@ -138,6 +138,44 @@
     </MudPaper>
 </MudContainer>
 
+<!-- Delete Dialog -->
+<MudDialog @ref="deleteDialog" MaxWidth="MaxWidth.ExtraSmall">
+    <TitleContent><MudText Typo="Typo.h6">Confirmar Exclusão</MudText></TitleContent>
+    <DialogContent>
+        <MudText>Deseja realmente excluir esta questão?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">Esta ação não pode ser desfeita.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => deleteDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ConfirmDelete">Excluir</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- Generate AI Dialog with Multi-Select -->
+<MudDialog @ref="generateDialog" MaxWidth="MaxWidth.Large">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Gerar Novas Questões</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Class="mb-2">Selecione as questões base para gerar novas questões:</MudText>
+        <MudSelect T="int" @bind-SelectedValues="_selectedBaseQuestionIds" MultiSelection="true" FullWidth="true">
+            @foreach (var q in _questoes)
+            {
+                <MudSelectItem T="int" Value="@q.IdQuestao">@q.EnunciadoQuestao</MudSelectItem>
+            }
+        </MudSelect>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+            Se não selecionar nada, serão usadas as primeiras 10 questões do banco.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => generateDialog.CloseAsync()">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="GenerateQuestions">
+            Gerar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<QuestaoResponse> _questoes = new();
     private IEnumerable<int> _selectedBaseQuestionIds = new List<int>();
@@ -146,8 +184,8 @@
     private string _selectedDifficulty = "";
     private string _selectedTopic = "";
     private List<string> _uniqueTopics = new();
-    private MudDialog deleteDialog;
-    private MudDialog generateDialog;
+    private MudDialog? deleteDialog;
+    private MudDialog? generateDialog;
     private int _questionToDeleteId;
 
     protected override async Task OnInitializedAsync() => await LoadQuestions();
