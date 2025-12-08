@@ -65,7 +65,7 @@
                                               Label="Nome"
                                               Variant="Variant.Outlined"
                                               FullWidth="true"
-                                              OnInput="@ChecarAlteracoes" />
+                                              OnInput="@( (string _) => ChecarAlteracoes() )" />
 
                                 <MudTextField @bind-Value="EmailAlterado"
                                               Label="Email"
@@ -81,15 +81,12 @@
                                               Class="mt-3"
                                               OnInput="@( (string _) => ChecarAlteracoes() )" />
 
-                                <MudText>não ta funcionando não clicar</MudText>
                                 <MudDatePicker Label="Data de Nascimento"
-                                               Editable="true"
                                                @bind-Value="DataAlterado"
                                                Variant="Variant.Outlined"
                                                Class="mt-3"
-                                               OnInput="@( (string _) => ChecarAlteracoes() )"
-                                               Mask="@(new DateMask("dd/MM/yyyy"))"
                                                DateFormat="dd/MM/yyyy"
+                                               MaxDate="DateTime.Today"
                                                Placeholder="DD/MM/YYYY" />
 
                                 <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" Disabled="@(carregando)" OnClick="SalvarAlteracoes">
@@ -135,24 +132,23 @@
     public AlunoResponse Aluno { get; set; } = new AlunoResponse(0, "", DateTime.MinValue, 0, "", "", null, null);
 
     public bool NomeAlt { get; set; }
-    private string NomeAlterado = "";
+    private string NomeAlterado = string.Empty;
 
     public bool EmailAlt { get; set; }
-    private string EmailAlterado = "";
+    private string EmailAlterado = string.Empty;
 
     public bool ContatoAlt { get; set; }
-    private string ContatoAlterado = "";
+    private string ContatoAlterado = string.Empty;
 
     public bool DatAlt { get; set; }
-    private DateTime DataAlterado = DateTime.MinValue;
+    private DateTime? DataAlterado = DateTime.MinValue;
 
     private void ChecarAlteracoes()
     {
-        NomeAlt = NomeAlterado != Aluno.NomeAluno || !string.IsNullOrEmpty(NomeAlterado);
-        EmailAlt = EmailAlterado != Aluno.EmailAluno || !string.IsNullOrEmpty(EmailAlterado);
-        ContatoAlt = ContatoAlterado != Aluno.ContatoAluno || !string.IsNullOrEmpty(ContatoAlterado);
+        NomeAlt = NomeAlterado != Aluno.NomeAluno || !string.IsNullOrWhiteSpace(NomeAlterado);
+        EmailAlt = EmailAlterado != Aluno.EmailAluno || !string.IsNullOrWhiteSpace(EmailAlterado);
+        ContatoAlt = ContatoAlterado != Aluno.ContatoAluno || !string.IsNullOrWhiteSpace(ContatoAlterado);
         DatAlt = DataAlterado != Aluno.NascimentoAluno || DataAlterado != DateTime.MinValue;
-
     }
 
     void ToggleEdit() => editMode = !editMode;
@@ -184,12 +180,13 @@
     private async void SalvarAlteracoes()
     {
         carregando = true;
-
+        ChecarAlteracoes();
         try
         {
+            DateTime Datamedio = DataAlterado ?? DateTime.MinValue;
             AlunoEditRequest AlunoEdit = new(Aluno.IdAluno,
                                              NomeAlt ? NomeAlterado : Aluno.NomeAluno,
-                                             DatAlt ? DataAlterado : Aluno.NascimentoAluno,
+                                             DatAlt ? Datamedio : Aluno.NascimentoAluno,
                                              Aluno.ProgressoAluno,
                                              EmailAlt ? EmailAlterado : Aluno.EmailAluno,
                                              ContatoAlt ? ContatoAlterado : Aluno.ContatoAluno);
@@ -233,7 +230,6 @@
         {
             if (UserSession.CurrentUser == null)
             {
-                Console.WriteLine("UserSession.CurrentUser is null");
                 Erro = "Usuário não encontrado.";
                 return;
             }
