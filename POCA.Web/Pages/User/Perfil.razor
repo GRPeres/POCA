@@ -82,12 +82,14 @@
                                               OnInput="@( (string _) => ChecarAlteracoes() )" />
 
                                 <MudDatePicker Label="Data de Nascimento"
-                                               @bind-Value="DataAlterado"
+                                               Editable="true"
+                                               @bind-Date="DataAlterado"
                                                Variant="Variant.Outlined"
                                                Class="mt-3"
                                                DateFormat="dd/MM/yyyy"
                                                MaxDate="DateTime.Today"
-                                               Placeholder="DD/MM/YYYY" />
+                                               Placeholder="DD/MM/YYYY"
+                                               Immediate="true"/>
 
                                 <MudButton Color="Color.Primary" Variant="Variant.Filled" Class="mt-4" Disabled="@(carregando)" OnClick="SalvarAlteracoes">
                                     @if (!carregando)
@@ -141,14 +143,14 @@
     private string ContatoAlterado = string.Empty;
 
     public bool DatAlt { get; set; }
-    private DateTime? DataAlterado = DateTime.MinValue;
+    private DateTime? DataAlterado;
 
     private void ChecarAlteracoes()
     {
-        NomeAlt = NomeAlterado != Aluno.NomeAluno || !string.IsNullOrWhiteSpace(NomeAlterado);
-        EmailAlt = EmailAlterado != Aluno.EmailAluno || !string.IsNullOrWhiteSpace(EmailAlterado);
-        ContatoAlt = ContatoAlterado != Aluno.ContatoAluno || !string.IsNullOrWhiteSpace(ContatoAlterado);
-        DatAlt = DataAlterado != Aluno.NascimentoAluno || DataAlterado != DateTime.MinValue;
+        NomeAlt = NomeAlterado != Aluno.NomeAluno && !string.IsNullOrWhiteSpace(NomeAlterado);
+        EmailAlt = EmailAlterado != Aluno.EmailAluno && !string.IsNullOrWhiteSpace(EmailAlterado);
+        ContatoAlt = ContatoAlterado != Aluno.ContatoAluno && !string.IsNullOrWhiteSpace(ContatoAlterado);
+        DatAlt = DataAlterado != Aluno.NascimentoAluno && DataAlterado != DateTime.MinValue && DataAlterado != null;
     }
 
     void ToggleEdit() => editMode = !editMode;
@@ -161,6 +163,11 @@
         {
             await LoadUserDataAsync();
         }
+    }
+
+    public void Dispose()
+    {
+        UserSession.OnChange -= HandleUserSessionChanged;
     }
 
     private async void HandleUserSessionChanged()
@@ -213,15 +220,13 @@
             carregando = false;
             ToggleEdit();
             ResetarVar();
-            StateHasChanged();
+            HandleUserSessionChanged();
         }
     }
 
     private void ResetarVar()
     {
         NomeAlt = EmailAlt = ContatoAlt = DatAlt = false;
-        NomeAlterado = EmailAlterado = ContatoAlterado = string.Empty;
-        DataAlterado = DateTime.MinValue;
     }
 
     private async Task LoadUserDataAsync()
@@ -252,10 +257,5 @@
         }
 
         await InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        UserSession.OnChange -= HandleUserSessionChanged;
     }
 }
