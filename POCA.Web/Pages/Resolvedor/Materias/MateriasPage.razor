@@ -170,7 +170,6 @@
         }
     }
 
-    // ✅ Função unificada para buscar média
     private async Task ObterMediaAlunoAsync()
     {
         var idAluno = UserSession.CurrentUser?.IdAluno;
@@ -184,20 +183,17 @@
             if (resultado is not null)
             {
                 mediaAluno = resultado.Media;
-                Console.WriteLine($"✅ Média do aluno: {mediaAluno}");
             }
             else
             {
                 mediaAluno = 0;
-                Console.WriteLine("⚠️ Nenhum resultado de média retornado.");
             }
 
             StateHasChanged();
         }
-        catch (Exception ex)
+        catch
         {
             mediaAluno = null;
-            Console.WriteLine($"❌ Erro ao buscar média: {ex.Message}");
         }
     }
 

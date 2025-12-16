@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject POCA.Web.Services.APIs.ReforcoAPI ReforcoAPI
 @inject POCA.Web.Services.APIs.QuestoesAPI QuestoesAPI
+@inject NavigationManager Navigation
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
     <MudPaper Class="pa-6" Elevation="3">
@@ -14,20 +15,20 @@
         <MudText Color="Color.Error">@erro</MudText>
 
         @if (!UserSession.IsLoggedIn)
-        {
+    {
             <MudStack Class="pa-4 text-center" Elevation="1">
                 <MudText Typo="Typo.h6" Class="mb-3">Você não está logado</MudText>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/login">Fazer Login</MudButton>
             </MudStack>
-        }
+    }
         else if (isloading)
-        {
+    {
             <MudStack JustifyContent="Center" Class="my-10">
                 <MudProgressCircular Indeterminate="true" Size="Size.Large" Color="Color.Primary" />
             </MudStack>
-        }
-        else
-        {
+    }
+    else
+    {
             @if (MostrarResumo)
             {
                 <MudStack Class="pa-4 mb-4" Elevation="2">
@@ -35,7 +36,7 @@
 
                     <MudList T="int" Dense="true">
                         @foreach (var resposta in Resposta)
-                        {
+                {
                             <MudListItem>
                                 <MudText>
                                     Resposta: @(resposta != -1 ? "Marcada" : "Não respondida")
@@ -59,14 +60,14 @@
 
                     <MudList T="bool" Dense="true">
                         @foreach (var certo in RespostaFinal)
-                        {
+                            {
                             <MudListItem>
                                 <MudText> @(certo ? "✅ Correta" : "❌ Errada") </MudText>
                             </MudListItem>
                         }
                     </MudList>
                 </MudStack>
-            }
+                            }
 
             else
             {
@@ -87,7 +88,7 @@
                                 <MudItem>
                                     <MudRadio T="int" Value="@option.Value">@option.Text</MudRadio>
                                 </MudItem>
-                            }
+                }
                         </MudRadioGroup>
                     </MudGrid>
 
@@ -96,7 +97,7 @@
                                    Disabled="@(posicao == 0)"
                                    OnClick="QuestaoVoltar">
                             Voltar
-                        </MudButton>
+                </MudButton>
 
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
@@ -104,10 +105,10 @@
                             @((posicao < questoes.Count - 1) ? "Avançar" : "Terminar")
                         </MudButton>
                     </MudStack>
-                </MudStack>
+            </MudStack>
             }
-        }
-    </MudPaper>
+    }
+</MudPaper>
 </MudContainer>
 
 @code {
@@ -189,18 +190,18 @@
     }
 
     private void ShuffleCurrentQuestionOptions()
-    {
+            {
         if (questoes.Count == 0) return;
 
         var q = questoes[posicao];
 
         var options = new List<OptionItem>
-        {
+                {
             new OptionItem { Value = 1, Text = q.RespostaCertaQuestao, IsCorrect = true },
             new OptionItem { Value = 2, Text = q.RespostaErrada1Questao },
             new OptionItem { Value = 3, Text = q.RespostaErrada2Questao },
             new OptionItem { Value = 4, Text = q.RespostaErrada3Questao }
-        };
+                };
 
         var rng = new Random();
         ShuffledOptions = options.OrderBy(x => rng.Next()).ToList();
@@ -232,7 +233,7 @@
             MostrarResumo = false;
             MostrarRespostas = true;
             return;
-        }
+            }
 
         Resposta[posicao] = currentSelection;
 
