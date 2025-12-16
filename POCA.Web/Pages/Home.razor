@@ -24,43 +24,6 @@
     .cursor-pointer {
         cursor: pointer;
     }
-
-    /* Parte de materias */
-    .cards-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scroll-behavior: smooth;
-        padding-bottom: 1rem;
-        user-select: none;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-        .cards-wrapper::-webkit-scrollbar {
-            display: none;
-        }
-
-    .card-container {
-        flex-shrink: 0;
-        scroll-snap-align: center;
-        width: 250px;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
-        position: relative;
-        z-index: 1;
-    }
-
-        .card-container:hover {
-            z-index: 10;
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
 </style>
 
 <MudLayout>
@@ -103,34 +66,44 @@
             }
             else
             {
-                <div class="cards-wrapper">
-                    @foreach (var materia in materias.Select((value, index) => new { value, index }))
+                <MudGrid>
+                    @foreach (var materia in materias)
                     {
-                        var progresso = materiasProgresso.FirstOrDefault(p => p.IdMateria == materia.value.IdMateria);
-                        var style = materia.index == 0 ? "padding-left: 1rem;"
-                        : materia.index == materias.Count - 1 ? "padding-right: 1rem;" : "";
+                        var progresso = materiasProgresso
+                        .FirstOrDefault(p => p.IdMateria == materia.IdMateria);
 
-                        <div class="card-container" style="@style" @onclick="() => NavigateToMateria(materia.value.IdMateria)">
-                            <MudCard Elevation="6" Class="hover:shadow-xl transition-all duration-300">
+                        <MudItem xs="12" sm="6" md="3">
+                            <!-- 4 columns on md+ -->
+                            <MudCard Elevation="6"
+                                     Class="hover:shadow-xl transition-all duration-300"
+                                     Style="cursor:pointer"
+                                     @onclick="() => NavigateToMateria(materia.IdMateria)">
+
                                 <MudCardActions Class="d-flex align-center gap-2 p-4">
-                                    <MudIcon Icon="@Icons.Material.Filled.Book" Color="Color.Primary" />
+                                    <MudIcon Icon="@Icons.Material.Filled.Book"
+                                             Color="Color.Primary" />
+
                                     <MudText Typo="Typo.h6" Class="mb-0">
-                                        @materia.value.NomeMateria
+                                        @materia.NomeMateria
                                     </MudText>
 
                                     @if (UserSession.CurrentUser?.IdAluno != null && progresso != null)
                                     {
-                                        <MudProgressLinear Value="@(progresso.Progresso)"
+                                        <MudProgressLinear Value="@progresso.Progresso"
                                                            Color="Color.Success"
                                                            Rounded="true"
                                                            Style="height:6px; flex:1; margin-left:10px;" />
-                                        <MudText Typo="Typo.caption" Class="ml-2">@($"{progresso.Progresso:F0}%")</MudText>
+
+                                        <MudText Typo="Typo.caption" Class="ml-2">
+                                            @($"{progresso.Progresso:F0}%")
+                                        </MudText>
                                     }
                                 </MudCardActions>
                             </MudCard>
-                        </div>
+                        </MudItem>
                     }
-                </div>
+                </MudGrid>
+
             }
 
         }
